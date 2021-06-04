@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="style.css">
+    <script type="application/javascript" src="kairos_anim.js"></script>
     <script type="application/javascript" src="kairos.js"></script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -34,12 +35,13 @@
 
 
 
-    <!-- <button type="button" onclick=test()>Click Me!</button> -->
 
     <div id="animation">
         <h4 id="speedText">Hello?</h4>
+        <button type="button" onclick=IrlTime()>Current Time</button>
+
         <div class="slidecontainer">
-            <input type="range" min="-10" max="100" value="0" class="slider" id="sliderSpeed">
+            <input type="range" min="-10" max="200" value="0" class="slider" id="sliderSpeed">
         </div>
         <canvas id="canvas" height=500px width=500px></canvas>
     </div>
