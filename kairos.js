@@ -7,6 +7,10 @@ class Celestial {
         this.month = 0;
         this.dayOfYear = 0;
         this.dayOfMonth = 0;
+        this.hDaysPerYear = 0;
+        this.hTypicalDaysPerYear = 0;
+        this.hDaysPerMonth = 0;
+        this.hTypicalDaysPerMonth = 0;
         this.hDayOfYear = 0;
         this.hDayOfWeek = 0;
         this.hDaysSinceEpoch = 0;
@@ -20,7 +24,8 @@ class Celestial {
         this.hms = 0;
         // this.monthLength = Math.floor(this.yearLength / (3600 * 1000 * 12)) * 3600 * 1000;
 
-        let numMonths = 12;
+        // let numMonths = 12;
+        let weeksPerMonth = 4;
         let dayDiff = 1;
 
         // Check if day length is +-dayDiff from 24 hours
@@ -35,9 +40,16 @@ class Celestial {
             this.hdWeekLength = this.dWeekLength;
         }
 
-        this.hYearLength = Math.floor(this.yearLength / this.hDayLength) * this.hDayLength;
-        this.monthLength = Math.floor(this.yearLength / (this.hDayLength * numMonths)) * this.hDayLength;
-        console.log(this.name + " month length is " + this.monthLength / this.hDayLength + " days");
+        this.hDaysPerYear = Math.floor(this.yearLength / this.hDayLength)
+        this.hYearLength = this.hDaysPerYear * this.hDayLength;
+        this.hTypicalDaysPerMonth = weeksPerMonth * this.hdWeekLength;
+        this.monthLength = this.hTypicalDaysPerMonth * this.hDayLength;
+        this.monthCount = Math.floor(this.hDaysPerYear / this.hTypicalDaysPerMonth);
+
+
+        // this.monthLength = Math.floor(this.yearLength / (this.hDayLength * numMonths)) * this.hDayLength;
+        // this.hTypicalDaysPerMonth = this.monthLength / this.hDayLength;
+        console.log(this.name + " has " + this.monthCount + " months, each with " + this.hTypicalDaysPerMonth + " days");
 
         this.YearRemainder1 = (this.yearLength % this.hYearLength) / this.hDayLength;
         this.LeapYearFreq1 = Math.ceil(1 / this.YearRemainder1);
@@ -45,7 +57,7 @@ class Celestial {
         this.YearRemainder2 = (this.yearLength % this.hYearLength) / this.hDayLength - (1 / this.LeapYearFreq1);
         this.LeapYearFreq2 = Math.ceil(1 / this.YearRemainder2);
 
-        this.monthRemainder = (this.hYearLength / this.hDayLength) - ((this.monthLength / this.hDayLength) * numMonths);
+        this.monthRemainder = (this.hYearLength / this.hDayLength) - ((this.monthLength / this.hDayLength) * this.monthCount);
 
         this.excessYearRemainder = (this.yearLength % this.hYearLength) / this.hDayLength - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
 
@@ -105,9 +117,15 @@ class Celestial {
         this.dayOfYear = Math.floor(msFromEpoch / this.dayLength);
         this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength);
 
+        // if (this.month < this.monthRemainder) {
+        //     this.month = Math.floor(msFromEpoch / this.monthLength);
+        //     this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
+        // } else {
+        //     this.month = Math.floor(msFromEpoch / this.monthLength);
+        //     this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
+        // }
         this.month = Math.floor(msFromEpoch / this.monthLength);
-        let msFromEpochwLs = msFromEpoch % this.monthLength;
-        this.dayOfMonth = Math.floor(msFromEpochwLs / this.hDayLength);
+        this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
 
         this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.hdWeekLength);
 
