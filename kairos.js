@@ -22,9 +22,7 @@ class Celestial {
         this.hm = 0;
         this.hs = 0;
         this.hms = 0;
-        // this.monthLength = Math.floor(this.yearLength / (3600 * 1000 * 12)) * 3600 * 1000;
 
-        // let numMonths = 12;
         let weeksPerMonth = 4;
         let dayDiff = 1;
 
@@ -41,30 +39,34 @@ class Celestial {
         }
 
         this.hDaysPerYear = Math.floor(this.yearLength / this.hDayLength)
-        this.hYearLength = this.hDaysPerYear * this.hDayLength;
+        this.hTypicalYearLength = this.hDaysPerYear * this.hDayLength;
         this.hTypicalDaysPerMonth = weeksPerMonth * this.hdWeekLength;
         this.monthLength = this.hTypicalDaysPerMonth * this.hDayLength;
         this.monthCount = Math.floor(this.hDaysPerYear / this.hTypicalDaysPerMonth);
 
 
-        // this.monthLength = Math.floor(this.yearLength / (this.hDayLength * numMonths)) * this.hDayLength;
-        // this.hTypicalDaysPerMonth = this.monthLength / this.hDayLength;
         console.log(this.name + " has " + this.monthCount + " months, each with " + this.hTypicalDaysPerMonth + " days");
 
-        this.YearRemainder1 = (this.yearLength % this.hYearLength) / this.hDayLength;
+        this.YearRemainder1 = (this.yearLength % this.hTypicalYearLength) / this.hDayLength;
         this.LeapYearFreq1 = Math.ceil(1 / this.YearRemainder1);
 
-        this.YearRemainder2 = (this.yearLength % this.hYearLength) / this.hDayLength - (1 / this.LeapYearFreq1);
+        this.YearRemainder2 = (this.yearLength % this.hTypicalYearLength) / this.hDayLength - (1 / this.LeapYearFreq1);
         this.LeapYearFreq2 = Math.ceil(1 / this.YearRemainder2);
 
-        this.monthRemainder = (this.hYearLength / this.hDayLength) - ((this.monthLength / this.hDayLength) * this.monthCount);
+        this.monthRemainder = (this.hTypicalYearLength / this.hDayLength) - ((this.monthLength / this.hDayLength) * this.monthCount);
 
-        this.excessYearRemainder = (this.yearLength % this.hYearLength) / this.hDayLength - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
+        this.excessYearRemainder = (this.yearLength % this.hTypicalYearLength) / this.hDayLength - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
 
         console.log(this.name + " remainder from year length " + this.YearRemainder1 + " days, leap year every " + this.LeapYearFreq1 + " and " + this.LeapYearFreq2 + " years");
         console.log(this.name + " excess remainder " + this.excessYearRemainder + " days");
         console.log(this.name + " remainder from months " + this.monthRemainder + " days");
-        console.log(this.name + " year length = " + this.hYearLength / this.hDayLength + " days");
+        console.log(this.name + " year length = " + this.hTypicalYearLength / this.hDayLength + " days");
+
+        // Length of time between leap years in ms
+        this.block1YearLength = this.LeapYearFreq1 * this.hTypicalYearLength + this.hDayLength;
+        this.block2YearLength = Math.floor(this.LeapYearFreq2 / this.LeapYearFreq1) * this.block1YearLength + (this.LeapYearFreq2 % this.LeapYearFreq1) * this.hTypicalYearLength + this.hDayLength;
+
+        console.log(this.name + " block 1 length = " + this.block1YearLength / this.hDayLength + " days, block 2 length = " + this.block2YearLength / this.hDayLength + " days");
 
         // Fudge factors
         this.leapSeconds = leapSeconds;
@@ -100,17 +102,12 @@ class Celestial {
 
         this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength);
 
-        if (this.hYearLength !== 1) {
-            this.y = Math.floor(msFromEpoch / this.hYearLength);
-            this.leapDays = Math.floor(this.y / this.LeapYearFreq1) + Math.floor(this.y / this.LeapYearFreq2);
-            // if ((this.y % this.LeapYearFreq1) === 0 || (this.y % this.LeapYearFreq2) === 0) {
-            //     this.leapYear = 1;
-            // }
-            // else {
-            //     this.leapYear = 0;
-            // }
-            msFromEpoch %= this.hYearLength;
-        }
+        let yearFromLeap2 = Math.floor(msFromEpoch / this.block2YearLength) * this.LeapYearFreq2;
+        if (yearFromLeap2 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block2YearLength) * this.block2YearLength;
+        let yearFromLeap1 = Math.floor(msFromEpoch / this.block1YearLength) * this.LeapYearFreq1;
+        if (yearFromLeap1 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block1YearLength) * this.block1YearLength;
+        this.y = yearFromLeap2 + yearFromLeap1 + Math.floor(msFromEpoch / this.hTypicalYearLength);
+        msFromEpoch %= this.hTypicalYearLength;
 
         // msFromEpoch -= this.leapDays * 86400 * 1000;
 
