@@ -1,5 +1,5 @@
 var realTime = 0;
-var scalingFactor = 0;
+var scalingFactor = 1;
 
 class Circle {
     constructor(a, x0, y0, period, radius, colour, omega = 0, ring = 0) {
@@ -46,16 +46,13 @@ function balls(table, bodies) {
     window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
     var canvas = document.getElementById('canvas');
-    var slider = document.getElementById("sliderSpeed");
     var output = document.getElementById("speedText");
-    output.innerHTML = "Seconds per second: " + Math.pow(10, slider.value * .04); // Display the default slider value
 
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
 
         var maxX = canvas.clientWidth;
         var maxY = canvas.clientHeight;
-        var scalingFactor = Math.pow(10, slider.value * .04).toPrecision(3);
 
         var lastTime = 0;
 
@@ -98,11 +95,17 @@ function balls(table, bodies) {
 
         function step(timestamp) {
             ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-            scalingFactor = Math.pow(10, slider.value * .04);
             output.innerHTML = "Multiplier: " + scalingFactor.toPrecision(5) + "x";
 
             var deltaTime = timestamp - lastTime;
             realTime += deltaTime * scalingFactor;
+
+            // Make sure time doesn't go negative
+            if (realTime < 0) {
+                realTime = 0;
+                deltaTime = 0;
+                scalingFactor = 0;
+            }
 
             for (var body in circles) {
                 if (body === "luna") {

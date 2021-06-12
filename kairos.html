@@ -40,10 +40,12 @@
         <h4 id="speedText">Hello?</h4>
         <button type="button" onclick=IrlTime()>Current Time</button>
         <button type="button" onclick=EpochTime()>Epoch Time</button>
-
-        <div class="slidecontainer">
-            <input type="range" min="-50" max="200" value="0" class="slider" id="sliderSpeed">
-        </div>
+        <button type="button" onclick=Rewind(10)>&lt;&lt;</button>
+        <button type="button" onclick=Rewind(1)>&lt;</button>
+        <button type="button" onclick=Pause()>||</button>
+        <!-- <button type="button" onclick=Forward(1)>&#9658;</button> -->
+        <button type="button" onclick=Forward(1)>&gt;</button>
+        <button type="button" onclick=Forward(10)>&gt;&gt;</button>
         <canvas id="canvas" height=500px width=500px></canvas>
     </div>
 

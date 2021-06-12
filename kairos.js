@@ -293,17 +293,43 @@ function updateTable(table, data) {
 
 function IrlTime() {
     // J2000ish epoch
-    // 946663200000
     realTime = Date.now() - 946684800000;
-    var slider = document.getElementById("sliderSpeed");
-    slider.value = 0;
+
+    scalingFactor = 1;
 }
 
 function EpochTime() {
     // J2000ish epoch
     realTime = 0;
-    var slider = document.getElementById("sliderSpeed");
-    slider.value = 0;
+    scalingFactor = 1;
+}
+
+function Pause() {
+    scalingFactor = 0;
+}
+
+function Forward(speed) {
+    if (Math.abs(scalingFactor) <= 1 || speed === 1) {
+        scalingFactor = speed;
+    }
+    else if (scalingFactor < 0) {
+        scalingFactor /= speed;
+    }
+    else {
+        scalingFactor *= speed;
+    }
+}
+
+function Rewind(speed) {
+    if (Math.abs(scalingFactor) <= 1 || speed === 1) {
+        scalingFactor = -speed;
+    }
+    else if (scalingFactor < 0) {
+        scalingFactor *= speed;
+    }
+    else {
+        scalingFactor /= speed;
+    }
 }
 
 function generate() {
