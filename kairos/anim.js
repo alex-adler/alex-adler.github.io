@@ -1,6 +1,3 @@
-var realTime = 0;
-var scalingFactor = 1;
-
 class Circle {
     constructor(a, x0, y0, period, radius, colour, omega = 0, ring = 0) {
         this.a = a; // Semi major axis (px)

@@ -3,8 +3,10 @@
 
 <head>
     <link rel="stylesheet" href="style.css">
-    <script type="application/javascript" src="kairos_anim.js"></script>
-    <script type="application/javascript" src="kairos.js"></script>
+    <script type="application/javascript" src="kairos/globals.js"></script>
+    <script type="application/javascript" src="kairos/anim.js"></script>
+    <script type="application/javascript" src="kairos/table.js"></script>
+    <script type="application/javascript" src="kairos/main.js"></script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,9 +35,6 @@
 
     <table></table>
 
-
-
-
     <div id="animation">
         <h4 id="speedText">Hello?</h4>
         <button type="button" onclick=IrlTime()>Current Time</button>
@@ -43,7 +42,6 @@
         <button type="button" onclick=Rewind(10)>&lt;&lt;</button>
         <button type="button" onclick=Rewind(1)>&lt;</button>
         <button type="button" onclick=Pause()>||</button>
-        <!-- <button type="button" onclick=Forward(1)>&#9658;</button> -->
         <button type="button" onclick=Forward(1)>&gt;</button>
         <button type="button" onclick=Forward(10)>&gt;&gt;</button>
         <canvas id="canvas" height=500px width=500px></canvas>
