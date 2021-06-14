@@ -44,9 +44,16 @@ function Rewind(speed) {
 function generate() {
     let table = document.querySelector("table");
     let tableHeaders = ["Body", "Local Time", "Solar Time", "Day of the Week", "Date"];
+    IrlTime();
     data = generateData(bodies);
+    info = generateInformation(bodies);
     generateTableHead(table, tableHeaders);
-    generateTable(table, data);
+    generateTable(table, data, info);
 
     balls(table, bodies);
 }
+
+/* TODO:
+- Display images and time lengths for each body
+- Date picker with all the calendars (https://github.com/crsten/datepickk?)
+*/

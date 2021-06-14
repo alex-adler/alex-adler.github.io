@@ -23,6 +23,8 @@ class Celestial {
         this.hs = 0;
         this.hms = 0;
 
+        this.img = "/images/" + this.name + ".jpg";
+
         let weeksPerMonth = 4;
         let dayDiff = 1;
 
@@ -197,29 +199,32 @@ class Celestial {
 
 // Celestial Bodies (name, dayLength, yearLength, leapSeconds, initialYearProgress, initialWeekDay)
 var Earth = new Celestial("Earth", 24, 365.256363004 * 24, 0, 0, 5);
-var Mars = new Celestial("Mars", 24.6230, 668.5991 * 24.6230, 0);
-var Venus = new Celestial("Venus", 116.75 * 24, 5832.6, 0);
+var Mars = new Celestial("Mars", 24.6230, 668.5991 * 24.6230, 0, 0, 0);
+var Venus = new Celestial("Venus", 116.75 * 24, 5832.6, 0, 0, 0);
 
-var Ceres = new Celestial("Ceres", 9.074170, 1683.14570801 * 24, 0);
+var Ceres = new Celestial("Ceres", 9.074170, 1683.14570801 * 24, 0, 0, 0);
 
-var Europa = new Celestial("Europa", 3.551181 * 24, 4332.59 * 24, 0);
-var Ganymede = new Celestial("Ganymede", 7.15455296 * 24, 4332.59 * 24, 0);
-var Callisto = new Celestial("Callisto", 16.6890184 * 24, 4332.59 * 24, 0);
+var Europa = new Celestial("Europa", 3.551181 * 24, 4332.59 * 24, 0, 0, 0);
+var Ganymede = new Celestial("Ganymede", 7.15455296 * 24, 4332.59 * 24, 0, 0, 0);
+var Callisto = new Celestial("Callisto", 16.6890184 * 24, 4332.59 * 24, 0, 0, 0);
 
-var Titan = new Celestial("Titan", 15.945 * 24, 10759.22 * 24, 0);
-var Enceladus = new Celestial("Enceladus", 1.370218 * 24, 10759.22 * 24, 0);
+var Titan = new Celestial("Titan", 15.945 * 24, 10759.22 * 24, 0, 0, 0);
+var Enceladus = new Celestial("Enceladus", 1.370218 * 24, 10759.22 * 24, 0, 0, 0);
 
-var Titania = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0);
+var Titania = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0, 0, 0);
 
-var Triton = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0);
+var Triton = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0, 0);
 
 var bodies = [Earth, Mars, Venus, Europa, Ganymede, Callisto, Titan, Enceladus, Titania, Triton, Ceres];
+
+// console.log(Mars.img);
 
 // Update everything
 function updateTimes(table, bodies, msFromEpoch) {
     updateInternalValues(msFromEpoch);
     data = generateData(bodies);
-    updateTable(table, data);
+    info = generateInformation(bodies);
+    updateTable(table, data, info);
     var text = document.getElementById("demo");
     t = timeConverter(realTime);
     text.innerText = t;
@@ -253,6 +258,22 @@ function generateData(bodies) {
     return data;
 }
 
+function generateInformation(bodies) {
+    var data = [];
+    var i;
+    for (i = 0; i < bodies.length; i++) {
+        data.push([bodies[i].name, bodies[i].img,
+        (bodies[i].hDayLength / (3600 * 1000)).toPrecision(4),
+        bodies[i].hdWeekLength,
+        bodies[i].hDaysPerYear,
+        bodies[i].monthCount,
+        bodies[i].hTypicalDaysPerMonth,
+        bodies[i].LeapYearFreq1,
+        bodies[i].LeapYearFreq2]);
+    }
+    return data;
+}
+
 // Generate HTML for the table head
 function generateTableHead(table, data) {
     let thead = table.createTHead();
@@ -265,26 +286,101 @@ function generateTableHead(table, data) {
     }
 }
 
-function generateTable(table, data) {
-    for (let element of data) {
-        let row = table.insertRow();
-        for (key in element) {
-            let cell = row.insertCell();
-            let text = document.createTextNode(element[key]);
+function generateTable(table, dataTime, dataFacts) {
+    // for (let element of dataTime) {
+    for (let i = 0; i < dataTime.length; i++) {
+        let rowTime = table.insertRow();
+        rowTime.className = "collapsible";
+
+        let rowFacts = table.insertRow();
+        rowFacts.className = "content";
+        rowFacts.style.display = 'none';
+
+        rowTime.addEventListener("click", function () {
+            this.classList.toggle("active");
+            if (rowFacts.style.display == 'none') {
+                rowFacts.style.display = '';
+            } else {
+                rowFacts.style.display = 'none';
+            }
+        });
+
+        for (key in dataTime[i]) {
+            let cell = rowTime.insertCell();
+            let text = document.createTextNode(dataTime[i][key]);
             cell.appendChild(text);
 
             if (key == 0) { cell.id = "tableName"; }
             else { cell.id = "tableValue"; }
         }
+
+        let cell = rowFacts.insertCell();
+        cell.colSpan = "5";
+        let image = document.createElement("img");
+        // image.src = "https://images-assets.nasa.gov/image/PIA19048/PIA19048~orig.jpg";
+        image.src = "/images/Europa.jpg"
+        image.alt = "Galileo image of Europa"
+        imageWidth = image.naturalWidth;
+        imageHeight = image.naturalHeight;
+        cellWidth = table.offsetWidth;
+        imageScale = 3 * imageWidth / cellWidth;
+        image.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+        image.id = "image" + i;
+        image.className = "bodyImage";
+        cell.appendChild(image);
+
+        let div = document.createElement("div");
+
+        let p = document.createElement("p");
+        let text = document.createTextNode("Day length, week length");
+        p.appendChild(text);
+        p.id = "dayLength" + i;
+        div.appendChild(p);
+
+        p = document.createElement("p");
+        text = document.createTextNode("Year length, month length");
+        p.appendChild(text);
+        p.id = "yearLength" + i;
+        div.appendChild(p);
+
+        p = document.createElement("p");
+        text = document.createTextNode("Leap year frequency");
+        p.appendChild(text);
+        p.id = "leapYear" + i;
+        div.appendChild(p);
+
+        div.className = "flavourText";
+        cell.appendChild(div);
     }
 }
 
-function updateTable(table, data) {
-    for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < data[i].length; j++) {
-            // console.log(data[i][j]);
-            table.rows[i + 1].cells[j].innerHTML = data[i][j];
-            // table.rows[i + 1].cells[j].setA
+// Try not to DDoS NASA
+function updateFlavour(table, id, data) {
+    img = document.getElementById("image" + id);
+    img.src = data[1];
+    img.alt = "Image of " + data[0];
+    imageWidth = img.naturalWidth;
+    imageHeight = img.naturalHeight;
+    cellWidth = table.offsetWidth;
+    imageScale = 3 * imageWidth / cellWidth;
+    img.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+
+    p = document.getElementById("dayLength" + id);
+    p.innerHTML = data[2] + " h per day, " + data[3] + " day week";
+
+    p = document.getElementById("yearLength" + id);
+    p.innerHTML = data[0] + "'s " + data[4] + " day year is comprised of " + data[5] + " months, each with " + data[6] + " days";
+
+    p = document.getElementById("leapYear" + id);
+    p.innerHTML = "Leap years every " + data[7] + " and " + data[8] + " years";
+
+}
+
+function updateTable(table, dataTime, dataFacts) {
+    for (let i = 0; i < dataTime.length; i++) {
+        for (let j = 0; j < dataTime[i].length; j++) {
+            table.rows[2 * (i + 1) - 1].cells[j].innerHTML = dataTime[i][j];
         }
+        updateFlavour(table, i, dataFacts[i]);
     }
 }

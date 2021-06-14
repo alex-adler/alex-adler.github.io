@@ -33,6 +33,7 @@ table {
 	padding-right: 0;
 	margin-left: auto;
 	margin-right: auto;
+	border-spacing: 0;
 }
 
 th {
@@ -55,7 +56,6 @@ td {
 /* Animation */
 #canvas {
 	position: relative;
-
 	display: block;
 	background-color: #222222;
 }
@@ -70,46 +70,31 @@ td {
 	/* margin: auto; */
 }
 
-/* Slider */
-.slidecontainer {
-	width: 500px; /* Width of the outside container */
-	padding-left: 0;
-	padding-right: 0;
-	margin-left: auto;
-	margin-right: auto;
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+	cursor: pointer;
 }
 
-/* The slider itself */
-.slider {
-	-webkit-appearance: none; /* Override default CSS styles */
-	appearance: none;
-	width: 100%; /* Full-width */
-	height: 25px; /* Specified height */
-	background: #d3d3d3; /* Grey background */
-	outline: none; /* Remove outline */
-	opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-	-webkit-transition: .2s; /* 0.2 seconds transition on hover */
-	transition: opacity .2s;
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active,
+.collapsible:hover {
+	background-color: #ccc;
 }
 
-/* Mouse-over effects */
-.slider:hover {
-	opacity: 1; /* Fully shown on mouse-over */
+/* Style the collapsible content. Note: hidden by default */
+.content {
+	padding: 0 18px;
+	background-color: white;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
 }
 
-/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-.slider::-webkit-slider-thumb {
-	-webkit-appearance: none; /* Override default look */
-	appearance: none;
-	width: 25px; /* Set a specific slider handle width */
-	height: 25px; /* Slider handle height */
-	background: #222222; /* Green background */
-	cursor: pointer; /* Cursor on hover */
+.bodyImage {
+	float: left;
 }
 
-.slider::-moz-range-thumb {
-	width: 25px; /* Set a specific slider handle width */
-	height: 25px; /* Slider handle height */
-	background: #222222; /* Green background */
-	cursor: pointer; /* Cursor on hover */
+.flavourText {
+	/* float: right; */
+	text-align: right;
 }
