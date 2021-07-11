@@ -54,6 +54,7 @@ function generate() {
 }
 
 /* TODO:
-- Display images and time lengths for each body
+- Figure out months
 - Date picker with all the calendars (https://github.com/crsten/datepickk?)
+- Make and add blender renders
 */
