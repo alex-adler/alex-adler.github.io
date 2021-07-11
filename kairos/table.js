@@ -1,15 +1,14 @@
 class Celestial {
     constructor(name, dayLength, yearLength, leapSeconds, initialYearProgress = 0, initialWeekDay = 0) {
         this.name = name;
-        this.dayLength = Math.floor(dayLength * 3600) * 1000;
-        this.yearLength = Math.floor(yearLength * 3600) * 1000;
+        this.dayLength_ms = Math.floor(dayLength * 3600) * 1000;
+        this.yearLength_ms = Math.floor(yearLength * 3600) * 1000;
         this.y = 0;
         this.month = 0;
         this.dayOfYear = 0;
         this.dayOfMonth = 0;
-        this.hDaysPerYear = 0;
-        this.hTypicalDaysPerYear = 0;
-        this.hDaysPerMonth = 0;
+        this.yearLength_hd = 0;
+        this.monthLength_hd = 0;
         this.hTypicalDaysPerMonth = 0;
         this.hDayOfYear = 0;
         this.hDayOfWeek = 0;
@@ -23,52 +22,67 @@ class Celestial {
         this.hs = 0;
         this.hms = 0;
 
+        // Path to image
         this.img = "/images/" + this.name + ".jpg";
 
-        let weeksPerMonth = 4;
-        let dayDiff = 1;
 
-        // Check if day length is +-dayDiff from 24 hours
-        if (Math.abs((24 * 3600 * 1000) - this.dayLength) > (dayDiff * 3600 * 1000)) {
+        // ------------------ Days and weeks -----------------------------
+
+        // Factor for calculating length of human day
+        let offsetFrom24h = 1;
+        // Check if day length is +-offsetFrom24h from 24 hours
+        if (Math.abs((24 * 3600 * 1000) - this.dayLength_ms) > (offsetFrom24h * 3600 * 1000)) {
             // If it's not, use the solar day as a week and calculate a human day
-            this.calculateWeek(dayDiff, 1);
-            console.log(this.name + " " + this.hDayLength / (3600 * 1000) + " " + this.hdWeekLength + " " + this.dWeekLength);
+            this.calculateWeek(offsetFrom24h, 1);
+            console.log(this.name + " " + this.hDayLength_ms / (3600 * 1000) + " " + this.weekLength_hd + " " + this.weekLength_d);
         } else {
             // Use a default 7 day week if we don't need a special one
-            this.hDayLength = this.dayLength;
-            this.dWeekLength = 7;
-            this.hdWeekLength = this.dWeekLength;
+            this.hDayLength_ms = this.dayLength_ms;
+            this.weekLength_d = 7;
+            this.weekLength_hd = this.weekLength_d;
         }
-
-        this.hDaysPerYear = Math.floor(this.yearLength / this.hDayLength)
-        this.hTypicalYearLength = this.hDaysPerYear * this.hDayLength;
-        this.hTypicalDaysPerMonth = weeksPerMonth * this.hdWeekLength;
-        this.monthLength = this.hTypicalDaysPerMonth * this.hDayLength;
-        this.monthCount = Math.floor(this.hDaysPerYear / this.hTypicalDaysPerMonth);
+        // Calculate year length including rounding to integer days
+        this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms)
+        this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
 
 
-        console.log(this.name + " has " + this.monthCount + " months, each with " + this.hTypicalDaysPerMonth + " days");
+        // ------------------ Months -----------------------------
 
-        this.YearRemainder1 = (this.yearLength % this.hTypicalYearLength) / this.hDayLength;
+        let idealWeeksPerMonth = 4;
+
+        let idealDaysPerMonth = idealWeeksPerMonth * this.weekLength_hd;
+        let idealMonthCount = Math.floor(this.yearLength_hd / idealDaysPerMonth);
+
+        this.monthCount = Math.floor(idealMonthCount / 4) * 4;
+        this.nominalMonthLength_hd = Math.floor(this.yearLength_hd / this.monthCount);
+        this.nominalMonthLength_ms = this.nominalMonthLength_hd * this.hDayLength_ms;
+
+        console.log(this.name + " has " + this.monthCount + " months, each typically with " + this.nominalMonthLength_hd + " days");
+
+
+        // ------------------ Leap Years -----------------------------
+
+        this.YearRemainder1 = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms;
         this.LeapYearFreq1 = Math.ceil(1 / this.YearRemainder1);
 
-        this.YearRemainder2 = (this.yearLength % this.hTypicalYearLength) / this.hDayLength - (1 / this.LeapYearFreq1);
+        this.YearRemainder2 = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - (1 / this.LeapYearFreq1);
         this.LeapYearFreq2 = Math.ceil(1 / this.YearRemainder2);
 
-        this.monthRemainder = (this.hTypicalYearLength / this.hDayLength) - ((this.monthLength / this.hDayLength) * this.monthCount);
+        this.monthRemainder = (this.hYearLength_ms / this.hDayLength_ms) - ((this.nominalMonthLength_ms / this.hDayLength_ms) * this.monthCount);
 
-        this.excessYearRemainder = (this.yearLength % this.hTypicalYearLength) / this.hDayLength - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
+        this.excessYearRemainder = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
 
+        console.log(this.name + " : " + (this.hYearLength_ms / this.hDayLength_ms) + " : " + this.hDayLength_ms + " : " + this.hDayLength_ms);
         console.log(this.name + " remainder from year length " + this.YearRemainder1 + " days, leap year every " + this.LeapYearFreq1 + " and " + this.LeapYearFreq2 + " years");
         console.log(this.name + " excess remainder " + this.excessYearRemainder + " days");
         console.log(this.name + " remainder from months " + this.monthRemainder + " days");
-        console.log(this.name + " year length = " + this.hTypicalYearLength / this.hDayLength + " days");
+        console.log(this.name + " year length = " + this.hYearLength_ms / this.hDayLength_ms + " days");
 
         // Length of time between leap years in ms
-        this.block1YearLength = this.LeapYearFreq1 * this.hTypicalYearLength + this.hDayLength;
-        this.block2YearLength = Math.floor(this.LeapYearFreq2 / this.LeapYearFreq1) * this.block1YearLength + (this.LeapYearFreq2 % this.LeapYearFreq1) * this.hTypicalYearLength + this.hDayLength;
+        this.block1YearLength = this.LeapYearFreq1 * this.hYearLength_ms + this.hDayLength_ms;
+        this.block2YearLength = Math.floor(this.LeapYearFreq2 / this.LeapYearFreq1) * this.block1YearLength + (this.LeapYearFreq2 % this.LeapYearFreq1) * this.hYearLength_ms + this.hDayLength_ms;
 
-        console.log(this.name + " block 1 length = " + this.block1YearLength / this.hDayLength + " days, block 2 length = " + this.block2YearLength / this.hDayLength + " days");
+        console.log(this.name + " block 1 length = " + this.block1YearLength / this.hDayLength_ms + " days, block 2 length = " + this.block2YearLength / this.hDayLength_ms + " days");
 
         // Fudge factors
         this.leapSeconds = leapSeconds;
@@ -77,14 +91,14 @@ class Celestial {
     }
     calculateWeek(dayDiff, solarDaysPerWeek) {
         let minWeekLength = 4;
-        let lowerLimit = (this.dayLength * solarDaysPerWeek) / ((24 - dayDiff) * 3600 * 1000)
-        let upperLimit = (this.dayLength * solarDaysPerWeek) / ((24 + dayDiff) * 3600 * 1000)
+        let lowerLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 - dayDiff) * 3600 * 1000)
+        let upperLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 + dayDiff) * 3600 * 1000)
 
         if ((Math.floor(lowerLimit) > upperLimit) && (Math.floor(lowerLimit) > minWeekLength)) {
             // Valid week length (also longer than the minimum length)
-            this.dWeekLength = solarDaysPerWeek;
-            this.hdWeekLength = Math.floor(lowerLimit);
-            this.hDayLength = Math.floor((this.dayLength * solarDaysPerWeek) / (this.hdWeekLength * 1000)) * 1000;
+            this.weekLength_d = solarDaysPerWeek;
+            this.weekLength_hd = Math.floor(lowerLimit);
+            this.hDayLength_ms = Math.floor((this.dayLength_ms * solarDaysPerWeek) / (this.weekLength_hd * 1000)) * 1000;
         }
         else {
             if (solarDaysPerWeek < 100) {
@@ -92,9 +106,9 @@ class Celestial {
             }
             else {
                 console.log("Week length not found for " + this.name);
-                this.hDayLength = 0;
-                this.dWeekLength = 0;
-                this.hdWeekLength = 0;
+                this.hDayLength_ms = 0;
+                this.weekLength_d = 0;
+                this.weekLength_hd = 0;
             }
         }
     }
@@ -102,35 +116,35 @@ class Celestial {
 
         msFromEpoch += this.leapSeconds * 1000;
 
-        this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength);
+        this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength_ms);
 
         let yearFromLeap2 = Math.floor(msFromEpoch / this.block2YearLength) * this.LeapYearFreq2;
         if (yearFromLeap2 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block2YearLength) * this.block2YearLength;
         let yearFromLeap1 = Math.floor(msFromEpoch / this.block1YearLength) * this.LeapYearFreq1;
         if (yearFromLeap1 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block1YearLength) * this.block1YearLength;
-        this.y = yearFromLeap2 + yearFromLeap1 + Math.floor(msFromEpoch / this.hTypicalYearLength);
-        msFromEpoch %= this.hTypicalYearLength;
+        this.y = yearFromLeap2 + yearFromLeap1 + Math.floor(msFromEpoch / this.hYearLength_ms);
+        msFromEpoch %= this.hYearLength_ms;
 
         // msFromEpoch -= this.leapDays * 86400 * 1000;
 
-        this.dayOfYear = Math.floor(msFromEpoch / this.dayLength);
-        this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength);
+        this.dayOfYear = Math.floor(msFromEpoch / this.dayLength_ms);
+        this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength_ms);
 
         // if (this.month < this.monthRemainder) {
-        //     this.month = Math.floor(msFromEpoch / this.monthLength);
-        //     this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
+        //     this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
+        //     this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
         // } else {
-        //     this.month = Math.floor(msFromEpoch / this.monthLength);
-        //     this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
+        //     this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
+        //     this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
         // }
-        this.month = Math.floor(msFromEpoch / this.monthLength);
-        this.dayOfMonth = Math.floor((msFromEpoch % this.monthLength) / this.hDayLength);
+        this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
+        this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
 
-        this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.hdWeekLength);
+        this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd);
 
         let msFromEpoch2 = msFromEpoch;
 
-        msFromEpoch %= this.dayLength;
+        msFromEpoch %= this.dayLength_ms;
         this.h = Math.floor(msFromEpoch / 3600000);
         msFromEpoch %= 3600000;
         this.m = Math.floor(msFromEpoch / 60000);
@@ -139,7 +153,7 @@ class Celestial {
         msFromEpoch %= 1000;
         this.ms = Math.floor(msFromEpoch);
 
-        msFromEpoch2 %= this.hDayLength;
+        msFromEpoch2 %= this.hDayLength_ms;
         this.hh = Math.floor(msFromEpoch2 / 3600000);
         msFromEpoch2 %= 3600000;
         this.hm = Math.floor(msFromEpoch2 / 60000);
@@ -157,21 +171,21 @@ class Celestial {
     formatTime() {
         let m = this.checkTime(this.hm);
         let s = this.checkTime(this.hs);
-        let h = this.checkHour(this.hh, this.hDayLength);
+        let h = this.checkHour(this.hh, this.hDayLength_ms);
         return h + ":" + m + ":" + s;// + ":" + this.ms;
     }
     formatSolarTime() {
         let m = this.checkTime(this.m);
         let s = this.checkTime(this.s);
-        let h = this.checkHour(this.h, this.dayLength);
+        let h = this.checkHour(this.h, this.dayLength_ms);
         return h + ":" + m + ":" + s;// + ":" + this.ms;
     }
     formatDate() {
-        let d = this.checkDay(this.dayOfMonth, this.dayLength, this.monthLength);
+        let d = this.checkDay(this.dayOfMonth, this.dayLength_ms, this.nominalMonthLength_ms);
         return d + "/" + this.month + "/" + this.y;
     }
     formatWeekDay() {
-        return this.hDayOfWeek + "/" + this.hdWeekLength;
+        return this.hDayOfWeek + "/" + this.weekLength_hd;
     }
     // Functions to add leading zeros
     checkTime(i) {
@@ -263,11 +277,12 @@ function generateInformation(bodies) {
     var i;
     for (i = 0; i < bodies.length; i++) {
         data.push([bodies[i].name, bodies[i].img,
-        (bodies[i].hDayLength / (3600 * 1000)).toPrecision(4),
-        bodies[i].hdWeekLength,
-        bodies[i].hDaysPerYear,
+        (bodies[i].hDayLength_ms / (3600 * 1000)).toPrecision(2),
+        (parseFloat((bodies[i].hDayLength_ms / (3600 * 1000)).toPrecision(4).toString().slice(2)) * 60).toFixed(0),
+        bodies[i].weekLength_hd,
+        bodies[i].yearLength_hd,
         bodies[i].monthCount,
-        bodies[i].hTypicalDaysPerMonth,
+        bodies[i].nominalMonthLength_hd,
         bodies[i].LeapYearFreq1,
         bodies[i].LeapYearFreq2]);
     }
@@ -366,13 +381,13 @@ function updateFlavour(table, id, data) {
     img.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
 
     p = document.getElementById("dayLength" + id);
-    p.innerHTML = data[2] + " h per day, " + data[3] + " day week";
+    p.innerHTML = data[2] + " h " + data[3] + " min per day, " + data[4] + " day week";
 
     p = document.getElementById("yearLength" + id);
-    p.innerHTML = data[0] + "'s " + data[4] + " day year is comprised of " + data[5] + " months, each with " + data[6] + " days";
+    p.innerHTML = data[0] + "'s " + data[5] + " day year is comprised of " + data[6] + " months, each with " + data[7] + " days";
 
     p = document.getElementById("leapYear" + id);
-    p.innerHTML = "Leap years every " + data[7] + " and " + data[8] + " years";
+    p.innerHTML = "Leap years every " + data[8] + " and " + data[9] + " years";
 
 }
 
