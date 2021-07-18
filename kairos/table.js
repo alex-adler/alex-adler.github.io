@@ -130,6 +130,11 @@ class Celestial {
         // Leap seconds
         msFromEpoch += this.leapSeconds * 1000;
 
+        // Add fudge factor to account for Earth year 0 being a leap year
+        if (this.name === "Earth" && msFromEpoch > this.dayLength_ms) {
+            msFromEpoch -= this.dayLength_ms;
+        }
+
         this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength_ms);
 
         // Years
