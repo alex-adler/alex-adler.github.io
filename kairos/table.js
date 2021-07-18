@@ -22,9 +22,10 @@ class Celestial {
         this.hs = 0;
         this.hms = 0;
 
+        this.monthTimeSteps_ms = [];
+
         // Path to image
         this.img = "/images/" + this.name + ".jpg";
-
 
         // ------------------ Days and weeks -----------------------------
 
@@ -112,12 +113,26 @@ class Celestial {
             }
         }
     }
+    generateMonths(){
+        this.monthTimeSteps_ms = [];
+
+        // Add current year to beginning of array 
+        this.monthTimeSteps_ms.push(this.y);
+
+        this.monthTimeSteps_ms.push(0);
+
+        for (let i = 1; i < this.monthCount; i++) {
+            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i]+this.nominalMonthLength_ms);  
+        }
+    }
     getDateTime(msFromEpoch) {
 
+        // Leap seconds
         msFromEpoch += this.leapSeconds * 1000;
 
         this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength_ms);
 
+        // Years
         let yearFromLeap2 = Math.floor(msFromEpoch / this.block2YearLength) * this.LeapYearFreq2;
         if (yearFromLeap2 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block2YearLength) * this.block2YearLength;
         let yearFromLeap1 = Math.floor(msFromEpoch / this.block1YearLength) * this.LeapYearFreq1;
@@ -125,25 +140,35 @@ class Celestial {
         this.y = yearFromLeap2 + yearFromLeap1 + Math.floor(msFromEpoch / this.hYearLength_ms);
         msFromEpoch %= this.hYearLength_ms;
 
-        // msFromEpoch -= this.leapDays * 86400 * 1000;
-
         this.dayOfYear = Math.floor(msFromEpoch / this.dayLength_ms);
         this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength_ms);
 
-        // if (this.month < this.monthRemainder) {
-        //     this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
-        //     this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
-        // } else {
-        //     this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
-        //     this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
-        // }
-        this.month = Math.floor(msFromEpoch / this.nominalMonthLength_ms);
-        this.dayOfMonth = Math.floor((msFromEpoch % this.nominalMonthLength_ms) / this.hDayLength_ms);
+        // Check if the array of months is up to date
+        if(this.monthTimeSteps_ms[0] !== this.y){
+            this.generateMonths();
+            console.log("Regenerating months for " + this.name);
+        }
+
+        // Find what the current month is
+        for (let i = this.monthCount + 1; i > 0; i--) {
+            if (msFromEpoch >= this.monthTimeSteps_ms[i]){
+                this.month = i - 1;
+
+                // Do not apply mod to 1st month (divide by 0)
+                if (i !== 1) {
+                    msFromEpoch %= this.monthTimeSteps_ms[i];
+                }
+
+                this.dayOfMonth = Math.floor(msFromEpoch/this.hDayLength_ms);
+                break;
+            }            
+        }
 
         this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd);
 
-        let msFromEpoch2 = msFromEpoch;
+        let hmsFromEpoch = msFromEpoch;
 
+        // Normal days
         msFromEpoch %= this.dayLength_ms;
         this.h = Math.floor(msFromEpoch / 3600000);
         msFromEpoch %= 3600000;
@@ -153,15 +178,17 @@ class Celestial {
         msFromEpoch %= 1000;
         this.ms = Math.floor(msFromEpoch);
 
-        msFromEpoch2 %= this.hDayLength_ms;
-        this.hh = Math.floor(msFromEpoch2 / 3600000);
-        msFromEpoch2 %= 3600000;
-        this.hm = Math.floor(msFromEpoch2 / 60000);
-        msFromEpoch2 %= 60000;
-        this.hs = Math.floor(msFromEpoch2 / 1000);
-        msFromEpoch2 %= 1000;
-        this.hms = Math.floor(msFromEpoch2);
+        // Human days
+        hmsFromEpoch %= this.hDayLength_ms;
+        this.hh = Math.floor(hmsFromEpoch / 3600000);
+        hmsFromEpoch %= 3600000;
+        this.hm = Math.floor(hmsFromEpoch / 60000);
+        hmsFromEpoch %= 60000;
+        this.hs = Math.floor(hmsFromEpoch / 1000);
+        hmsFromEpoch %= 1000;
+        this.hms = Math.floor(hmsFromEpoch);
 
+        // Fudge factors because dates start at 1
         this.dayOfYear += 1;
         this.dayOfMonth += 1;
         this.hDayOfYear += 1;
@@ -230,8 +257,6 @@ var Titania = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0, 0, 0);
 var Triton = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0, 0);
 
 var bodies = [Earth, Mars, Venus, Europa, Ganymede, Callisto, Titan, Enceladus, Titania, Triton, Ceres];
-
-// console.log(Mars.img);
 
 // Update everything
 function updateTimes(table, bodies, msFromEpoch) {
