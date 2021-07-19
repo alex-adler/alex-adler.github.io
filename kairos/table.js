@@ -113,7 +113,7 @@ class Celestial {
             }
         }
     }
-    generateMonths(){
+    generateMonths() {
         this.monthTimeSteps_ms = [];
 
         // Add current year to beginning of array 
@@ -122,7 +122,7 @@ class Celestial {
         this.monthTimeSteps_ms.push(0);
 
         for (let i = 1; i < this.monthCount; i++) {
-            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i]+this.nominalMonthLength_ms);  
+            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.nominalMonthLength_ms);
         }
     }
     getDateTime(msFromEpoch) {
@@ -149,14 +149,14 @@ class Celestial {
         this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength_ms);
 
         // Check if the array of months is up to date
-        if(this.monthTimeSteps_ms[0] !== this.y){
+        if (this.monthTimeSteps_ms[0] !== this.y) {
             this.generateMonths();
             console.log("Regenerating months for " + this.name);
         }
 
         // Find what the current month is
         for (let i = this.monthCount + 1; i > 0; i--) {
-            if (msFromEpoch >= this.monthTimeSteps_ms[i]){
+            if (msFromEpoch >= this.monthTimeSteps_ms[i]) {
                 this.month = i - 1;
 
                 // Do not apply mod to 1st month (divide by 0)
@@ -164,9 +164,9 @@ class Celestial {
                     msFromEpoch %= this.monthTimeSteps_ms[i];
                 }
 
-                this.dayOfMonth = Math.floor(msFromEpoch/this.hDayLength_ms);
+                this.dayOfMonth = Math.floor(msFromEpoch / this.hDayLength_ms);
                 break;
-            }            
+            }
         }
 
         this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd);

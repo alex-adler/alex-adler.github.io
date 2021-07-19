@@ -2,11 +2,14 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/datepickk.css">
     <script type="application/javascript" src="kairos/globals.js"></script>
     <script type="application/javascript" src="kairos/anim.js"></script>
     <script type="application/javascript" src="kairos/table.js"></script>
+
     <script type="application/javascript" src="kairos/main.js"></script>
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,11 +28,16 @@
 <div class="topnav">
     <a href="index.html">Home</a>
     <a class="active" href="kairos.html">Kairos</a>
-    <a href="#contact">Contact</a>
+    <a href="extra.html">Extra</a>
     <a href="#about">About</a>
 </div>
 
 <body onload=generate()>
+    <script type="application/javascript" src="kairos/date_picker.js"></script>
+    <script>
+        var datepicker = new Datepickk();
+    </script>
+
     <h1 id="demo">G'day</h1>
     <div id="txt"></div>
 
@@ -44,6 +52,7 @@
         <button type="button" onclick=Pause()>||</button>
         <button type="button" onclick=Forward(1)>&gt;</button>
         <button type="button" onclick=Forward(10)>&gt;&gt;</button>
+        <button onclick="datepicker.show();">Date Picker</button>
         <canvas id="canvas" height=500px width=500px></canvas>
     </div>
 

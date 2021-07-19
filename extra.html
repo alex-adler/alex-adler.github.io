@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/datepickk.css">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,14 +20,20 @@
 </head>
 
 <div class="topnav">
-    <a class="active" href="index.html">Home</a>
+    <a href="index.html">Home</a>
     <a href="kairos.html">Kairos</a>
-    <a href="extra.html">Extra</a>
+    <a class="active" href="extra.html">Extra</a>
     <a href="#about">About</a>
 </div>
 
 <body>
-    <h1>hiaxcvbnm</h1>
+    <script src="kairos/date_picker.js"></script>
+    <script>
+        var datepicker = new Datepickk();
+    </script>
+    <div>
+        <button onclick="datepicker.show();">Date Picker</button>
+    </div>
 </body>
 
 </html>
