@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/datepickk.css">
+    <script type="application/javascript" src="kairos/globals.js"></script>
+    <script type="application/javascript" src="kairos/anim.js"></script>
+    <script type="application/javascript" src="kairos/table.js"></script>
+
+    <script type="application/javascript" src="kairos/main.js"></script>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <title>Space Time</title>
+</head>
+
+<div class="topnav">
+    <a href="index.html">Home</a>
+    <a class="active" href="spaceTime.html">Space Time</a>
+    <a href="extra.html">Extra</a>
+    <a href="#about">About</a>
+</div>
+
+<body onload=generate()>
+    <script type="application/javascript" src="kairos/date_picker.js"></script>
+    <script>
+        var datepicker = new Datepickk();
+    </script>
+
+    <h1 id="demo">G'day</h1>
+    <div id="txt"></div>
+
+    <table></table>
+
+    <div id="animation">
+        <h4 id="speedText">Hello?</h4>
+        <button type="button" onclick=IrlTime()>Current Time</button>
+        <button type="button" onclick=EpochTime()>Epoch Time</button>
+        <button type="button" onclick=Rewind(10)>&lt;&lt;</button>
+        <button type="button" onclick=Rewind(1)>&lt;</button>
+        <button type="button" onclick=Pause()>||</button>
+        <button type="button" onclick=Forward(1)>&gt;</button>
+        <button type="button" onclick=Forward(10)>&gt;&gt;</button>
+        <button onclick="datepicker.show();">Date Picker</button>
+        <canvas id="canvas" height=500px width=500px></canvas>
+    </div>
+
+</body>
+
+</html>
