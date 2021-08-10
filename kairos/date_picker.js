@@ -122,69 +122,19 @@ SOFTWARE.
 					Datepickk.numInstances = (Datepickk.numInstances || 0) + 1;
 					var that = this;
 					var eventName = 'click';
-					var selectedDates = [];
 
-					// var currentYear = new Date().getFullYear();
-
-					// var currentYear = 21;
-					// var currentMonth = new Date().getMonth() + 1;
-
-					// var languages = {
-					// 	no: {
-					// 		monthNames: ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'],
-					// 		dayNames: ['sø', 'ma', 'ti', 'on', 'to', 'fr', 'lø'],
-					// 		weekStart: 1
-					// 	},
-					// 	se: {
-					// 		monthNames: ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'],
-					// 		dayNames: ['sö', 'må', 'ti', 'on', 'to', 'fr', 'lö'],
-					// 		weekStart: 1
-					// 	},
-					// 	ru: {
-					// 		monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
-					// 		dayNames: ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'],
-					// 		weekStart: 1
-					// 	},
-					// 	en: {
-					// 		monthNames: ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'],
-					// 		dayNames: ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'],
-					// 		weekStart: 1
-					// 	},
-					// 	de: {
-					// 		monthNames: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-					// 		dayNames: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-					// 		weekStart: 1
-					// 	}
-					// };
-
-					/*Language aliases*/
-					// languages.nb = languages.no;
-					// languages.nn = languages.no;
-
-					var range = false;
-					var maxSelections = null;
 					var container = document.body;
 					var opened = false;
 					var months = 1;
 					var closeOnSelect = false;
-					var button = null;
-					var title = null;
 					var onNavigation = null;
 					var onClose = null;
-					var onConfirm = null;
 					var closeOnClick = true;
 					var inline = false;
-					var lang = 'en';
-					var onSelect = null;
-					var disabledDates = [];
-					var disabledDays = [];
-					var highlight = [];
-					var tooltips = {};
 					var daynames = true;
 					var today = true;
 					var startDate = null;
 					var minDate = null;
-					var maxDate = null;
 					var weekStart = null;
 					var locked = false;
 
@@ -299,35 +249,18 @@ SOFTWARE.
 						}
 					}
 
-					// TODO: Remove gracefully
-					// function parseMonth(month) {
-					// 	if (month > 11) month -= 12; else if (month < 0) month += 12;
-					// 	return month;
-					// }
-
 					function generateDates(year, month) {
 						var monthElements = that.el.querySelectorAll('.d-table');
-						// var ws = weekStart !== null ? weekStart : languages[lang].weekStart;
 						// Week start
 						var ws = 1;
 
 						[].slice.call(that.el.querySelectorAll('.d-table')).forEach(function (element, index) {
-							// // Number of days in current month
-							// var days = new Date(year, month + index, 0).getDate();
-							// // Number of days in last month
-							// var daysLast = new Date(year, month + index - 1, 0).getDate();
-							// // Day of the week of the first day of the month
-							// var startDay = new Date(year, month + index - 1, 1).getDay();
-
 							// Number of days in current month
 							var days = new SpaceDate(body, year, month + index, 0).getDate();
 							// Number of days in last month
 							var daysLast = new SpaceDate(body, year, month + index - 1, 0).getDate();
 							// Day of the week of the first day of the month
 							var startDay = new SpaceDate(body, year, month + index - 1, 1).getDay();
-
-							var startDate = null;
-							var endDate = null;
 
 							// Decide which day of the week to start on 
 							if (startDay - ws < 0) {
@@ -379,21 +312,14 @@ SOFTWARE.
 									}
 								}
 
-								// console.log(month + index);
-
 								if (date instanceof SpaceDate) {
 									inputEl.setAttribute('data-date', date.day);
 								} else {
 									console.log("date is not a SpaceDate");
 								}
 
-								// 	if (disabledDates.indexOf(date.getTime()) != -1 || disabledDays.indexOf(date.getDay()) != -1) {
-								// 		inputEl.setAttribute('disabled', true);
-								// 	}
-
 								// Disable the arrow if you are trying to go before the epoch
 								if (date.year < 0) {
-									// console.log("Before epoch");
 									inputEl.setAttribute('disabled', true);
 									labelEl.className = 'd-hidden';
 								}
@@ -404,62 +330,13 @@ SOFTWARE.
 								} else {
 									labelEl.classList.remove('today');
 								}
-
-								// 	if (tooltips[date.getTime()]) {
-								// 		labelEl.childNodes[0].setAttribute('data-tooltip', true);
-								// 		labelEl.childNodes[1].innerHTML = tooltips[date.getTime()];
-								// 	} else {
-								// 		labelEl.childNodes[0].removeAttribute('data-tooltip');
-								// 		labelEl.childNodes[1].innerHTML = '';
-								// 	}
-
-								// 	var _highlights = highlight.filter(function (x) {
-								// 		for (var m = 0; m < x.dates.length; m++) {
-								// 			if (date.getTime() >= x.dates[m].start.getTime() && date.getTime() <= x.dates[m].end.getTime()) {
-								// 				return true;
-								// 			}
-								// 		}
-								// 		return false;
-								// 	});
-
-								// 	if (_highlights.length > 0) {
-								// 		var bgColor = '';
-								// 		var legendIds = '';
-
-								// 		if (_highlights.length > 1) {
-								// 			var percent = Math.round(100 / _highlights.length);
-								// 			bgColor = 'background: linear-gradient(-45deg,';
-								// 			for (var z = 0; z < _highlights.length; z++) {
-								// 				legendIds += highlight.indexOf(_highlights[z]);
-								// 				if (z !== _highlights.length - 1) {
-								// 					legendIds += ' ';
-								// 				}
-								// 				bgColor += _highlights[z].backgroundColor + ' ' + percent * z + '%';
-								// 				if (z != _highlights.length - 1) {
-								// 					bgColor += ',';
-								// 					bgColor += _highlights[z].backgroundColor + ' ' + percent * (z + 1) + '%,';
-								// 				}
-								// 			}
-								// 			bgColor += ');';
-								// 		} else {
-								// 			bgColor = _highlights[0].backgroundColor ? 'background:' + _highlights[0].backgroundColor + ';' : '';
-								// 			legendIds += highlight.indexOf(_highlights[0]);
-								// 		}
-								// 		var Color = _highlights[0].color ? 'color:' + _highlights[0].color + ';' : '';
-								// 		labelEl.setAttribute('style', bgColor + Color);
-								// 		labelEl.setAttribute('data-legend-id', legendIds);
-								// 	}
-								// }
 							});
 						});
-
-						// generateLegends();
 					};
 
 					function setDate() {
 						if (lastBody !== currentBody) {
 							lastBody = currentBody;
-							console.log("Body has changed");
 
 							displayedDaysCount = displayedWeeksCount * body.weekLength_hd;
 							let newDayBoxSize = 100 / body.weekLength_hd;
@@ -467,32 +344,23 @@ SOFTWARE.
 							// Probably not the correct way of changing the css rules
 
 							// Display all week numbers
-							// console.log(document.styleSheets[1].cssRules[60]);
 							document.styleSheets[1].deleteRule(60);
 							document.styleSheets[1].insertRule("#Datepickk .d-week > div {flex-basis: calc(" + newDayBoxSize + "%);text-align: center;}", 60);
-							// console.log(document.styleSheets[1].cssRules[60]);
 
 							// Not sure what this changes
-							// console.log(document.styleSheets[1].cssRules[65]);
 							document.styleSheets[1].deleteRule(65);
 							document.styleSheets[1].insertRule("#Datepickk .d-table label:nth-of-type(" + body.weekLength_hd + "n) .d-date-legends {padding-right: 0;}", 65);
-							// console.log(document.styleSheets[1].cssRules[65]);
 
 							// Nor this one
-							// console.log(document.styleSheets[1].cssRules[66]);
 							document.styleSheets[1].deleteRule(66);
 							document.styleSheets[1].insertRule("#Datepickk .d-table label:nth-last-of-type(-n + " + body.weekLength_hd + ") .d-date-legends {padding-bottom: 0;}", 66);
-							// console.log(document.styleSheets[1].cssRules[66]);
 
 							// Correctly display week lengths
-							console.log(document.styleSheets[1].cssRules[68]);
 							document.styleSheets[1].deleteRule(68);
 							document.styleSheets[1].insertRule("#Datepickk .d-table input + label {flex-basis: calc(" + newDayBoxSize + "%);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color 0.2s ease, background 0.2s ease, color 0.2s ease;position: relative;box-sizing: border-box;}", 68);
-							// console.log(document.styleSheets[1].cssRules[68]);
 
 							generateInputs();
 							generateDaynames();
-							// bindEvents();
 						}
 						if (!that.el.tables.childNodes.length || !that.el.tables.childNodes[0].childNodes.length) return;
 
@@ -520,67 +388,29 @@ SOFTWARE.
 							that.el.header.childNodes[0].removeAttribute('style');
 						}
 
-						// for (var c = 0; c < months; c++) {
-						// 	var index = currentMonth - 1 + c;
-						// 	if (index > body.monthCount - 1) {
-						// 		index -= body.monthCount;
-						// 	} else if (index < 0) {
-						// 		index += body.monthCount;
-						// 	}
-
-						// 	that.el.monthPicker.childNodes[index].classList.add('current');
-						// }
-
 						generateDates(currentYear, currentMonth);
 						generateYears();
-						// var startmonth = languages[lang].monthNames[currentMonth - 1];
-						// var startmonth = currentMonth;
-						// var endmonth = '';
 
+						// Generate strings to be displayed
 						var monthname = 'M' + currentMonth + '';
-
 						var yearname = 'Y' + currentYear.toString();
-
-
 
 						// Display current body name
 						that.el.body.childNodes[1].childNodes[0].innerHTML = body.name;
 
-						// Display slected month and year
+						// Display selected month and year
 						that.el.header.childNodes[1].childNodes[0].innerHTML = monthname;
 						that.el.header.childNodes[1].childNodes[1].innerHTML = yearname;
 
+						// Set current body, year, and month
+						that.el.monthPicker.querySelector('[data-month="0"]').classList.add('current');
+						that.el.bodyPicker.querySelector('[data-body="0"]').classList.add('current');
 						that.el.yearPicker.querySelector('[data-year="0"]').classList.add('current');
+						// Check for month overflow
 						if (currentMonth - 1 + months - 1 > body.monthCount - 1) {
 							that.el.yearPicker.querySelector('[data-year="1"]').classList.add('current');
 						}
-
-						that.el.monthPicker.querySelector('[data-month="0"]').classList.add('current');
-						that.el.bodyPicker.querySelector('[data-body="0"]').classList.add('current');
-
-						renderSelectedDates();
 						if (onNavigation) onNavigation.call(that);
-					};
-
-					function renderSelectedDates() {
-						selectedDates.forEach(function (date) {
-							var el = that.el.querySelector('[data-date="' + date.save() + '"]');
-							if (el) {
-								el.checked = true;
-							}
-						});
-
-						that.el.tables.classList.remove('before');
-						if (range && selectedDates.length > 1) {
-							var currentDate = new Date(currentYear, currentMonth - 1, 1);
-							var sorted = selectedDates.sort(function (a, b) {
-								return a.getTime() - b.getTime();
-							});
-							var first = that.el.querySelector('[data-date="' + sorted[0].toJSON() + '"]');
-							if (!first && currentDate >= new Date(sorted[0].getFullYear(), sorted[0].getMonth(), 1) && currentDate <= new Date(sorted[1].getFullYear(), sorted[1].getMonth(), 1)) {
-								that.el.tables.classList.add('before');
-							}
-						}
 					};
 
 					function resetCalendar() {
@@ -623,52 +453,6 @@ SOFTWARE.
 						setDate();
 					}
 
-					function selectDate(date, ignoreOnSelect) {
-						date = new SpaceDate(body, date);
-						date.setHours(0, 0, 0, 0);
-						var el = that.el.querySelector('[data-date="' + date.save() + '"]');
-
-						if (range && el && el.checked) {
-							el.classList.add('single');
-						}
-
-						if (el && !el.checked) {
-							el.checked = true;
-						}
-
-						selectedDates.push(date);
-
-						if (onSelect && !ignoreOnSelect) {
-							onSelect.apply(date, [true]);
-						}
-					};
-
-					// function unselectDate(date, ignoreOnSelect) {
-					// 	date = new Date(date);
-					// 	date.setHours(0, 0, 0, 0);
-					// 	var el = that.el.querySelector('[data-date="' + date.save() + '"]');
-					// 	if (el) {
-					// 		el.classList.remove('single');
-					// 		if (el.checked) {
-					// 			el.checked = false;
-					// 		}
-					// 	}
-
-					// 	selectedDates = selectedDates.filter(function (x) {
-					// 		return x.getTime() != date.getTime();
-					// 	});
-
-					// 	if (onSelect && !ignoreOnSelect) {
-					// 		onSelect.call(date, false);
-					// 	}
-					// };
-
-					// function unselectAll(ignoreOnSelect) {
-					// 	selectedDates.forEach(function (date) {
-					// 		unselectDate(date, ignoreOnSelect);
-					// 	});
-					// };
-
 					// Runs when a date is selected
 					function inputChange(e) {
 						// Close calendar
@@ -676,48 +460,12 @@ SOFTWARE.
 
 						var input = this;
 						var date = new SpaceDate(body, currentYear, currentMonth, input.getAttribute('data-date'));
-						realTime = date.getMsFromEpoch();
-						// var date = new SpaceDate(body, currentYear,currentMonth)
 
-						// var input = this;
-						// var date = new Date(input.getAttribute('data-date'));
-						// input.classList.remove('single');
-						// if (locked) {
-						// 	return;
-						// }
-						// if (range) {
-						// 	that.el.tables.classList.remove('before');
-						// }
-						// if (input.checked) {
-						// 	if (maxSelections && selectedDates.length > maxSelections - 1) {
-						// 		var length = selectedDates.length;
-						// 		for (length; length > maxSelections - 1; length--) {
-						// 			unselectDate(selectedDates[0]);
-						// 		}
-						// 	}
+						if (date.isBeforeEpoch())
+							realTime = 0;
+						else
+							realTime = date.getMsFromEpoch();
 
-						// 	if (range && selectedDates.length) {
-						// 		var first = that.el.querySelector('[data-date="' + selectedDates[0].toJSON() + '"]');
-						// 		if (!first && date > selectedDates[0]) {
-						// 			that.el.tables.classList.add('before');
-						// 		}
-						// 	}
-
-						// 	selectedDates.push(date);
-
-						// if (onSelect) {
-						// 	onSelect.call(date, input.checked);
-						// }
-					};
-
-					function setRange(val) {
-						if (val) {
-							range = true;
-							that.el.tables.classList.add('range');
-						} else {
-							range = false;
-							that.el.tables.classList.remove('range');
-						}
 					};
 
 					function show(properties) {
@@ -734,18 +482,12 @@ SOFTWARE.
 						container.appendChild(that.el);
 						opened = true;
 
-						// if (startDate) {
-						// 	currentMonth = startDate.getMonth() + 1;
-						// 	currentYear = startDate.getFullYear() - 2000;
-						// }
 						currentYear = body.y;
 						currentMonth = body.month;
 						setDate();
 					};
 
 					function hide() {
-						console.log("Hiding");
-						console.log(that.el);
 						document.body.classList.remove('d-noscroll');
 						var handler = function handler() {
 							that.el.parentNode.removeChild(that.el);
@@ -877,14 +619,6 @@ SOFTWARE.
 						that.el.titleBox = that.el.childNodes[0];
 						that.el.button = that.el.childNodes[3];
 
-						console.log(that.el.childNodes);
-
-						// that.el.header = that.el.calendar.childNodes[0];
-						// that.el.monthPicker = that.el.calendar.childNodes[1];
-						// that.el.yearPicker = that.el.calendar.childNodes[2];
-						// that.el.tables = that.el.calendar.childNodes[4];
-						// that.el.days = that.el.calendar.childNodes[3];
-
 						that.el.body = that.el.calendar.childNodes[0];
 						that.el.bodyPicker = that.el.calendar.childNodes[1];
 
@@ -911,81 +645,17 @@ SOFTWARE.
 
 					that.show = show;
 					that.hide = hide;
-					// that.selectDate = selectDate;
-					// that.unselectAll = unselectAll;
-					// that.unselectDate = unselectDate;
 
 					function currentDateGetter() {
 						return new SpaceDate(body, currentYear, currentMonth - 1, 1);
 					}
 					function currentDateSetter() {
-						// x = new Date(x);
-						// currentMonth = x.getMonth() + 1;
-						// currentYear = x.getFullYear();
 						currentMonth = body.month;
 						currentYear = body.y;
 						setDate();
 					}
 
 					Object.defineProperties(that, {
-						"selectedDates": {
-							get: function get() {
-								return selectedDates.sort(function (a, b) {
-									return a.getTime() - b.getTime();
-								});
-							}
-						},
-						"range": {
-							get: function get() {
-								return range;
-							},
-							set: function set(x) {
-								setRange(x);
-								if (x) {
-									maxSelections = 2;
-								}
-							}
-						},
-						"button": {
-							get: function get() {
-								return button;
-							},
-							set: function set(x) {
-								if (typeof x == 'string') {
-									button = x;
-								} else {
-									button = null;
-								}
-								that.el.button.innerHTML = button ? button : '';
-							}
-						},
-						"title": {
-							get: function get() {
-								return title;
-							},
-							set: function set(x) {
-								if (typeof x == 'string') {
-									title = x;
-								} else {
-									title = null;
-								}
-								that.el.titleBox.innerText = title ? title : '';
-							}
-						},
-						"lang": {
-							get: function get() {
-								return lang;
-							},
-							set: function set(x) {
-								if (x in languages) {
-									lang = x;
-									generateDaynames();
-									setDate();
-								} else {
-									console.error('Language not found');
-								}
-							}
-						},
 						"weekStart": {
 							get: function get() {
 								return weekStart !== null ? weekStart : languages[lang].weekStart;
@@ -1038,108 +708,6 @@ SOFTWARE.
 								}
 							}
 						},
-						"disabledDays": {
-							get: function get() {
-								return disabledDays;
-							},
-							set: function set(x) {
-								if (x instanceof Array) {
-									for (var i = 0; i < x.length; i++) {
-										if (typeof x[i] == 'number') {
-											disabledDays.push(x[i]);
-										}
-									}
-								} else if (typeof x == 'number') {
-									disabledDays = [x];
-								} else if (!x) {
-									disabledDays = [];
-								}
-								setDate();
-							}
-						},
-						"disabledDates": {
-							get: function get() {
-								return disabledDates.map(function (x) {
-									return new Date(x);
-								});
-							},
-							set: function set(x) {
-								if (x instanceof Array) {
-									x.forEach(function (date) {
-										if (date instanceof Date) {
-											disabledDates.push(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime());
-										}
-									});
-								} else if (x instanceof Date) {
-									disabledDates = [new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()];
-								} else if (!x) {
-									disabledDates = [];
-								}
-								setDate();
-							}
-						},
-						"highlight": {
-							get: function get() {
-								return highlight;
-							},
-							set: function set(x) {
-								if (x instanceof Array) {
-									x.forEach(function (hl) {
-										if (hl instanceof Object) {
-											var highlightObj = {};
-											highlightObj.dates = [];
-
-											if ('start' in hl) {
-												highlightObj.dates.push({
-													start: new Date(hl.start.getFullYear(), hl.start.getMonth(), hl.start.getDate()),
-													end: 'end' in hl ? new Date(hl.end.getFullYear(), hl.end.getMonth(), hl.end.getDate()) : new Date(hl.start.getFullYear(), hl.start.getMonth(), hl.start.getDate())
-												});
-											} else if ('dates' in hl && hl.dates instanceof Array) {
-												hl.dates.forEach(function (hlDate) {
-													highlightObj.dates.push({
-														start: new Date(hlDate.start.getFullYear(), hlDate.start.getMonth(), hlDate.start.getDate()),
-														end: 'end' in hlDate ? new Date(hlDate.end.getFullYear(), hlDate.end.getMonth(), hlDate.end.getDate()) : new Date(hlDate.start.getFullYear(), hlDate.start.getMonth(), hlDate.start.getDate())
-													});
-												});
-											}
-
-											highlightObj.color = hl.color;
-											highlightObj.backgroundColor = hl.backgroundColor;
-											highlightObj.legend = 'legend' in hl ? hl.legend : null;
-
-											highlight.push(highlightObj);
-										}
-									});
-								} else if (x instanceof Object) {
-									var highlightObj = {};
-									highlightObj.dates = [];
-
-									if ('start' in x) {
-										highlightObj.dates.push({
-											start: new Date(x.start.getFullYear(), x.start.getMonth(), x.start.getDate()),
-											end: 'end' in x ? new Date(x.end.getFullYear(), x.end.getMonth(), x.end.getDate()) : new Date(x.start.getFullYear(), x.start.getMonth(), x.start.getDate())
-										});
-									} else if ('dates' in x && x.dates instanceof Array) {
-										x.dates.forEach(function (hlDate) {
-											highlightObj.dates.push({
-												start: new Date(hlDate.start.getFullYear(), hlDate.start.getMonth(), hlDate.start.getDate()),
-												end: 'end' in hlDate ? new Date(hlDate.end.getFullYear(), hlDate.end.getMonth(), hlDate.end.getDate()) : new Date(hlDate.start.getFullYear(), hlDate.start.getMonth(), hlDate.start.getDate())
-											});
-										});
-									}
-
-									highlightObj.color = x.color;
-									highlightObj.backgroundColor = x.backgroundColor;
-									highlightObj.legend = 'legend' in x ? x.legend : null;
-
-									highlight.push(highlightObj);
-								} else if (!x) {
-									highlight = [];
-								}
-
-								setDate();
-							}
-						},
 						"onClose": {
 							set: function set(callback) {
 								onClose = callback;
@@ -1175,59 +743,6 @@ SOFTWARE.
 								generateDaynames();
 							}
 						},
-						"fullscreen": {
-							get: function get() {
-								return that.el.classList.contains('fullscreen');
-							},
-							set: function set(x) {
-								if (x) {
-									that.el.classList.add('fullscreen');
-								} else {
-									that.el.classList.remove('fullscreen');
-								}
-							}
-						},
-						"locked": {
-							get: function get() {
-								return locked;
-							},
-							set: function set(x) {
-								if (x) {
-									locked = true;
-									that.el.tables.classList.add('locked');
-								} else {
-									locked = false;
-									that.el.tables.classList.remove('locked');
-								}
-							}
-						},
-						"maxSelections": {
-							get: function get() {
-								return maxSelections;
-							},
-							set: function set(x) {
-								if (typeof x == 'number' && !range) {
-									maxSelections = x;
-								} else {
-									if (range) {
-										maxSelections = 2;
-									} else {
-										maxSelections = null;
-									}
-								}
-							}
-						},
-						"onConfirm": {
-							set: function set(callback) {
-								if (typeof callback == 'function') {
-									onConfirm = callback.bind(that);
-									that.el.button.addEventListener(eventName, onConfirm);
-								} else if (!callback) {
-									that.el.button.removeEventListener(eventName, onConfirm);
-									onConfirm = null;
-								}
-							}
-						},
 						"onNavigation": {
 							set: function set(callback) {
 								if (typeof callback == 'function') {
@@ -1249,34 +764,6 @@ SOFTWARE.
 								}
 							}
 						},
-						// "tooltips": {
-						// 	get: function get() {
-						// 		var ret = [];
-						// 		for (key in tooltips) {
-						// 			ret.push({
-						// 				date: new Date(parseInt(key)),
-						// 				text: tooltips[key]
-						// 			});
-						// 		}
-						// 		return ret;
-						// 	},
-						// 	set: function set(x) {
-						// 		if (x instanceof Array) {
-						// 			x.forEach(function (item) {
-						// 				if (item.date && item.text && item.date instanceof Date) {
-						// 					tooltips[new Date(item.date.getFullYear(), item.date.getMonth(), item.date.getDate()).getTime()] = item.text;
-						// 				}
-						// 			});
-						// 		} else if (x instanceof Object) {
-						// 			if (x.date && x.text && x.date instanceof Date) {
-						// 				tooltips[new Date(x.date.getFullYear(), x.date.getMonth(), x.date.getDate()).getTime()] = x.text;
-						// 			}
-						// 		} else if (!x) {
-						// 			tooltips = [];
-						// 		}
-						// 		setDate();
-						// 	}
-						// },
 						"currentDate": {
 							get: currentDateGetter,
 							set: currentDateSetter
@@ -1308,15 +795,6 @@ SOFTWARE.
 								setDate();
 							}
 						},
-						"maxDate": {
-							get: function get() {
-								return maxDate;
-							},
-							set: function set(x) {
-								maxDate = x ? new Date(x) : null;
-								setDate();
-							}
-						},
 						"container": {
 							get: function get() {
 								return container;
@@ -1345,22 +823,7 @@ SOFTWARE.
 									console.error("Invalid type");
 								}
 							}
-						},
-						"inline": {
-							get: function get() {
-								return inline;
-							},
-							set: function set(x) {
-								if (x) {
-									inline = true;
-									that.el.classList.add('inline');
-								} else {
-									inline = false;
-									that.el.classList.remove('inline');
-								}
-							}
 						}
-
 					});
 
 					init();
@@ -1386,16 +849,6 @@ SOFTWARE.
 						}
 					}
 				}
-
-				// var template = '<div class="d-title"></div>' + '<div class="d-calendar">' + '<div class="d-header">' + '<i id="d-previous"></i>' + '<p><span class="d-month"></span><span class="d-year"></span></p>' + '<i id="d-next"></i>' + '</div>' + '<div class="d-month-picker">' + '<div data-month="1">1</div>' + '<div data-month="2">2</div>' + '<div data-month="3">3</div>' + '<div data-month="4">4</div>' + '<div data-month="5">5</div>' + '<div data-month="6">6</div>' + '<div data-month="7">7</div>' + '<div data-month="8">8</div>' + '<div data-month="9">9</div>' + '<div data-month="10">10</div>' + '<div data-month="11">11</div>' + '<div data-month="12">12</div>' + '</div>' + '<div class="d-year-picker">' + '<div data-year="-5"></div>' + '<div data-year="-4"></div>' + '<div data-year="-3"></div>' + '<div data-year="-2"></div>' + '<div data-year="-1"></div>' + '<div data-year="0"></div>' + '<div data-year="1"></div>' + '<div data-year="2"></div>' + '<div data-year="3"></div>' + '<div data-year="4"></div>' + '<div data-year="5"></div>' + '</div>' + '<div class="d-weekdays"></div>' + '<div class="d-tables"></div>' + '</div>' + '<div class="d-legend"></div>' + '<button class="d-confirm"></button>' + '<div class="d-overlay"></div>';
-
-				// var template = '<div class="d-title"></div>';
-				// template += '<div class="d-calendar">';
-				// template += '<div class="d-header">' + '<i id="d-previous"></i>' + '<p><span class="d-month"></span><span class="d-year"></span></p>' + '<i id="d-next"></i>' + '</div>';
-				// template += '<div class="d-month-picker">' + '<div data-month="1">1</div>' + '<div data-month="2">2</div>' + '<div data-month="3">3</div>' + '<div data-month="4">4</div>' + '<div data-month="5">5</div>' + '<div data-month="6">6</div>' + '<div data-month="7">7</div>' + '<div data-month="8">8</div>' + '<div data-month="9">9</div>' + '<div data-month="10">10</div>' + '<div data-month="11">11</div>' + '<div data-month="12">12</div>' + '</div>';
-				// template += '<div class="d-year-picker">' + '<div data-year="-5"></div>' + '<div data-year="-4"></div>' + '<div data-year="-3"></div>' + '<div data-year="-2"></div>' + '<div data-year="-1"></div>' + '<div data-year="0"></div>' + '<div data-year="1"></div>' + '<div data-year="2"></div>' + '<div data-year="3"></div>' + '<div data-year="4"></div>' + '<div data-year="5"></div>' + '</div>';
-				// template += '<div class="d-weekdays"></div>' + '<div class="d-tables"></div>' + '</div>';
-				// template += '<div class="d-legend"></div>' + '<button class="d-confirm"></button>' + '<div class="d-overlay"></div>';
 
 				var template = '<div class="d-title"></div>';
 				template += '<div class="d-calendar">';

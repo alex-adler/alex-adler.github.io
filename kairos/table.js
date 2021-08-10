@@ -378,9 +378,6 @@ class SpaceDate {
         }
         this.body.generateMonthData(this.year);
 
-        // console.log(this.body);
-        // console.log(this.month);
-
         this.monthLength = this.body.monthData[this.month][1];
         this.weekDay = this.body.monthData[this.month][2];
     }
@@ -401,9 +398,9 @@ class SpaceDate {
         if (isNaN(ms)) ms = 0;
         return ms;
     }
-    save() {
-        // console.log(JSON.stringify(this));
-        return JSON.stringify(this);
+    isBeforeEpoch() {
+        if (this.year < 0) return true;
+        else return false;
     }
 }
 
