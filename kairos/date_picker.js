@@ -313,7 +313,7 @@ SOFTWARE.
 								}
 
 								if (date instanceof SpaceDate) {
-									inputEl.setAttribute('data-date', date.day);
+									inputEl.setAttribute('data-date', JSON.stringify(date));
 								} else {
 									console.log("date is not a SpaceDate");
 								}
@@ -459,8 +459,12 @@ SOFTWARE.
 						that.hide();
 
 						var input = this;
-						var date = new SpaceDate(body, currentYear, currentMonth, input.getAttribute('data-date'));
 
+						// Get the data stored in the selected date
+						var parsedData = JSON.parse(input.getAttribute('data-date'));
+						var date = new SpaceDate(body, parsedData.year, parsedData.month, parsedData.day);
+
+						// Make sure the date is valid
 						if (date.isBeforeEpoch())
 							realTime = 0;
 						else

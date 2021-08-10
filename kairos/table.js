@@ -363,6 +363,7 @@ var bodies = [Earth, Mars, /*Venus,*/ Europa, Ganymede, Callisto, Titan, Encelad
 class SpaceDate {
     constructor(body, year = -1, month = -1, day = -1) {
         this.body = body;
+        // Get current date for the body
         if ((year === -1) && (month === -1) && (day === -1)) {
             this.year = this.body.y;
             this.month = this.body.month;
@@ -399,7 +400,7 @@ class SpaceDate {
         return ms;
     }
     isBeforeEpoch() {
-        if (this.year < 0) return true;
+        if ((this.year < 0) || (this.year === 0 && this.month === 0)) return true;
         else return false;
     }
 }
