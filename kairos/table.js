@@ -117,15 +117,40 @@ class Celestial {
     generateMonths() {
         this.monthTimeSteps_ms = [];
 
-        // Add current year to beginning of array 
+        // Add current year to beginning of array for checking data is valid
         this.monthTimeSteps_ms.push(this.y);
 
+        // First month starts at 0ms
         this.monthTimeSteps_ms.push(0);
 
+        // For each month, add the ms since the start of the year that the month starts on
         for (let i = 1; i < this.monthCount; i++) {
-            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.nominalMonthLength_ms);
+            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.getMonthLength(i, this.y) * this.hDayLength_ms);
         }
     }
+    // Generate data for the calendar
+    generateMonthData(y) {
+        // [ms at end of month, length of month(in days), week day of the first day of the month]
+        this.monthData = [];
+
+        var monthLength = this.nominalMonthLength_hd;
+
+        // Add data for the final month of the previous year
+        this.monthData.push([0, this.getMonthLength(this.monthCount, y - 1), 0]);
+
+        for (let i = 1; i < this.monthCount + 1; i++) {
+            monthLength = this.getMonthLength(i, y);
+            let monthLength_ms = monthLength * this.hDayLength_ms;
+            // Append the ms of the start of the month, the month length in days, and the weekday on day 1
+            if (i === 1) {
+                this.monthData.push([monthLength_ms, monthLength, this.getWeekDay(0, y)]);
+            }
+            else {
+                this.monthData.push([this.monthData[i - 1][0] + monthLength_ms, monthLength, this.getWeekDay(this.monthData[i - 1][0] + monthLength_ms, y)]);
+            }
+        }
+    }
+    // If no other system is preferred, stff all the excess days into the last month
     processLastMonth(y, monthLength) {
         monthLength += this.monthRemainder;
 
@@ -138,33 +163,41 @@ class Celestial {
         }
         return monthLength;
     }
-    // Generate data for the calendar
-    generateMonthData(y) {
-        // [ms at start of month, length of month(in days), week day of the first day of the month]
-        this.monthData = [];
-
-        var monthLength = this.nominalMonthLength_hd;
-
-        // Add data for the final month of the previous year
-        this.monthData.push([0, this.processLastMonth(y - 1, monthLength), 0]);
-
-        this.monthData.push([0, this.nominalMonthLength_hd, this.getWeekDay(0, y)]);
-
-        for (let i = 1; i < this.monthCount; i++) {
+    getMonthLength(month, year) {
+        var monthLength = 0;
+        // Yay Fudge factors !!
+        if (this.name === "Earth") {
+            // Assign different lengths to each month
+            if (month === 2) {
+                monthLength = 28;
+                if (year % this.LeapYearFreq1 === 0 || year % this.LeapYearFreq2 === 0) {
+                    monthLength++;
+                }
+            }
+            else if ([1, 3, 5, 7, 8, 10, 12].includes(month)) {
+                monthLength = 31;
+            } else {
+                monthLength = 30;
+            }
+        }
+        // General rule for the rest of the bodies
+        else {
             monthLength = this.nominalMonthLength_hd;
 
             // Check if it is the last month of the year
-            if ((i + 1) === this.monthCount) {
+            if (month === this.monthCount) {
                 // console.log("lastMonth");
-                monthLength = this.processLastMonth(y, monthLength);
+                monthLength = this.processLastMonth(year, monthLength);
             }
-            let monthLength_ms = monthLength * this.hDayLength_ms;
-            // Append the ms of the start of the month, the month length in days, and the weekday on day 1
-            this.monthData.push([this.monthData[i][0] + monthLength_ms, monthLength, this.getWeekDay(this.monthData[i][0] + monthLength_ms, y)]);
         }
+        return monthLength;
     }
     generateMsFromEpoch(y, month, day) {
         let msFromEpoch = 0;
+
+        if (month === 0) {
+            y -= 1;
+        }
 
         // Add the time from the years that have passed
         msFromEpoch += Math.floor(y / this.LeapYearFreq2) * this.block2YearLength;
@@ -173,12 +206,17 @@ class Celestial {
         y %= this.LeapYearFreq1;
         msFromEpoch += y * this.hYearLength_ms;
 
-
         // Add leap seconds
         msFromEpoch += this.leapSeconds * 1000;
 
-        msFromEpoch += this.monthData[month][0];
+        // Add all the ms from previous months
+        if (month === 0) {
 
+        } else {
+            msFromEpoch += this.monthData[month - 1][0];
+        }
+
+        // Add ms from the days of the month
         msFromEpoch += (day - 1) * this.dayLength_ms;
 
         // Add fudge factor to account for Earth year 0 being a leap year
@@ -395,6 +433,7 @@ class SpaceDate {
         return this.weekDay;
     }
     getMsFromEpoch() {
+        console.log(this.day + "/" + this.month + "/" + this.year)
         var ms = this.body.generateMsFromEpoch(this.year, this.month, this.day);
         if (isNaN(ms)) ms = 0;
         return ms;
