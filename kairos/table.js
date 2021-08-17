@@ -114,6 +114,7 @@ class Celestial {
             }
         }
     }
+    // Generate the timestep for when each month starts for the displayed time 
     generateMonths() {
         this.monthTimeSteps_ms = [];
 
@@ -128,7 +129,7 @@ class Celestial {
             this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.getMonthLength(i, this.y) * this.hDayLength_ms);
         }
     }
-    // Generate data for the calendar
+    // Generate month data for the calendar
     generateMonthData(y) {
         // [ms at end of month, length of month(in days), week day of the first day of the month]
         this.monthData = [];
@@ -150,7 +151,7 @@ class Celestial {
             }
         }
     }
-    // If no other system is preferred, stff all the excess days into the last month
+    // If no other system is preferred, stuff all the excess days into the last month
     processLastMonth(y, monthLength) {
         monthLength += this.monthRemainder;
 
@@ -186,7 +187,7 @@ class Celestial {
 
             // Check if it is the last month of the year
             if (month === this.monthCount) {
-                // console.log("lastMonth");
+                // Current plan is to dump excess days in the last month
                 monthLength = this.processLastMonth(year, monthLength);
             }
         }
@@ -227,7 +228,6 @@ class Celestial {
         return msFromEpoch;
     }
     updateDateTime(msFromEpoch) {
-
         // Leap seconds
         msFromEpoch += this.leapSeconds * 1000;
 
@@ -324,12 +324,8 @@ class Celestial {
 
         this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd);
 
-        // Fudge factors because dates start at 1
-        // this.dayOfYear += 1;
-        // this.dayOfMonth += 1;
-        // this.hDayOfYear += 1;
+        // Fudge factor because weeks start on day 1
         this.hDayOfWeek += 1;
-        // this.month += 1;
 
         return this.hDayOfWeek;
     }
@@ -513,15 +509,18 @@ function generateTableHead(table, data) {
 }
 
 function generateTable(table, dataTime, dataFacts) {
-    // for (let element of dataTime) {
+    // For each body that will have data displayed
     for (let i = 0; i < dataTime.length; i++) {
+        // Add row to show the times
         let rowTime = table.insertRow();
         rowTime.className = "collapsible";
 
+        // Add row to include the bonus info
         let rowFacts = table.insertRow();
         rowFacts.className = "content";
         rowFacts.style.display = 'none';
 
+        // Make clicking the time row toggle the info row
         rowTime.addEventListener("click", function () {
             this.classList.toggle("active");
             if (rowFacts.style.display == 'none') {
@@ -531,19 +530,24 @@ function generateTable(table, dataTime, dataFacts) {
             }
         });
 
+        // Add each piece of data to the table
         for (key in dataTime[i]) {
             let cell = rowTime.insertCell();
             let text = document.createTextNode(dataTime[i][key]);
             cell.appendChild(text);
 
+            // Set the css for specific columns of data
             if (key == 0) { cell.id = "tableName"; }
+            else if (key == 3) { cell.id = "weekDay"; }
             else { cell.id = "tableValue"; }
         }
 
+        // Format the cell for the extra info
         let cell = rowFacts.insertCell();
         cell.colSpan = "5";
+
+        // Insert the image placeholder
         let image = document.createElement("img");
-        // image.src = "https://images-assets.nasa.gov/image/PIA19048/PIA19048~orig.jpg";
         image.src = "/images/Europa.jpg"
         image.alt = "Galileo image of Europa"
         imageWidth = image.naturalWidth;
@@ -555,8 +559,8 @@ function generateTable(table, dataTime, dataFacts) {
         image.className = "bodyImage";
         cell.appendChild(image);
 
+        // Insert placeholders for bonus info
         let div = document.createElement("div");
-
         let p = document.createElement("p");
         let text = document.createTextNode("Day length, week length");
         p.appendChild(text);

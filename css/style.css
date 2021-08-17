@@ -49,6 +49,10 @@ td {
 	text-align: center;
 }
 
+#weekDay{
+	text-align: center;
+}
+
 #tableValue {
 	text-align: right;
 }
