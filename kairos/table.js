@@ -478,6 +478,7 @@ function generateData(bodies) {
     return data;
 }
 
+// Cycle through each celestial body and get all the data that is wanted in the collapsible area
 function generateInformation(bodies) {
     var data = [];
     var i;
@@ -507,6 +508,7 @@ function generateTableHead(table, data) {
     }
 }
 
+// Generate the HTML for the table that will be used to display all the time information
 function generateTable(table, dataTime, dataFacts) {
     // For each body that will have data displayed
     for (let i = 0; i < dataTime.length; i++) {
@@ -549,14 +551,17 @@ function generateTable(table, dataTime, dataFacts) {
         let image = document.createElement("img");
         image.src = "/images/Europa.jpg"
         image.alt = "Galileo image of Europa"
-        imageWidth = image.naturalWidth;
-        imageHeight = image.naturalHeight;
-        cellWidth = table.offsetWidth;
-        imageScale = 3 * imageWidth / cellWidth;
-        image.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+        image.onload = function () {
+            imageWidth = this.naturalWidth;
+            imageHeight = this.naturalHeight;
+            cellWidth = table.offsetWidth;
+            imageScale = 3 * imageWidth / cellWidth;
+            this.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+        }
         image.id = "image" + i;
         image.className = "bodyImage";
         cell.appendChild(image);
+
 
         // Insert placeholders for bonus info
         let div = document.createElement("div");
@@ -580,6 +585,9 @@ function generateTable(table, dataTime, dataFacts) {
 
         div.className = "flavourText";
         cell.appendChild(div);
+
+        // Add the bonus info and image
+        updateFlavour(table, i, dataFacts[i]);
     }
 }
 
@@ -588,11 +596,14 @@ function updateFlavour(table, id, data) {
     img = document.getElementById("image" + id);
     img.src = data[1];
     img.alt = "Image of " + data[0];
-    imageWidth = img.naturalWidth;
-    imageHeight = img.naturalHeight;
-    cellWidth = table.offsetWidth;
-    imageScale = 3 * imageWidth / cellWidth;
-    img.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+    img.onload = function () {
+        imageWidth = this.naturalWidth;
+        imageHeight = this.naturalHeight;
+        cellWidth = table.offsetWidth;
+        imageScale = 3 * imageWidth / cellWidth;
+        this.style = "width:" + (imageWidth / imageScale) + "px;height:" + (imageHeight / imageScale) + "px;";
+    }
+
 
     p = document.getElementById("dayLength" + id);
     p.innerHTML = data[2] + " h " + data[3] + " min per day, " + data[4] + " day week";
@@ -605,11 +616,12 @@ function updateFlavour(table, id, data) {
 
 }
 
+// Each time step, update the required data from the table
 function updateTable(table, dataTime, dataFacts) {
     for (let i = 0; i < dataTime.length; i++) {
         for (let j = 0; j < dataTime[i].length; j++) {
             table.rows[2 * (i + 1) - 1].cells[j].innerHTML = dataTime[i][j];
         }
-        updateFlavour(table, i, dataFacts[i]);
+        // updateFlavour(table, i, dataFacts[i]);
     }
 }
