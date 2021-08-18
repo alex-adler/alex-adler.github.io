@@ -218,10 +218,10 @@ class Celestial {
         }
 
         // Add ms from the days of the month
-        msFromEpoch += (day - 1) * this.dayLength_ms;
+        msFromEpoch += (day - 1) * this.hDayLength_ms;
 
         // Add fudge factor to account for Earth year 0 being a leap year
-        if (this.name === "Earth" && msFromEpoch > this.dayLength_ms) {
+        if (this.name === "Earth" && msFromEpoch > this.hDayLength_ms) {
             msFromEpoch += this.dayLength_ms;
         }
 
@@ -429,7 +429,6 @@ class SpaceDate {
         return this.weekDay;
     }
     getMsFromEpoch() {
-        console.log(this.day + "/" + this.month + "/" + this.year)
         var ms = this.body.generateMsFromEpoch(this.year, this.month, this.day);
         if (isNaN(ms)) ms = 0;
         return ms;

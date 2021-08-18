@@ -454,7 +454,7 @@ SOFTWARE.
 					}
 
 					// Runs when a date is selected
-					function inputChange(e) {
+					function inputChange() {
 						// Close calendar
 						that.hide();
 
@@ -469,7 +469,6 @@ SOFTWARE.
 							realTime = 0;
 						else
 							realTime = date.getMsFromEpoch();
-
 					};
 
 					function show(properties) {
