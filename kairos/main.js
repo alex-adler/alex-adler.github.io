@@ -52,9 +52,3 @@ function generate() {
 
     balls(table, bodies);
 }
-
-/* TODO:
-- Figure out months
-- Date picker with all the calendars (https://github.com/crsten/datepickk?)
-- Make and add blender renders
-*/

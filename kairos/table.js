@@ -77,6 +77,9 @@ class Celestial {
         console.log(this.name + " remainder from year length " + this.YearRemainder1 + " days, leap year every " + this.LeapYearFreq1 + " and " + this.LeapYearFreq2 + " years");
         console.log(this.name + " excess remainder " + this.excessYearRemainder + " days");
         console.log(this.name + " remainder from months " + this.monthRemainder + " days");
+        console.log(this.name + " a day is added every " + Math.ceil(this.monthCount / this.monthRemainder) + " months and the last " + (this.monthRemainder * Math.ceil(this.monthCount / this.monthRemainder) - this.monthCount) + " months have an extra day too");
+
+
         console.log(this.name + " year length = " + this.hYearLength_ms / this.hDayLength_ms + " days");
 
         // Length of time between leap years in ms
@@ -151,8 +154,8 @@ class Celestial {
         }
     }
     // If no other system is preferred, stuff all the excess days into the last month
-    processLastMonth(y, monthLength) {
-        monthLength += this.monthRemainder;
+    processLastMonth(y, monthLength, remainderDays) {
+        monthLength += remainderDays;
 
         // Add the leap day to the final month
         if ((y % this.LeapYearFreq1) === 0) {
@@ -165,14 +168,16 @@ class Celestial {
     }
     getMonthLength(month, year) {
         var monthLength = 0;
-        // Yay Fudge factors !!
+        // Yay Fudge Factors !!
         if (this.name === "Earth") {
             // Assign different lengths to each month
             if (month === 2) {
+                // February
                 monthLength = 28;
-                if (year % this.LeapYearFreq1 === 0 || year % this.LeapYearFreq2 === 0) {
+                if (year % this.LeapYearFreq1 === 0)
                     monthLength++;
-                }
+                if (year % this.LeapYearFreq2 === 0)
+                    monthLength++;
             }
             else if ([1, 3, 5, 7, 8, 10, 12].includes(month)) {
                 monthLength = 31;
@@ -180,15 +185,38 @@ class Celestial {
                 monthLength = 30;
             }
         }
-        // General rule for the rest of the bodies
+        // General rule for the rest of the bodies:
+        // Try to divide the remaining days equally among the months
+        // and any left overs get added to the last few months.
+        // No month should have more than 2 days added
         else {
             monthLength = this.nominalMonthLength_hd;
 
-            // Check if it is the last month of the year
-            if (month === this.monthCount) {
-                // Current plan is to dump excess days in the last month
-                monthLength = this.processLastMonth(year, monthLength);
-            }
+            // Calculate the interval at which months should have an extra day
+            var longMonthInterval = Math.ceil(this.monthCount / this.monthRemainder);
+
+            if (longMonthInterval < 1)
+                console.log("The interval between longer months for " + this.name + " is invalid");
+
+            // If the month is on the interval, it has an extra day
+            if ((month - 1) % longMonthInterval === 0)
+                monthLength++;
+
+            // Figure out how many days still need to be added
+            var remainderDays = this.monthRemainder * longMonthInterval - this.monthCount;
+
+            // Include leap days into the remainder
+            if ((year % this.LeapYearFreq1) === 0)
+                remainderDays++;
+            if ((year % this.LeapYearFreq2) === 0)
+                remainderDays++;
+
+            if (remainderDays > this.monthCount)
+                console.log(this.name + " has more days left over than it has months (this should not be possible)");
+
+            // The last few months also have days added to make up for the remainder
+            if ((this.monthCount - month) < remainderDays)
+                monthLength++;
         }
         return monthLength;
     }
