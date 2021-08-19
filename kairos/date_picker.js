@@ -336,8 +336,14 @@ SOFTWARE.
 
 					function setDate() {
 						if (lastBody !== currentBody) {
+							// Calculate the ms from epoch of the first day of the displayed month
+							let dateOfOldBody = new SpaceDate(bodies[lastBody], currentYear, currentMonth, Math.floor(bodies[lastBody].nominalMonthLength_hd / 2));
+							let msOfFirstDay = dateOfOldBody.getMsFromEpoch();
+
+							// Confirm the change of celestial body
 							lastBody = currentBody;
 
+							// Reconfigure how many days are displayed on the current month and how large each rectangle is
 							displayedDaysCount = displayedWeeksCount * body.weekLength_hd;
 							let newDayBoxSize = 100 / body.weekLength_hd;
 
@@ -358,6 +364,10 @@ SOFTWARE.
 							// Correctly display week lengths
 							document.styleSheets[1].deleteRule(68);
 							document.styleSheets[1].insertRule("#Datepickk .d-table input + label {flex-basis: calc(" + newDayBoxSize + "%);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color 0.2s ease, background 0.2s ease, color 0.2s ease;position: relative;box-sizing: border-box;}", 68);
+
+							let newYearMonth = bodies[currentBody].getYearMonth(msOfFirstDay);
+							currentYear = newYearMonth[0];
+							currentMonth = newYearMonth[1];
 
 							generateInputs();
 							generateDaynames();

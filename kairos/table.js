@@ -8,7 +8,6 @@ class Celestial {
         this.dayOfYear = 0;
         this.dayOfMonth = 0;
         this.yearLength_hd = 0;
-        this.monthLength_hd = 0;
         this.hTypicalDaysPerMonth = 0;
         this.hDayOfYear = 0;
         this.hDayOfWeek = 0;
@@ -115,18 +114,18 @@ class Celestial {
         }
     }
     // Generate the timestep for when each month starts for the displayed time 
-    generateMonths() {
+    generateMonths(y) {
         this.monthTimeSteps_ms = [];
 
         // Add current year to beginning of array for checking data is valid
-        this.monthTimeSteps_ms.push(this.y);
+        this.monthTimeSteps_ms.push(y);
 
         // First month starts at 0ms
         this.monthTimeSteps_ms.push(0);
 
         // For each month, add the ms since the start of the year that the month starts on
         for (let i = 1; i < this.monthCount; i++) {
-            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.getMonthLength(i, this.y) * this.hDayLength_ms);
+            this.monthTimeSteps_ms.push(this.monthTimeSteps_ms[i] + this.getMonthLength(i, y) * this.hDayLength_ms);
         }
     }
     // Generate month data for the calendar
@@ -251,7 +250,7 @@ class Celestial {
 
         // Check if the array of months is up to date
         if (this.monthTimeSteps_ms[0] !== this.y) {
-            this.generateMonths();
+            this.generateMonths(this.y);
             console.log("Regenerating months for " + this.name);
         }
 
@@ -300,6 +299,53 @@ class Celestial {
         this.hDayOfYear += 1;
         this.hDayOfWeek += 1;
         this.month += 1;
+    }
+    getYearMonth(msFromEpoch) {
+        var y = 0;
+        var m = 0;
+
+        // Leap seconds
+        msFromEpoch += this.leapSeconds * 1000;
+
+        // Add fudge factor to account for Earth year 0 being a leap year
+        if (this.name === "Earth" && msFromEpoch > this.dayLength_ms) {
+            msFromEpoch -= this.dayLength_ms;
+        }
+
+        this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength_ms);
+
+        // Years
+        let yearFromLeap2 = Math.floor(msFromEpoch / this.block2YearLength) * this.LeapYearFreq2;
+        if (yearFromLeap2 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block2YearLength) * this.block2YearLength;
+        let yearFromLeap1 = Math.floor(msFromEpoch / this.block1YearLength) * this.LeapYearFreq1;
+        if (yearFromLeap1 !== 0) msFromEpoch %= Math.floor(msFromEpoch / this.block1YearLength) * this.block1YearLength;
+        y = yearFromLeap2 + yearFromLeap1 + Math.floor(msFromEpoch / this.hYearLength_ms);
+        msFromEpoch %= this.hYearLength_ms;
+
+        this.dayOfYear = Math.floor(msFromEpoch / this.dayLength_ms);
+        this.hDayOfYear = Math.floor(msFromEpoch / this.hDayLength_ms);
+
+        // Check if the array of months is up to date
+        if (this.monthTimeSteps_ms[0] !== y) {
+            this.generateMonths(y);
+            console.log("Regenerating months for " + this.name);
+        }
+
+        // Find what the current month is
+        for (let i = this.monthCount + 1; i > 0; i--) {
+            if (msFromEpoch >= this.monthTimeSteps_ms[i]) {
+                m = i - 1;
+
+                // Do not apply mod to 1st month (divide by 0)
+                if (i !== 1) {
+                    msFromEpoch %= this.monthTimeSteps_ms[i];
+                }
+                break;
+            }
+        }
+        m += 1;
+
+        return [y, m];
     }
     getWeekDay(msFromYearStart, y) {
 
@@ -394,6 +440,7 @@ var Triton = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0, 0);
 
 var bodies = [Earth, Mars, /*Venus,*/ Europa, Ganymede, Callisto, Titan, Enceladus, Titania, Triton, Ceres];
 
+// Class that can store a date from any of the celestial bodies
 class SpaceDate {
     constructor(body, year = -1, month = -1, day = -1) {
         this.body = body;
