@@ -1,13 +1,15 @@
 @import url("https://fonts.googleapis.com/css?family=Merriweather:900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Roboto:wght@700&display=swap");
 :root {
-  --color-primary: #002626;
+  --color-primary: #222222;
   --color-secondary: #F0F7EE;
-  --duration: 1s;
-  --nav-duration: calc(var(--duration) / 4);
+  --duration: .5s;
+  --nav-duration: calc(var(--duration) / 2);
   --ease: cubic-bezier(0.215, 0.61, 0.355, 1);
   --space: 1rem;
-  --font-primary: "Helvetica", sans-serif;
-  --font-heading: "Merriweather", serif;
+  --font-special: "Roboto", sans-serif;
+  --font-primary: "Atkinson Hyperlegible", sans-serif;
+  --font-heading: "Atkinson Hyperlegible", sans-serif;
   --font-size: 1.125rem;
   --line-height: 1.5;
 }
@@ -29,6 +31,27 @@ h1 {
   line-height: calc(var(--line-height) / 1.25);
 }
 
+.home-navigation {
+  position: fixed;
+  --size: calc(10rem + 4vmin);
+  display: flex;
+  height: calc(var(--size)/3);
+  font-family: var(--font-special);
+  font-size: calc(1.5rem + 2vmin);
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  top: calc(var(--space) * 1);
+  left: calc(var(--space) * 2);
+  cursor: pointer;
+  z-index: 2;
+}
+.home-navigation a {
+  color: var(--color-primary);
+  text-decoration: none;
+  user-select: none;
+}
+
 .main-navigation-toggle {
   position: fixed;
   height: 1px;
@@ -46,13 +69,13 @@ h1 {
 }
 
 .icon--menu-toggle {
-  --size: calc(1rem + 4vmin);
+  --size: calc(5rem + 4vmin);
   display: flex;
   align-items: center;
   justify-content: center;
   width: var(--size);
-  height: var(--size);
-  stroke-width: 6;
+  height: calc(var(--size)/3);
+  stroke-width: 0;
 }
 
 .icon-group {
@@ -67,6 +90,7 @@ h1 {
 .icon--close {
   stroke: var(--color-secondary);
   transform: translateX(-100%);
+  stroke-width: 2;
 }
 
 .main-navigation {
@@ -118,19 +142,50 @@ h1 {
 .main-navigation a {
   display: inline-block;
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 100vw;
+  margin: 0 0;
   color: var(--color-secondary);
   line-height: 1;
   text-decoration: none;
   user-select: none;
-  padding: var(--space) calc(var(--space) * 2) calc(var(--space) + var(--border-size) / 2);
+  padding: calc(var(--space) * 2) 10vw;
   transform: translateY(100%);
+}
+
+.menu-left {
+  text-align: left;
+}
+
+.menu-right {
+  text-align: right;
+}
+
+.menu-element-kairos:hover {
+  color: #2abc31;
+  text-shadow: 0 0 15px #2abc31;
+  transition: all 0.5s ease;
+}
+
+.menu-element-arean:hover {
+  color: #bc642a;
+  text-shadow: 0 0 15px #bc642a;
+  transition: all 0.5s ease;
+}
+
+.menu-element-pit:hover {
+  color: #cc75d4;
+  text-shadow: 0 0 15px #cc75d4;
+  transition: all 0.5s ease;
+}
+
+.menu-element-turbine:hover {
+  color: #1d749c;
+  text-shadow: 0 0 15px #1d749c;
+  transition: all 0.5s ease;
 }
 
 .main-content {
   margin: 6rem auto;
-  max-width: 70ch;
   padding: 0 calc(var(--space) * 2);
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);
