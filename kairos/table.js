@@ -25,7 +25,7 @@ class Celestial {
         this.monthData = [];
 
         // Path to image
-        this.img = "/images/" + this.name + ".jpg";
+        this.img = "/space_images/" + this.name + ".jpg";
 
         // ------------------ Days and weeks -----------------------------
 
@@ -624,7 +624,7 @@ function generateTable(table, dataTime, dataFacts) {
 
         // Insert the image placeholder
         let image = document.createElement("img");
-        image.src = "/images/Europa.jpg"
+        image.src = "/space_images/Europa.jpg"
         image.alt = "Galileo image of Europa"
         image.onload = function () {
             imageWidth = this.naturalWidth;

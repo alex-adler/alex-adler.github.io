@@ -1,22 +1,94 @@
-@import url('https://fonts.googleapis.com/css?family=Merriweather:900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Roboto:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Roboto:wght@700&display=swap");
 
 :root {
   --color-primary: #222222;
-  --color-secondary: #F0F7EE;
-  --duration: .5s;
+  --color-secondary: #e7e7e7;
+  --duration: 0.5s;
   --nav-duration: calc(var(--duration) / 2);
   --ease: cubic-bezier(0.215, 0.61, 0.355, 1);
   --space: 1rem;
-  --font-special: 'Roboto', sans-serif;
-  --font-primary: 'Atkinson Hyperlegible', sans-serif;
-  --font-heading: 'Atkinson Hyperlegible', sans-serif;
+  --font-special: "Roboto", sans-serif;
+  --font-primary: "Atkinson Hyperlegible", sans-serif;
+  --font-heading: "Atkinson Hyperlegible", sans-serif;
   --font-size: 1.125rem;
-  --line-height: 1.5;
+  --line-height: 1.6;
+}
+
+.main-navigation {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform var(--nav-duration);
+  z-index: 1;
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-primary);
+    z-index: -1;
+    transition: opacity 0.5s;
+    opacity: 1;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+
+  ul {
+    font-size: 12vmin;
+    font-family: var(--font-heading);
+    width: 100%;
+    list-style-type: none; // Remove bullets
+    padding: 0;
+  }
+
+  li {
+    --border-size: 1vmin;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    &:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--border-size);
+      background-color: var(--color-secondary);
+      transform-origin: 0 50%;
+      transform: translateX(-100%) skew(15deg);
+      transition: all 0.5s linear 0.1s;
+      // transition: opacity 0.1s;
+    }
+  }
+
+  a {
+    display: inline-block;
+    margin: 0 10vw;
+    color: var(--color-secondary);
+    line-height: 1.1;
+    text-decoration: none;
+    user-select: none;
+    transform: translateY(130%);
+  }
 }
 
 * {
   box-sizing: border-box;
+  overflow: hidden; // Make sure translateX doesn't add a scrollbar
 }
 
 body {
@@ -32,16 +104,17 @@ h1 {
   line-height: calc(var(--line-height) / 1.25);
 }
 
-.home-navigation{
+// Configure the button to go home
+.home-navigation {
   position: fixed;
   --size: calc(10rem + 4vmin);
   display: flex;
-  height: calc(var(--size)/3);
+  height: calc(var(--size) / 3);
 
   font-family: var(--font-special);
   font-size: calc(1.5rem + 2vmin);
   text-align: left;
-  
+
   overflow: hidden;
   white-space: nowrap;
   top: calc(var(--space) * 1);
@@ -49,6 +122,7 @@ h1 {
   cursor: pointer;
   z-index: 2;
 
+  // Make sure it doesn't look like a hyperlink
   a {
     color: var(--color-primary);
     text-decoration: none;
@@ -56,14 +130,15 @@ h1 {
   }
 }
 
+// Configure the button to open up the menu
 .main-navigation-toggle {
   position: fixed;
-  height: 1px; 
+  height: 1px;
   width: 1px;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap;
-  
+
   + label {
     position: fixed;
     top: calc(var(--space) * 1.5);
@@ -79,7 +154,7 @@ h1 {
   align-items: center;
   justify-content: center;
   width: var(--size);
-  height: calc(var(--size)/3);
+  height: calc(var(--size) / 3);
   stroke-width: 0;
 }
 
@@ -98,101 +173,26 @@ h1 {
   stroke-width: 2;
 }
 
-.main-navigation {
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  transform: translateX(-100%);
-  transition: transform var(--nav-duration);
-  z-index: 1;
-  
-  &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--color-primary);
-    transform-origin: 0 50%;
-    z-index: -1;
-  }
-  
-  ul {
-    font-size: 12vmin;
-    font-family: var(--font-heading);
-    width: 100%;
-  }
-  
-  li {
-    --border-size: 1vmin;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: var(--border-size);
-      background-color: var(--color-secondary);
-      transform-origin: 0 50%;
-      transform: translateX(-100%) skew(15deg);
-    }
-  }
-  
-  a {
-    display: inline-block;
-    width: 100%;
-    max-width: 100vw;
-    margin: 0 0;
-    color: var(--color-secondary);
-    line-height: 1;
-    text-decoration: none;
-    user-select: none;
-    // padding: var(--space) calc(var(--space) * 2) calc(var(--space) + var(--border-size) / 2);
-    padding: calc(var(--space) * 2) 10vw;
-    transform: translateY(100%);
-  }
-}
-
-.menu-left{
-  text-align: left;
-}
-.menu-right{
-  text-align: right;
-}
-
-@mixin menu-colour($colour) {
+@mixin menu-element($colour) {
   color: $colour;
   text-shadow: 0 0 15px $colour;
-  // border: 5px solid $colour;
-  // box-shadow: 0 0 15px $colour;
-  transition: all 0.5s ease;  
-  
+  transition: all 0.5s;
 }
 
-.menu-element-kairos:hover{
-  @include menu-colour($colour: #2abc31);
+.menu-element-kairos:hover {
+  @include menu-element($colour: #2abc31);
 }
 
-.menu-element-arean:hover{
-  @include menu-colour($colour: #bc642a);
+.menu-element-arean:hover {
+  @include menu-element($colour: #bc642a);
 }
 
-.menu-element-pit:hover{
-  @include menu-colour($colour: #cc75d4);
+.menu-element-pit:hover {
+  @include menu-element($colour: #cc75d4);
 }
 
-.menu-element-turbine:hover{
-  @include menu-colour($colour: #1d749c);
+.menu-element-turbine:hover {
+  @include menu-element($colour: #1d749c);
 }
 
 .main-content {
@@ -201,42 +201,43 @@ h1 {
   padding: 0 calc(var(--space) * 2);
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);
-  
+
   > * + * {
     margin-top: calc(var(--space) * var(--line-height));
   }
 }
 
 .main-navigation-toggle:checked {
-  ~ label .icon--menu-toggle {    
+  ~ label .icon--menu-toggle {
     .icon-group {
       transform: translateX(100%);
     }
   }
-  
+
   ~ .main-content {
     transform: translateX(10%);
   }
-  
+
   ~ .main-navigation {
     transition-duration: 0s;
     transform: translateX(0);
-    
+
     &:after {
       animation: nav-bg var(--nav-duration) var(--ease) forwards;
     }
-    
+
     li:after {
       animation: nav-line var(--duration) var(--ease) forwards;
     }
-    
+
     a {
       animation: link-appear calc(var(--duration) * 1.5) var(--ease) forwards;
     }
-    
+
     @for $i from 1 through 4 {
       li:nth-child(#{$i}) {
-        &:after, a {
+        &:after,
+        a {
           animation-delay: calc((var(--duration) / 2) * #{$i} * 0.125);
         }
       }
@@ -245,18 +246,40 @@ h1 {
 }
 
 @keyframes nav-bg {
-  from { transform: translateX(-100%) skewX(-15deg) }
-  to { transform: translateX(0) }
+  from {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes nav-line {
-  0%   { transform: scaleX(0); transform-origin: 0 50%; }
-  35%  { transform: scaleX(1.001); transform-origin: 0 50%; }
-  65%  { transform: scaleX(1.001); transform-origin: 100% 50%; }
-  100% { transform: scaleX(0); transform-origin: 100% 50%; }
+  0% {
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+  35% {
+    transform: scaleX(1.001);
+    transform-origin: 0 50%;
+  }
+  65% {
+    transform: scaleX(1.001);
+    transform-origin: 100% 50%;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: 100% 50%;
+  }
 }
 
 @keyframes link-appear {
-  0%, 25%   { transform: translateY(100%); }
-  50%, 100% { transform: translateY(0); }
+  0%,
+  25% {
+    transform: translateY(130%);
+  }
+  50%,
+  100% {
+    transform: translateY(0);
+  }
 }

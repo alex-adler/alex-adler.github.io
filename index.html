@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="stylesheet" href="css/index.css">
+    <script type="application/javascript" src="nav.js"></script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,7 @@
     <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Alex Adler</title>
 </head>
@@ -33,7 +35,7 @@
     <!-- <h1>Hello</h1> -->
 </nav>
 
-<input id="page-nav-toggle" class="main-navigation-toggle" type="checkbox" />
+<input id="page-nav-toggle" class="main-navigation-toggle" type="checkbox" onchange="full_menu_reset(this);" />
 <label for="page-nav-toggle">
     <svg class="icon--menu-toggle" viewBox="0 0 50 10">
         <g class="icon-group">
@@ -76,12 +78,44 @@
     </svg>
 </label>
 
-<nav class="main-navigation">
+
+
+
+<nav class="main-navigation" id="nav">
     <ul>
-        <li><a class="menu-left menu-element-kairos" href="SpaceTime.html">Space Time</a></li>
-        <li><a class="menu-right menu-element-arean" href="#0">Arean Freight</a></li>
-        <li><a class="menu-left menu-element-pit" href="#0">PIT</a></li>
-        <li><a class="menu-right menu-element-turbine" href="#0">Turbine</a></li>
+        <li style="text-align: left;">
+            <span>
+                <a class="menu-element-kairos" onmouseover="menu_hovered('../menu_images/kairos.png')"
+                    onmouseleave="menu_reset()" href="SpaceTime.html">
+                    Space Time
+                </a>
+            </span>
+        </li>
+        <li style="text-align: right;">
+            <span>
+                <a class="menu-element-arean" onmouseover="menu_hovered('../space_images/Mars.jpg')"
+                    onmouseleave="menu_reset()" href="#0">
+                    Arean Freight
+                </a>
+            </span>
+        </li>
+        <li style="text-align: left;">
+            <span>
+                <a class="menu-element-pit" onmouseover="menu_hovered('../menu_images/pit.png')"
+                    onmouseleave="menu_reset()" href="#0">
+                    PIT
+                </a>
+            </span>
+        </li>
+        <li style="text-align: right;">
+            <span>
+                <a class="menu-element-turbine"
+                    onmouseover="menu_hovered('https://upload.wikimedia.org/wikipedia/commons/e/ec/Gas_Turbine_Blade.jpg')"
+                    onmouseleave="menu_reset()" href="#0">
+                    Turbine
+                </a>
+            </span>
+        </li>
     </ul>
 </nav>
 
