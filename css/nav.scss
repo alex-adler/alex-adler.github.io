@@ -85,7 +85,7 @@
 
 * {
   box-sizing: border-box;
-  overflow: hidden; // Make sure translateX doesn't add a scrollbar
+  // overflow: hidden; // Make sure translateX doesn't add a scrollbar
 }
 
 body {
@@ -216,6 +216,8 @@ a {
   padding: 0 calc(var(--space) * 2);
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);
+
+  // overflow: hidden; // Make sure translateX doesn't add a scrollbar
 
   > * + * {
     margin-top: calc(var(--space) * var(--line-height));

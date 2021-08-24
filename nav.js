@@ -13,11 +13,18 @@ function menu_reset() {
     document.styleSheets[1].insertRule(".main-navigation:hover::after {opacity: 1;}", 4);
 }
 
-// Clear the background image
-function full_menu_reset(checkboxElem) {
+// Runs when the menu is opened or closed
+function menu_toggle(checkboxElem) {
+
     if (!checkboxElem.checked) {
+        // Allow document to scroll again
+        document.body.style.overflow = "";
+        // Clear the background image when the menu is closed
         document.styleSheets[1].deleteRule(2);
         document.styleSheets[1].insertRule(".main-navigation{position: fixed;top: 0;left: 0;display: flex;align-items: center;width: 100%;height: 100%;transform: translateX(-100%);transition: transform var(--nav-duration);z-index: 1;}", 2);
-        // alert("hi");
+    }
+    else {
+        // Remove scrollbars when the menu is open
+        document.body.style.overflow = "hidden";
     }
 }

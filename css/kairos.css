@@ -1,29 +1,5 @@
-/* Add a black background color to the top navigation */
-.topnav {
-	background-color: #222;
-	overflow: hidden;
-}
-
-/* Style the links inside the navigation bar */
-.topnav a {
-	float: left;
-	color: #f2f2f2;
-	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
-	font-size: 17px;
-}
-
-/* Change the color of links on hover */
-.topnav a:hover {
-	background-color: #ddd;
-	color: black;
-}
-
-/* Add a color to the active/current link */
-.topnav a.active {
-	background-color: #ffffff;
-	color: #222222;
+:root {
+	--bg: url(../backgrounds/space.svg);
 }
 
 /* Table stuff */
@@ -43,13 +19,15 @@ th {
 td {
 	height: 20px;
 	vertical-align: middle;
+	font-family: "Courier New", Courier, monospace;
 }
 
 #tableName {
 	text-align: center;
+	font-family: var(--font-primary);
 }
 
-#weekDay{
+#weekDay {
 	text-align: center;
 }
 
@@ -101,4 +79,19 @@ td {
 .flavourText {
 	/* float: right; */
 	text-align: right;
+}
+
+body {
+	background-image: var(--bg);
+	background-size: 20vmax;
+	background-repeat: no-repeat;
+	background-position: left bottom;
+	background-attachment: fixed;
+}
+
+.main-navigation::after {
+	background-image: var(--bg);
+	background-size: 20vmax;
+	background-repeat: no-repeat;
+	background-position: left bottom;
 }
