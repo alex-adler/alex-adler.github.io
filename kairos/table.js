@@ -520,22 +520,6 @@ function updateTimes(table, bodies, msFromEpoch) {
     data = generateData(bodies);
     info = generateInformation(bodies);
     updateTable(table, data, info);
-    var text = document.getElementById("demo");
-    t = timeConverter(realTime);
-    text.innerText = t;
-}
-
-function timeConverter(timestamp) {
-    var a = new Date(timestamp + 946684800000);
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-    return time;
 }
 
 // Update all of the internal values of each celestial body
@@ -620,7 +604,6 @@ function generateTable(table, dataTime, dataFacts) {
 
         // Format the cell for the extra info
         let cell = rowFacts.insertCell();
-        cell.id = "flavourText";
         cell.colSpan = "5";
 
         // Insert the image placeholder
