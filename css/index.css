@@ -1,37 +1,55 @@
+:root {
+  --bg: url(../backgrounds/garden.svg);
+}
+
 .row {
-    display: flex;
-  }
-  
+  display: flex;
+}
+
+.column {
+  float: left;
+}
+
+.left {
+  width: 55%;
+}
+
+.right {
+  width: 45%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
   .column {
-    float: left;
+    width: 100%;
   }
-  
   .left {
-    width: 55%;
-  }
-  
-  .right {
-    width: 45%;
-    
+    width: 0%;
   }
 
-  /* Clear floats after the columns */
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
+  .right {
+    width: 100%;
   }
-  
-  /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-  @media screen and (max-width: 600px) {
-    .column {
-      width: 100%;
-    }
-    .left {
-        width: 0%;
-      }
-      
-      .right {
-        width: 100%;
-      }
-  }
+}
+
+body {
+  height: 100vh;
+  background-image: var(--bg);
+  background-size: 50vmax;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
+
+.main-navigation::after {
+  background-image: var(--bg);
+  background-size: 50vmax;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
