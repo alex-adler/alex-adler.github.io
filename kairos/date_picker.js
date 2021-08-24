@@ -350,20 +350,20 @@ SOFTWARE.
 							// Probably not the correct way of changing the css rules
 
 							// Display all week numbers
-							document.styleSheets[1].deleteRule(60);
-							document.styleSheets[1].insertRule("#Datepickk .d-week > div {flex-basis: calc(" + newDayBoxSize + "%);text-align: center;}", 60);
+							document.styleSheets[2].deleteRule(60);
+							document.styleSheets[2].insertRule("#Datepickk .d-week > div {flex-basis: calc(" + newDayBoxSize + "%);text-align: center;}", 60);
 
 							// Not sure what this changes
-							document.styleSheets[1].deleteRule(65);
-							document.styleSheets[1].insertRule("#Datepickk .d-table label:nth-of-type(" + body.weekLength_hd + "n) .d-date-legends {padding-right: 0;}", 65);
+							document.styleSheets[2].deleteRule(65);
+							document.styleSheets[2].insertRule("#Datepickk .d-table label:nth-of-type(" + body.weekLength_hd + "n) .d-date-legends {padding-right: 0;}", 65);
 
 							// Nor this one
-							document.styleSheets[1].deleteRule(66);
-							document.styleSheets[1].insertRule("#Datepickk .d-table label:nth-last-of-type(-n + " + body.weekLength_hd + ") .d-date-legends {padding-bottom: 0;}", 66);
+							document.styleSheets[2].deleteRule(66);
+							document.styleSheets[2].insertRule("#Datepickk .d-table label:nth-last-of-type(-n + " + body.weekLength_hd + ") .d-date-legends {padding-bottom: 0;}", 66);
 
 							// Correctly display week lengths
-							document.styleSheets[1].deleteRule(68);
-							document.styleSheets[1].insertRule("#Datepickk .d-table input + label {flex-basis: calc(" + newDayBoxSize + "%);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color 0.2s ease, background 0.2s ease, color 0.2s ease;position: relative;box-sizing: border-box;}", 68);
+							document.styleSheets[2].deleteRule(68);
+							document.styleSheets[2].insertRule("#Datepickk .d-table input + label {flex-basis: calc(" + newDayBoxSize + "%);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color 0.2s ease, background 0.2s ease, color 0.2s ease;position: relative;box-sizing: border-box;}", 68);
 
 							let newYearMonth = bodies[currentBody].getYearMonth(msOfFirstDay);
 							currentYear = newYearMonth[0];
