@@ -620,6 +620,7 @@ function generateTable(table, dataTime, dataFacts) {
 
         // Format the cell for the extra info
         let cell = rowFacts.insertCell();
+        cell.id = "flavourText";
         cell.colSpan = "5";
 
         // Insert the image placeholder
@@ -666,7 +667,7 @@ function generateTable(table, dataTime, dataFacts) {
     }
 }
 
-// Try not to DDoS NASA
+// Try not to DDoS NASA by using local images
 function updateFlavour(table, id, data) {
     img = document.getElementById("image" + id);
     img.src = data[1];

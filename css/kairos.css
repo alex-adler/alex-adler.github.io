@@ -1,10 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap");
+
 :root {
 	--bg: url(../backgrounds/space.svg);
 }
 
 /* Table stuff */
 table {
-	width: 50%;
+	width: 50vmax;
 	padding-left: 0;
 	padding-right: 0;
 	margin-left: auto;
@@ -19,7 +21,7 @@ th {
 td {
 	height: 20px;
 	vertical-align: middle;
-	font-family: "Courier New", Courier, monospace;
+	font-family: "Roboto Mono", monospace;
 }
 
 #tableName {
@@ -79,6 +81,10 @@ td {
 .flavourText {
 	/* float: right; */
 	text-align: right;
+}
+
+td p {
+	font-family: var(--font-primary);
 }
 
 body {
