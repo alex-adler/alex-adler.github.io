@@ -102,9 +102,8 @@ a {
 
 .home-navigation {
   position: fixed;
-  --size: calc(10rem + 4vmin);
   display: flex;
-  height: calc(var(--size) / 3);
+  height: calc((10rem + 4vmin) / 3);
   font-family: var(--font-special);
   font-size: calc(1.5rem + 2vmin);
   font-weight: 700;
@@ -119,9 +118,8 @@ a {
 
 .about-navigation {
   position: fixed;
-  --size: calc(10rem + 4vmin);
   display: flex;
-  height: calc(var(--size) / 3);
+  height: calc((10rem + 4vmin) / 3);
   font-family: var(--font-special);
   font-size: calc(1.1rem + 1vmin);
   font-weight: 500;
@@ -145,7 +143,7 @@ a {
 .main-navigation-toggle + label {
   position: fixed;
   top: calc(var(--space) * 1.5);
-  right: calc(var(--space) * 7);
+  right: calc(var(--space) * 2 + 2rem + 5vmin);
   cursor: pointer;
   z-index: 2;
 }
