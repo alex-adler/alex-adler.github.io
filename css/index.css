@@ -1,5 +1,5 @@
 :root {
-  --bg: url(../backgrounds/garden.svg);
+  --bg: url(../backgrounds/Logo.svg);
 }
 
 .row {
@@ -46,14 +46,14 @@ html {
 
 body {
   background-image: var(--bg);
-  background-size: 40vmax;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: left bottom;
 }
 
 .main-navigation::after {
   background-image: var(--bg);
-  background-size: 40vmax;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: left bottom;
 }
