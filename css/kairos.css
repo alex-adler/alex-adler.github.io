@@ -46,6 +46,7 @@ td {
 .active,
 .collapsible:hover {
 	background-color: #ccc;
+	opacity: 0.9;
 }
 
 /* Style the collapsible content. Note: hidden by default */
