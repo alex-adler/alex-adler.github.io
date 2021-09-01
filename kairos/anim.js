@@ -56,8 +56,10 @@ function balls(table, bodies) {
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
 
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+        const pixelRatio = window.devicePixelRatio;
+
+        canvas.width = canvas.clientWidth * pixelRatio;
+        canvas.height = canvas.clientHeight * pixelRatio;
 
         var lastTime = 0;
 
@@ -97,8 +99,8 @@ function balls(table, bodies) {
         // circles["pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
 
         function step(timestamp) {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
+            canvas.width = canvas.clientWidth * pixelRatio;
+            canvas.height = canvas.clientHeight * pixelRatio;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             output.innerHTML = "Multiplier: " + scalingFactor.toPrecision(5) + "x";
 
