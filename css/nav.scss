@@ -213,16 +213,19 @@ a {
 }
 
 .main-content {
-  margin: 6rem auto;
-  padding: 0 calc(var(--space) * 2);
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);
 
+  p {
+    margin: 3rem auto;
+    padding: 0 calc(var(--space) * 2);
+  }
+
   // overflow: hidden; // Make sure translateX doesn't add a scrollbar
 
-  > * + * {
-    margin-top: calc(var(--space) * var(--line-height));
-  }
+  // > * + * {
+  //   margin-top: calc(var(--space) * var(--line-height));
+  // }
 }
 
 .main-navigation-toggle:checked {

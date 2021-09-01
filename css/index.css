@@ -57,3 +57,9 @@ body {
   background-repeat: no-repeat;
   background-position: left bottom;
 }
+
+h1 {
+  margin: 6rem auto;
+  margin-bottom: 3rem;
+  padding: 0 2rem;
+}

@@ -14,22 +14,23 @@ class Circle {
         this.smear = 0; // 1 if smeared in the animation
         this.disabled = 0;  // 0 if enabled
     }
-    draw(ctx) {
+    draw(c, ctx) {
         if (!this.disabled) {
+            var min = Math.min(c.height, c.width);
             if (this.smear) {
                 ctx.strokeStyle = this.colour;
                 ctx.beginPath();
-                ctx.arc(this.x0, this.y0, this.a, 0, 2 * Math.PI);
+                ctx.arc(this.x0 * min, this.y0 * min, this.a * min, 0, 2 * Math.PI);
                 ctx.stroke();
             } else {
                 ctx.fillStyle = this.colour;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                ctx.arc(this.x * min, this.y * min, this.radius * min, 0, 2 * Math.PI);
                 ctx.fill();
                 if (this.ring) {
                     ctx.strokeStyle = this.colour;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius * 1.5, 0, 2 * Math.PI);
+                    ctx.arc(this.x * min, this.y * min, this.radius * 1.5 * min, 0, 2 * Math.PI);
                     ctx.stroke();
                 }
             }
@@ -38,60 +39,67 @@ class Circle {
     }
 }
 
+const setUpCanvas = () => {
+    // Feed the size back to the canvas.
+    var c = document.getElementById("planets-canvas");
+    c.width = c.clientWidth;
+    c.height = c.clientHeight;
+};
+
 function balls(table, bodies) {
 
     window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
-    var canvas = document.getElementById('canvas');
+    var canvas = document.getElementById("planets-canvas");
     var output = document.getElementById("speedText");
 
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
 
-        var maxX = canvas.clientWidth;
-        var maxY = canvas.clientHeight;
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
 
         var lastTime = 0;
 
-        var sun_x0 = 0.5 * maxX;
-        var sun_y0 = 0.5 * maxY;
+        var sun_x0 = 0.5;
+        var sun_y0 = 0.5;
 
         var circles = {};
 
-        var sun = new Circle(0, sun_x0, sun_y0, 0, 10, 'yellow', 0);
+        // Circle parameters: semi-major axis, x0, y0, period, radius, colour, omega = 0, ring = 0
 
-        circles["mercury"] = new Circle(25, sun_x0, sun_y0, 89.9691, 2, 'red', 252.25166724);
+        var sun = new Circle(0, sun_x0, sun_y0, 0, .02, 'yellow', 0);
 
-        circles["venus"] = new Circle(50, sun_x0, sun_y0, 224.701, 4, '#D4CAA3', 181.97970850);
+        circles["mercury"] = new Circle(0.05, sun_x0, sun_y0, 89.9691, .004, 'red', 252.25166724);
 
-        circles["earth"] = new Circle(75, sun_x0, sun_y0, 365.25, 5, 'blue', 100.46457166);
-        circles["luna"] = new Circle(10, 0, 0, 28, 1, 'white', Math.random() * 360);
+        circles["venus"] = new Circle(0.1, sun_x0, sun_y0, 224.701, .008, '#D4CAA3', 181.97970850);
 
-        circles["mars"] = new Circle(100, sun_x0, sun_y0, 686.971, 4, 'orangered', -4.56813164);
-        circles["phobos"] = new Circle(7, 0, 0, 0.3189, 1, 'white', Math.random() * 360);
-        circles["deimos"] = new Circle(10, 0, 0, 2, 1.263, 'white', Math.random() * 360);
+        circles["earth"] = new Circle(0.15, sun_x0, sun_y0, 365.25, .01, 'blue', 100.46457166);
+        circles["luna"] = new Circle(0.02, 0, 0, 28, .002, 'white', Math.random() * 360);
 
-        circles["ceres"] = new Circle(125, sun_x0, sun_y0, 1683, 2, 'white', 153.9032);
+        circles["mars"] = new Circle(.2, sun_x0, sun_y0, 686.971, .008, 'orangered', -4.56813164);
+        circles["phobos"] = new Circle(.014, 0, 0, 0.3189, .002, 'white', Math.random() * 360);
+        circles["deimos"] = new Circle(.02, 0, 0, 1.263, .002, 'white', Math.random() * 360);
 
-        circles["jupiter"] = new Circle(150, sun_x0, sun_y0, 4332.59, 8, 'orange', 34.33479152);
-        circles["io"] = new Circle(17, 0, 0, 1.769, 1, 'yellow', Math.random() * 360);
-        circles["europa"] = new Circle(19, 0, 0, 3.5551, 1, 'white', Math.random() * 360);
-        circles["ganymede"] = new Circle(21, 0, 0, 7.155, 1, 'white', Math.random() * 360);
-        circles["callisto"] = new Circle(23, 0, 0, 16.69, 1, 'white', Math.random() * 360);
-        // circles["io"] = new Circle(17, 0, 0, 1.769, 1, 'yellow', 0);
-        // circles["europa"] = new Circle(19, 0, 0, 3.5551, 1, 'white', 0);
-        // circles["ganymede"] = new Circle(21, 0, 0, 7.155, 1, 'white', 0);
-        // circles["callisto"] = new Circle(23, 0, 0, 16.69, 1, 'white', 0);
+        circles["ceres"] = new Circle(.25, sun_x0, sun_y0, 1683, .004, 'white', 153.9032);
 
-        circles["saturn"] = new Circle(175, sun_x0, sun_y0, 10759.22, 7, '#FFFDD0', 50.07571329, 1);
-        circles["titan"] = new Circle(15, 0, 0, 15.945, 1, 'white', Math.random() * 360);
+        circles["jupiter"] = new Circle(.3, sun_x0, sun_y0, 4332.59, .016, 'orange', 34.33479152);
+        circles["io"] = new Circle(.034, 0, 0, 1.769, .002, 'yellow', Math.random() * 360);
+        circles["europa"] = new Circle(.038, 0, 0, 3.5551, .002, 'white', Math.random() * 360);
+        circles["ganymede"] = new Circle(.042, 0, 0, 7.155, .002, 'white', Math.random() * 360);
+        circles["callisto"] = new Circle(.046, 0, 0, 16.69, .002, 'white', Math.random() * 360);
 
-        circles["uranus"] = new Circle(200, sun_x0, sun_y0, 30688.5, 6, 'cyan', 314.20276625);
-        circles["neptune"] = new Circle(225, sun_x0, sun_y0, 60182, 6, 'purple', 304.22289287);
-        circles["pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
+        circles["saturn"] = new Circle(.35, sun_x0, sun_y0, 10759.22, .014, '#FFFDD0', 50.07571329, 1);
+        circles["titan"] = new Circle(.03, 0, 0, 15.945, .002, 'white', Math.random() * 360);
+
+        circles["uranus"] = new Circle(.4, sun_x0, sun_y0, 30688.5, .012, 'cyan', 314.20276625);
+        circles["neptune"] = new Circle(.45, sun_x0, sun_y0, 60182, .012, 'purple', 304.22289287);
+        // circles["pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
 
         function step(timestamp) {
-            ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             output.innerHTML = "Multiplier: " + scalingFactor.toPrecision(5) + "x";
 
             var deltaTime = timestamp - lastTime;
@@ -128,9 +136,9 @@ function balls(table, bodies) {
                 updatePos(circles[body], realTime, deltaTime, scalingFactor);
             }
 
-            for (var body in circles) circles[body].draw(ctx);
+            for (var body in circles) circles[body].draw(canvas, ctx);
 
-            sun.draw(ctx);
+            sun.draw(canvas, ctx);
             lastTime = timestamp;
             requestAnimationFrame(step);
             updateTimes(table, bodies, realTime);

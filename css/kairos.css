@@ -6,9 +6,9 @@
 
 /* Table stuff */
 table {
-	width: 50vmax;
-	padding-left: 0;
-	padding-right: 0;
+	width: 100%;
+	padding-left: 1rem;
+	padding-right: 1rem;
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 0;
@@ -37,23 +37,6 @@ td {
 	text-align: right;
 }
 
-/* Animation */
-#canvas {
-	position: relative;
-	display: block;
-	background-color: #222222;
-}
-
-#animation {
-	position: relative;
-	width: 500px;
-	padding-left: 0;
-	padding-right: 0;
-	margin-left: auto;
-	margin-right: auto;
-	/* margin: auto; */
-}
-
 /* Style the button that is used to open and close the collapsible content */
 .collapsible {
 	cursor: pointer;
@@ -70,7 +53,7 @@ td {
 	padding: 0 18px;
 	background-color: white;
 	max-height: 0;
-	overflow: hidden;
+	/* overflow: hidden; */
 	transition: max-height 0.2s ease-out;
 }
 
@@ -83,8 +66,28 @@ td {
 	text-align: right;
 }
 
+/* Format the flavour text */
 td p {
 	font-family: var(--font-primary);
+}
+
+/* Animation */
+#planets-canvas {
+	position: relative;
+	/* width: 100vmin;
+	height: 100vmin; */
+	width: 50vw;
+	height: 50vw;
+	/* width: 100vw;
+	height: 100vw; */
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	/* vertical-align: middle; */
+	display: block;
+	background-color: #222222;
+	/* margin: auto; */
 }
 
 body {
@@ -93,6 +96,18 @@ body {
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	background-attachment: fixed;
+	margin: 0 0;
+}
+
+h1 {
+	text-align: center;
+	margin: 4rem auto;
+	margin-bottom: 2rem;
+	padding: 0 2rem;
+}
+
+.intro {
+	text-align: justify;
 }
 
 .main-navigation::after {
@@ -100,4 +115,27 @@ body {
 	background-size: 20vmax;
 	background-repeat: no-repeat;
 	background-position: left bottom;
+}
+
+.layout {
+	float: left;
+	width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 950px) {
+	.layout {
+		width: 100%;
+	}
+	#planets-canvas {
+		width: 100vw;
+		height: 100vw;
+	}
 }

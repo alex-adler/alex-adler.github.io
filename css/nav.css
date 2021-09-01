@@ -198,13 +198,12 @@ a {
 }
 
 .main-content {
-  margin: 6rem auto;
-  padding: 0 calc(var(--space) * 2);
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);
 }
-.main-content > * + * {
-  margin-top: calc(var(--space) * var(--line-height));
+.main-content p {
+  margin: 3rem auto;
+  padding: 0 calc(var(--space) * 2);
 }
 
 .main-navigation-toggle:checked ~ label .icon--menu-toggle .icon-group {

@@ -43,7 +43,7 @@ function Rewind(speed) {
 
 function generate() {
     let table = document.querySelector("table");
-    let tableHeaders = ["Body", "Local Time", "Solar Time", "Day of the Week", "Date"];
+    let tableHeaders = ["Body", "Local Time", "Solar Time", "Weekday", "Date"];
     IrlTime();
     data = generateData(bodies);
     info = generateInformation(bodies);
