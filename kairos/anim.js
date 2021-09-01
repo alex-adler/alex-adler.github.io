@@ -133,7 +133,7 @@ function balls(table, bodies) {
                     circles[body].x0 = circles["jupiter"].x;
                     circles[body].y0 = circles["jupiter"].y;
                 }
-                updatePos(circles[body], realTime, deltaTime, scalingFactor);
+                updatePos(circles[body], realTime, scalingFactor);
             }
 
             for (var body in circles) circles[body].draw(canvas, ctx);
@@ -147,15 +147,14 @@ function balls(table, bodies) {
     }
 }
 
-function updatePos(circle, realTime, deltaTime = 0, scalingFactor = 0) {
+function updatePos(circle, realTime, scalingFactor = 0) {
     var x, y;
     var time = realTime % circle.period;
-    var deltaProg = (deltaTime / circle.period) * 360 * scalingFactor;
 
     circle.progress = (time / circle.period) * 360 + circle.startProgress;
     circle.progress %= 360;
 
-    if (deltaProg > 10) {
+    if (Math.abs(scalingFactor / circle.period) * 1000 > 2) {
         circle.smear = 1;
     } else {
         circle.smear = 0;
