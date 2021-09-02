@@ -2,7 +2,7 @@
 document.querySelector('.button').addEventListener('click', (e) => {
     e.target.classList.toggle('pause');
     // PLaying
-    if (scalingFactor === 0) {
+    if (isPaused) {
         Play();
     }
     // Pausing
