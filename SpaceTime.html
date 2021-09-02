@@ -9,7 +9,7 @@
     <script type="application/javascript" src="kairos/globals.js"></script>
     <script type="application/javascript" src="kairos/anim.js"></script>
     <script type="application/javascript" src="kairos/table.js"></script>
-    <script type="application/javascript" src="kairos/main.js"></script>
+    <script type="application/javascript" src="kairos/main.js" defer></script>
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -136,17 +136,41 @@
                 <div style="overflow-x: auto;">
                     <table></table>
                 </div>
-                <h4 id="speedText">Hello?</h4>
+
                 <button type="button" onclick=IrlTime()>Current Time</button>
                 <button type="button" onclick=EpochTime()>Epoch Time</button>
-                <button type="button" onclick=Rewind(10)>&lt;&lt;</button>
-                <button type="button" onclick=Rewind(1)>&lt;</button>
-                <button type="button" onclick=Pause()>||</button>
-                <button type="button" onclick=Forward(1)>&gt;</button>
-                <button type="button" onclick=Forward(10)>&gt;&gt;</button>
                 <button onclick="datepicker.show();">Date Picker</button>
             </div>
             <div class="layout right">
+                <div class="controls">
+                    <div class="playpause">
+                        <div class="button pause"></div>
+                    </div>
+                    <button class="change-input" data-text-swap="Slider">Buttons</button>
+                    <input type="range" min="-200" max="200" value="0" class="slider" id="sliderSpeed">
+                    <div id="speed-buttons">
+                        <svg width="46" height="32" viewBox="0 0 46 32" fill="none" id="fast-rewind" onclick=Rewind(10)
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 17L25.5 2.27757L25.5 31.7224L0 17Z" fill="#C4C4C4" />
+                            <path d="M12 17L37.5 2.27757V31.7224L12 17Z" fill="#C4C4C4" />
+                        </svg>
+                        <svg width="46" height="32" viewBox="0 0 26 32" fill="none" id="rewind" onclick=Rewind(1)
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 15.2776L25.5 0.555138L25.5 30L0 15.2776Z" fill="#C4C4C4" />
+                        </svg>
+                        <svg width="46" height="32" viewBox="0 0 26 32" fill="none" id="forward" onclick=Forward(1)
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M26 15L0.5 29.7224L0.5 0.277568L26 15Z" fill="#C4C4C4" />
+                        </svg>
+                        <svg width="46" height="32" viewBox="0 0 46 32" fill="none" id="fast-forward"
+                            onclick=Forward(10) xmlns="http://www.w3.org/2000/svg">
+                            <path d="M46 16L20.5 30.7224L20.5 1.27757L46 16Z" fill="#C4C4C4" />
+                            <path d="M34 16L8.5 30.7224L8.5 1.27757L34 16Z" fill="#C4C4C4" />
+                        </svg>
+                        <button class="reset-multiplier" onclick=ResetMultiplier()>Reset</button>
+                    </div>
+                    <h4 id="speedText">Hello?</h4>
+                </div>
                 <canvas id="planets-canvas"></canvas>
             </div>
         </div>

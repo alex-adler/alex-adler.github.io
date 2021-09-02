@@ -1,13 +1,14 @@
 class Circle {
     constructor(a, x0, y0, period, radius, colour, omega = 0, ring = 0) {
-        this.a = a; // Semi major axis (px)
-        this.x0 = x0;   // Barycenter x (px)
-        this.y0 = y0;   // Barycenter y (px)
+        // Units for distances are fractions of the canvas dimensions
+        this.a = a; // Semi major axis
+        this.x0 = x0;   // Barycenter x
+        this.y0 = y0;   // Barycenter y
         this.period = period * 86400 * 1000; // Orbital Period (ms)
         this.startProgress = omega; // Mean Longitude at Epoch (deg)
         this.progress = omega;  // Mean Longitude (deg)
-        this.x = this.x0;   // x position (px)
-        this.y = this.y0;   // y position (px)
+        this.x = this.x0;   // x position
+        this.y = this.y0;   // y position
         this.radius = radius;
         this.colour = colour;
         this.ring = ring;   // 0 if body has no rings
@@ -35,7 +36,6 @@ class Circle {
                 }
             }
         }
-
     }
 }
 
@@ -99,9 +99,21 @@ function balls(table, bodies) {
         // circles["pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
 
         function step(timestamp) {
+            // Account for pixel ratio's != 1 to improve resolution on most mobile devices
             canvas.width = canvas.clientWidth * pixelRatio;
             canvas.height = canvas.clientHeight * pixelRatio;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Use slider for speed if it is being displayed
+            var slider = document.getElementById('sliderSpeed');
+            if (slider.style.display !== 'none' && !isPaused) {
+                // console.log("Showing slider");
+                if (slider.value >= 0)
+                    scalingFactor = Math.pow(10, slider.value * .04);
+                else
+                    scalingFactor = -Math.pow(10, -slider.value * .04);
+            }
+
             output.innerHTML = "Multiplier: " + scalingFactor.toPrecision(5) + "x";
 
             var deltaTime = timestamp - lastTime;
