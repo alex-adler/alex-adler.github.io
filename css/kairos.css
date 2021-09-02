@@ -104,7 +104,7 @@ td p {
 	margin-top: 1rem;
 	float: left;
 	-webkit-appearance: none;
-	width: 55%;
+	width: calc(100% - 22rem);
 	height: 1rem;
 	background: #ffffff6b;
 	outline: none;
@@ -113,11 +113,6 @@ td p {
 	transition: opacity 0.2s;
 	cursor: pointer;
 }
-
-/* 
-.slider:hover {
-	opacity: 1;
-} */
 
 /* .slider::-webkit-slider-thumb {
 	-webkit-appearance: none;
@@ -145,26 +140,6 @@ td p {
 	/* padding: 1rem; */
 	display: none;
 }
-
-/* #fast-rewind:hover path {
-	fill: #ffffff;
-	cursor: pointer;
-}
-
-#rewind:hover path {
-	fill: #ffffff;
-	cursor: pointer;
-}
-
-#forward:hover path {
-	fill: #ffffff;
-	cursor: pointer;
-}
-
-#fast-forward:hover path {
-	fill: #ffffff;
-	cursor: pointer;
-} */
 
 #speed-buttons svg:hover path {
 	fill: #ffffff;
