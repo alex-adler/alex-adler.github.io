@@ -148,6 +148,16 @@ td p {
 	cursor: pointer;
 }
 
+#fast-rewind,
+#fast-forward {
+	width: 5vmin;
+}
+
+#rewind,
+#forward {
+	width: 2.5vmin;
+}
+
 .controls button {
 	height: 2rem;
 	color: white;
