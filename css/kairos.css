@@ -234,6 +234,26 @@ h1 {
 	background: #222222;
 }
 
+.right:fullscreen > #planets-canvas {
+	width: 100vmin;
+	height: 100vmin;
+	/* background: violet; */
+
+	padding: 0;
+	margin: auto;
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: -1;
+}
+
+.right:fullscreen > .controls {
+	opacity: 0.5;
+}
+
 /* Clear floats after the columns */
 .row:after {
 	content: "";
