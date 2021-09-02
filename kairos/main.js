@@ -98,6 +98,19 @@ function Rewind(speed) {
     }
 }
 
+/* Function to open fullscreen mode */
+function openFullscreen() {
+    var canvas = document.getElementsByClassName("right")[0];
+    console.log(document.getElementsByClassName("right"));
+    if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+    } else if (canvas.webkitRequestFullscreen) { /* Safari */
+        canvas.webkitRequestFullscreen();
+    } else if (canvas.msRequestFullscreen) { /* IE11 */
+        canvas.msRequestFullscreen();
+    }
+}
+
 function generate() {
     let table = document.querySelector("table");
     let tableHeaders = ["Body", "Local Time", "Solar Time", "Weekday", "Date"];
