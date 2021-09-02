@@ -71,6 +71,10 @@ td p {
 	font-family: var(--font-primary);
 }
 
+.left button {
+	float: right;
+}
+
 /* Controls */
 .controls {
 	width: 100%;
