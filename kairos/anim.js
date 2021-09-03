@@ -138,39 +138,41 @@ function balls(table, bodies) {
                 else
                     circles[body].hover = false;
             }
-        })
+        });
 
-        canvas.addEventListener('mousedown', e => {
-            var rect = canvas.getBoundingClientRect(), // abs. size of element
-                scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
-                scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+        ['click', 'ontouchstart'].forEach(evt => {
+            canvas.addEventListener(evt, e => {
+                var rect = canvas.getBoundingClientRect(), // abs. size of element
+                    scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
+                    scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
 
-            var mouseX = (e.clientX - rect.left) * scaleX;   // scale mouse coordinates after they have
-            var mouseY = (e.clientY - rect.top) * scaleY;     // been adjusted to be relative to element
+                var mouseX = (e.clientX - rect.left) * scaleX;   // scale mouse coordinates after they have
+                var mouseY = (e.clientY - rect.top) * scaleY;     // been adjusted to be relative to element
 
-            if ((canvas.width - mouseX) <= (fullscreenButtonSize + fullscreenButtonPadding) && (canvas.height - mouseY) <= (fullscreenButtonSize + fullscreenButtonPadding)) {
-                // If we are already full screen
-                if (document.fullscreenElement)
-                    document.exitFullscreen();
-                // Go fullscreen
-                else {
-                    var anim = document.getElementsByClassName("right")[0];
-                    if (anim.requestFullscreen) {
-                        anim.requestFullscreen("hide");
-                    } else if (anim.webkitRequestFullscreen) { /* Safari */
-                        anim.webkitRequestFullscreen();
-                    } else if (anim.msRequestFullscreen) { /* IE11 */
-                        anim.msRequestFullscreen();
+                if ((canvas.width - mouseX) <= (fullscreenButtonSize + fullscreenButtonPadding) && (canvas.height - mouseY) <= (fullscreenButtonSize + fullscreenButtonPadding)) {
+                    // If we are already full screen
+                    if (document.fullscreenElement)
+                        document.exitFullscreen();
+                    // Go fullscreen
+                    else {
+                        var anim = document.getElementsByClassName("right")[0];
+                        if (anim.requestFullscreen) {
+                            anim.requestFullscreen("hide");
+                        } else if (anim.webkitRequestFullscreen) { /* Safari */
+                            anim.webkitRequestFullscreen();
+                        } else if (anim.msRequestFullscreen) { /* IE11 */
+                            anim.msRequestFullscreen();
+                        }
                     }
                 }
-            }
 
-            if (ctx.isPointInPath(sun.path, mouseX, mouseY)) {
-                sun.hover = true;
-                for (var body in circles)
-                    circles[body].hover = true;
-            }
-        })
+                if (ctx.isPointInPath(sun.path, mouseX, mouseY)) {
+                    sun.hover = true;
+                    for (var body in circles)
+                        circles[body].hover = true;
+                }
+            }, false)
+        });
 
         function step(timestamp) {
             // Account for pixel ratio's != 1 to improve resolution on most mobile devices
@@ -185,7 +187,6 @@ function balls(table, bodies) {
             // Use slider for speed if it is being displayed
             var slider = document.getElementById('sliderSpeed');
             if (slider.style.display !== 'none' && !isPaused) {
-                // console.log("Showing slider");
                 if (slider.value >= 0)
                     scalingFactor = Math.pow(10, slider.value * .04);
                 else
