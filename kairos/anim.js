@@ -12,8 +12,8 @@ class Circle {
         this.radius = radius;
         this.colour = colour;
         this.ring = ring;   // 0 if body has no rings
-        this.smear = 0; // 1 if smeared in the animation
-        this.disabled = 0;  // 0 if enabled
+        this.smear = false; // 1 if smeared in the animation
+        this.disabled = false;  // 0 if enabled
         this.path = new Path2D();
         this.hover = false;
     }
@@ -81,7 +81,7 @@ function balls(table, bodies) {
         var circles = {};
 
         // Circle parameters: semi-major axis, x0, y0, period (Earth days), radius, colour, omega = 0, ring = 0
-        var sun = new Circle(0, sun_x0, sun_y0, 0, .02, 'yellow', 0);
+        var sun = new Circle(0, sun_x0, sun_y0, 0, .02, 'yellow');
 
         circles["Mercury"] = new Circle(0.05, sun_x0, sun_y0, 89.9691, .004, 'red', 252.25166724);
 
@@ -102,7 +102,7 @@ function balls(table, bodies) {
         circles["Ganymede"] = new Circle(.042, 0, 0, 7.155, .002, 'white', Math.random() * 360);
         circles["Callisto"] = new Circle(.046, 0, 0, 16.69, .002, 'white', Math.random() * 360);
 
-        circles["Saturn"] = new Circle(.35, sun_x0, sun_y0, 10759.22, .014, '#FFFDD0', 50.07571329, 1);
+        circles["Saturn"] = new Circle(.35, sun_x0, sun_y0, 10759.22, .014, '#FFFDD0', 50.07571329, true);
         circles["Enceladus"] = new Circle(.025, 0, 0, 1.37, .002, 'white', Math.random() * 360);
         circles["Titan"] = new Circle(.03, 0, 0, 15.945, .003, 'orange', Math.random() * 360);
 
@@ -232,13 +232,17 @@ function balls(table, bodies) {
                 circles[body].draw(canvas, ctx);
 
                 // Display the name of the body if the mouse is hovering it
-                if (circles[body].hover)
-                    drawBodyName(ctx, body, circles[body].x * min, circles[body].y * min - 20);
+                if (circles[body].hover) {
+                    if (circles[body].smear === false)
+                        drawBodyName(ctx, body, circles[body].x * min, circles[body].y * min - canvas.width / 50);
+                    else
+                        drawBodyName(ctx, body, circles[body].x0 * min, (circles[body].y0 - circles[body].a) * min - canvas.width / 50);
+                }
             }
 
             // Display "The Sun" if the mouse is hovering it
             if (sun.hover)
-                drawBodyName(ctx, "The Sun", sun.x * min, sun.y * min - 20);
+                drawBodyName(ctx, "The Sun", sun.x * min, sun.y * min - canvas.width / 40);
 
             // Draw the sun
             sun.draw(canvas, ctx);
@@ -270,11 +274,10 @@ function updatePos(circle, realTime, scalingFactor = 0) {
     circle.progress %= 360;
 
     // If it's spinning too fast, smear it
-    if (Math.abs(scalingFactor / circle.period) * 1000 > 2) {
-        circle.smear = 1;
-    } else {
-        circle.smear = 0;
-    }
+    if (Math.abs(scalingFactor / circle.period) * 1000 > 2)
+        circle.smear = true;
+    else
+        circle.smear = false;
 
     // Calculate new x and y coordinates
     x = circle.a * Math.sin((circle.progress) * (Math.PI / 180)); // x = ƒ(t)
