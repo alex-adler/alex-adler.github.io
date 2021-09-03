@@ -64,15 +64,14 @@ function balls(table, bodies) {
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
 
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-
-
+        // Deal with devices with a pixel ratio != 1
         const pixelRatio = window.devicePixelRatio;
-
         canvas.width = canvas.clientWidth * pixelRatio;
         canvas.height = canvas.clientHeight * pixelRatio;
+
+        var fullscreenHovered = false;
+        const fullscreenButtonSize = canvas.width / 20;
+        const fullscreenButtonPadding = canvas.width / 60;
 
         var lastTime = 0;
 
@@ -108,8 +107,11 @@ function balls(table, bodies) {
         circles["Titan"] = new Circle(.03, 0, 0, 15.945, .003, 'orange', Math.random() * 360);
 
         circles["Uranus"] = new Circle(.4, sun_x0, sun_y0, 30688.5, .012, 'cyan', 314.20276625);
+
         circles["Neptune"] = new Circle(.45, sun_x0, sun_y0, 60182, .012, 'purple', 304.22289287);
+
         // circles["Pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
+
 
         // Set up a function that runs whenever the mouse moves over the canvas
         canvas.addEventListener('mousemove', e => {
@@ -119,6 +121,11 @@ function balls(table, bodies) {
 
             var mouseX = (e.clientX - rect.left) * scaleX;   // scale mouse coordinates after they have
             var mouseY = (e.clientY - rect.top) * scaleY;     // been adjusted to be relative to element
+
+            if ((canvas.width - mouseX) <= (fullscreenButtonSize + fullscreenButtonPadding) && (canvas.height - mouseY) <= (fullscreenButtonSize + fullscreenButtonPadding))
+                fullscreenHovered = true;
+            else
+                fullscreenHovered = false;
 
             if (ctx.isPointInPath(sun.path, mouseX, mouseY))
                 sun.hover = true;
@@ -130,6 +137,38 @@ function balls(table, bodies) {
                     circles[body].hover = true;
                 else
                     circles[body].hover = false;
+            }
+        })
+
+        canvas.addEventListener('mousedown', e => {
+            var rect = canvas.getBoundingClientRect(), // abs. size of element
+                scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
+                scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+            var mouseX = (e.clientX - rect.left) * scaleX;   // scale mouse coordinates after they have
+            var mouseY = (e.clientY - rect.top) * scaleY;     // been adjusted to be relative to element
+
+            if ((canvas.width - mouseX) <= (fullscreenButtonSize + fullscreenButtonPadding) && (canvas.height - mouseY) <= (fullscreenButtonSize + fullscreenButtonPadding)) {
+                // If we are already full screen
+                if (document.fullscreenElement)
+                    document.exitFullscreen();
+                // Go fullscreen
+                else {
+                    var anim = document.getElementsByClassName("right")[0];
+                    if (anim.requestFullscreen) {
+                        anim.requestFullscreen("hide");
+                    } else if (anim.webkitRequestFullscreen) { /* Safari */
+                        anim.webkitRequestFullscreen();
+                    } else if (anim.msRequestFullscreen) { /* IE11 */
+                        anim.msRequestFullscreen();
+                    }
+                }
+            }
+
+            if (ctx.isPointInPath(sun.path, mouseX, mouseY)) {
+                sun.hover = true;
+                for (var body in circles)
+                    circles[body].hover = true;
             }
         })
 
@@ -204,6 +243,12 @@ function balls(table, bodies) {
             // Draw the sun
             sun.draw(canvas, ctx);
 
+            // If we are already fullscreen then draw the button to exit, if not draw the other one (both at the bottom right corner)
+            if (document.fullscreenElement)
+                drawFullScreenButtonClose(ctx, canvas.width - (fullscreenButtonPadding + fullscreenButtonSize), canvas.height - (fullscreenButtonPadding + fullscreenButtonSize), fullscreenButtonSize, fullscreenHovered);
+            else
+                drawFullScreenButtonOpen(ctx, canvas.width - (fullscreenButtonPadding + fullscreenButtonSize), canvas.height - (fullscreenButtonPadding + fullscreenButtonSize), fullscreenButtonSize, fullscreenHovered);
+
             // Store the current time
             lastTime = timestamp;
             // Tell the browser that this frame is done
@@ -246,4 +291,68 @@ function drawBodyName(ctx, body, x, y) {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.fillText(body, x, y);
+}
+
+// Draw the button to enter fullscreen
+function drawFullScreenButtonOpen(ctx, posX, posY, size, hovered) {
+    if (hovered)
+        ctx.strokeStyle = "white";
+    else
+        ctx.strokeStyle = "#c4c4c4";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+
+    // |-
+    ctx.moveTo(posX, size / 3 + posY);
+    ctx.lineTo(posX, posY);
+    ctx.lineTo(size / 3 + posX, posY);
+
+    // -|
+    ctx.moveTo(2 * size / 3 + posX, posY);
+    ctx.lineTo(size + posX, posY);
+    ctx.lineTo(size + posX, size / 3 + posY);
+
+    // _|
+    ctx.moveTo(size + posX, 2 * size / 3 + posY);
+    ctx.lineTo(size + posX, size + posY);
+    ctx.lineTo(2 * size / 3 + posX, size + posY);
+
+    // |_
+    ctx.moveTo(size / 3 + posX, size + posY);
+    ctx.lineTo(posX, size + posY);
+    ctx.lineTo(posX, 2 * size / 3 + posY);
+
+    ctx.stroke();
+}
+
+// Draw the button to exit fullscreen
+function drawFullScreenButtonClose(ctx, posX, posY, size, hovered) {
+    if (hovered)
+        ctx.strokeStyle = "white";
+    else
+        ctx.strokeStyle = "#ffffff22";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+
+    // _|
+    ctx.moveTo(posX, size / 3 + posY);
+    ctx.lineTo(size / 3 + posX, size / 3 + posY);
+    ctx.lineTo(size / 3 + posX, posY);
+
+    // |_
+    ctx.moveTo(2 * size / 3 + posX, posY);
+    ctx.lineTo(2 * size / 3 + posX, size / 3 + posY);
+    ctx.lineTo(size + posX, size / 3 + posY);
+
+    // |-
+    ctx.moveTo(size + posX, 2 * size / 3 + posY);
+    ctx.lineTo(2 * size / 3 + posX, 2 * size / 3 + posY);
+    ctx.lineTo(2 * size / 3 + posX, size + posY);
+
+    // -|
+    ctx.moveTo(size / 3 + posX, size + posY);
+    ctx.lineTo(size / 3 + posX, 2 * size / 3 + posY);
+    ctx.lineTo(posX, 2 * size / 3 + posY);
+
+    ctx.stroke();
 }
