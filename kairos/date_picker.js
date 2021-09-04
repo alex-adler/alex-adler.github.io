@@ -251,8 +251,6 @@ SOFTWARE.
 
 					function generateDates(year, month) {
 						var monthElements = that.el.querySelectorAll('.d-table');
-						// Week start
-						var ws = 1;
 
 						[].slice.call(that.el.querySelectorAll('.d-table')).forEach(function (element, index) {
 							// Number of days in current month
@@ -260,14 +258,7 @@ SOFTWARE.
 							// Number of days in last month
 							var daysLast = new SpaceDate(body, year, month + index - 1, 0).getDate();
 							// Day of the week of the first day of the month
-							var startDay = new SpaceDate(body, year, month + index - 1, 1).getDay();
-
-							// Decide which day of the week to start on 
-							if (startDay - ws < 0) {
-								startDay = body.weekLength_hd - ws;
-							} else {
-								startDay -= ws;
-							}
+							var startDay = new SpaceDate(body, year, month + index, 1).getDay();
 
 							element.setAttribute('data-month', month);
 
@@ -282,10 +273,10 @@ SOFTWARE.
 
 								var date = null;
 								// If the date is from the previous month
-								if (i < startDay) {
-									labelEl.childNodes[0].innerHTML = daysLast - (startDay - i - 1);
+								if (i < startDay - 1) {
+									labelEl.childNodes[0].innerHTML = daysLast - (startDay - i - 2);
 									if (index == 0) {
-										date = new SpaceDate(body, year, month + index - 1, daysLast - (startDay - i - 1));
+										date = new SpaceDate(body, year, month + index - 1, daysLast - (startDay - i - 2));
 										labelEl.className = 'prev';
 									} else {
 										date = '';
@@ -294,16 +285,16 @@ SOFTWARE.
 									}
 								}
 								// Else if the date is from the current month 
-								else if (i < days + startDay) {
-									date = new SpaceDate(body, year, month + index, i - startDay + 1);
-									labelEl.childNodes[0].innerHTML = i - startDay + 1;
+								else if (i < days + startDay - 1) {
+									date = new SpaceDate(body, year, month + index, i - startDay + 2);
+									labelEl.childNodes[0].innerHTML = i - startDay + 2;
 									labelEl.className = '';
 								}
 								// Else the date is from the next month
 								else {
-									labelEl.childNodes[0].innerHTML = i - days - startDay + 1;
+									labelEl.childNodes[0].innerHTML = i - days - startDay + 2;
 									if (index == monthElements.length - 1) {
-										date = new SpaceDate(body, year, month + index + 1, i - days - startDay + 1);
+										date = new SpaceDate(body, year, month + index + 1, i - days - startDay + 2);
 										labelEl.className = 'next';
 									} else {
 										date = '';

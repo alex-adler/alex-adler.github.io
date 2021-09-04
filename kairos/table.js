@@ -149,23 +149,11 @@ class Celestial {
                 this.monthData.push([monthLength_ms, monthLength, this.getWeekDay(0, y)]);
             }
             else {
-                this.monthData.push([this.monthData[i - 1][0] + monthLength_ms, monthLength, this.getWeekDay(this.monthData[i - 1][0] + monthLength_ms, y)]);
+                this.monthData.push([this.monthData[i - 1][0] + monthLength_ms, monthLength, this.getWeekDay(this.monthData[i - 1][0], y)]);
             }
         }
     }
-    // If no other system is preferred, stuff all the excess days into the last month
-    processLastMonth(y, monthLength, remainderDays) {
-        monthLength += remainderDays;
-
-        // Add the leap day to the final month
-        if ((y % this.LeapYearFreq1) === 0) {
-            monthLength++;
-        }
-        if ((y % this.LeapYearFreq2) === 0) {
-            monthLength++;
-        }
-        return monthLength;
-    }
+    // Calculate number of days in each month for a given year
     getMonthLength(month, year) {
         var monthLength = 0;
         // Yay Fudge Factors !!
@@ -176,7 +164,7 @@ class Celestial {
                 monthLength = 28;
                 if (year % this.LeapYearFreq1 === 0)
                     monthLength++;
-                if (year % this.LeapYearFreq2 === 0)
+                if (year % this.LeapYearFreq2 === 0 && year !== 0)
                     monthLength++;
             }
             else if ([1, 3, 5, 7, 8, 10, 12].includes(month)) {
@@ -379,6 +367,12 @@ class Celestial {
 
         let msFromEpoch = msFromYearStart;
 
+        // Leap years don't start the year on the 2nd (or 3rd) day
+        if (y % this.LeapYearFreq1 === 0)
+            msFromEpoch -= this.hDayLength_ms;
+        if (y % this.LeapYearFreq2 === 0 && !(this.name === "Earth" && y === 0))
+            msFromEpoch -= this.hDayLength_ms;
+
         // Add the time from the years that have passed
         msFromEpoch += Math.floor(y / this.LeapYearFreq2) * this.block2YearLength;
         y %= this.LeapYearFreq2;
@@ -390,16 +384,16 @@ class Celestial {
         msFromEpoch += this.leapSeconds * 1000;
 
         // Add fudge factor to account for Earth year 0 being a leap year
-        if (this.name === "Earth" && msFromEpoch > this.dayLength_ms) {
-            msFromEpoch -= this.dayLength_ms;
-        }
+        if (this.name === "Earth" && msFromEpoch > this.dayLength_ms)
+            msFromEpoch += this.dayLength_ms;
 
         this.hDaysSinceEpoch = Math.floor(msFromEpoch / this.hDayLength_ms);
 
-        this.hDayOfWeek = Math.floor((this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd);
+        this.hDayOfWeek = (this.hDaysSinceEpoch + this.initialWeekDay) % this.weekLength_hd;
 
         // Fudge factor because weeks start on day 1
-        this.hDayOfWeek += 1;
+        if (this.hDayOfWeek === 0)
+            this.hDayOfWeek = 7;
 
         return this.hDayOfWeek;
     }
@@ -447,9 +441,8 @@ class Celestial {
 }
 
 
-
 // Celestial Bodies (name, dayLength, yearLength, leapSeconds, initialYearProgress, initialWeekDay)
-var Earth = new Celestial("Earth", 24, 365.256363004 * 24, 0, 0, 5);
+var Earth = new Celestial("Earth", 24, 365.256363004 * 24, 0, 0, 6);
 var Mars = new Celestial("Mars", 24.6230, 668.5991 * 24.6230, 0, 0, 0);
 // var Venus = new Celestial("Venus", 116.75 * 24, 5832.6, 0, 0, 0);
 
@@ -477,7 +470,12 @@ class SpaceDate {
             this.year = this.body.y;
             this.month = this.body.month;
             this.day = this.body.dayOfMonth;
-        } else if (month > this.body.monthCount) {
+        } else if (month === 0) {
+            this.year = this.body.y - 1;
+            this.month = this.body.monthCount;
+            this.day = day;
+        }
+        else if (month > this.body.monthCount) {
             this.year = year + Math.floor(month / this.body.monthCount);
             this.month = month % this.body.monthCount;
         }
