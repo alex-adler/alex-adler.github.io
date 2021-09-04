@@ -157,7 +157,7 @@ function balls(table, bodies) {
                     else {
                         var anim = document.getElementsByClassName("right")[0];
                         if (anim.requestFullscreen) {
-                            anim.requestFullscreen("hide");
+                            anim.requestFullscreen();
                         } else if (anim.webkitRequestFullscreen) { /* Safari */
                             anim.webkitRequestFullscreen();
                         } else if (anim.msRequestFullscreen) { /* IE11 */
