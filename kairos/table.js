@@ -46,7 +46,6 @@ class Celestial {
         this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms)
         this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
 
-
         // ------------------ Months -----------------------------
 
         let idealWeeksPerMonth = 4;
@@ -541,7 +540,7 @@ function generateInformation(bodies) {
     var i;
     for (i = 0; i < bodies.length; i++) {
         data.push([bodies[i].name, bodies[i].img,
-        (bodies[i].hDayLength_ms / (3600 * 1000)).toPrecision(2),
+        (Math.floor(bodies[i].hDayLength_ms / (3600 * 1000))).toPrecision(2),
         (parseFloat((bodies[i].hDayLength_ms / (3600 * 1000)).toPrecision(4).toString().slice(2)) * 60).toFixed(0),
         bodies[i].weekLength_hd,
         bodies[i].yearLength_hd,
