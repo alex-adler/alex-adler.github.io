@@ -35,7 +35,6 @@ class Celestial {
         if (Math.abs((24 * 3600 * 1000) - this.dayLength_ms) > (offsetFrom24h * 3600 * 1000)) {
             // If it's not, use the solar day as a week and calculate a human day
             this.calculateWeek(offsetFrom24h, 1);
-            console.log(this.name + " " + this.hDayLength_ms / (3600 * 1000) + " " + this.weekLength_hd + " " + this.weekLength_d);
         } else {
             // Use a default 7 day week if we don't need a special one
             this.hDayLength_ms = this.dayLength_ms;
@@ -45,6 +44,7 @@ class Celestial {
         // Calculate year length including rounding to integer days
         this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms)
         this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
+
 
         // ------------------ Months -----------------------------
 
@@ -56,8 +56,6 @@ class Celestial {
         this.monthCount = Math.floor(idealMonthCount / 4) * 4;
         this.nominalMonthLength_hd = Math.floor(this.yearLength_hd / this.monthCount);
         this.nominalMonthLength_ms = this.nominalMonthLength_hd * this.hDayLength_ms;
-
-        console.log(this.name + " has " + this.monthCount + " months, each typically with " + this.nominalMonthLength_hd + " days");
 
 
         // ------------------ Leap Years -----------------------------
@@ -72,20 +70,9 @@ class Celestial {
 
         this.excessYearRemainder = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - (1 / this.LeapYearFreq1) - (1 / this.LeapYearFreq2);
 
-        console.log(this.name + " : " + (this.hYearLength_ms / this.hDayLength_ms) + " : " + this.hDayLength_ms + " : " + this.hDayLength_ms);
-        console.log(this.name + " remainder from year length " + this.YearRemainder1 + " days, leap year every " + this.LeapYearFreq1 + " and " + this.LeapYearFreq2 + " years");
-        console.log(this.name + " excess remainder " + this.excessYearRemainder + " days");
-        console.log(this.name + " remainder from months " + this.monthRemainder + " days");
-        console.log(this.name + " a day is added every " + Math.ceil(this.monthCount / this.monthRemainder) + " months and the last " + (this.monthRemainder * Math.ceil(this.monthCount / this.monthRemainder) - this.monthCount) + " months have an extra day too");
-
-
-        console.log(this.name + " year length = " + this.hYearLength_ms / this.hDayLength_ms + " days");
-
         // Length of time between leap years in ms
         this.block1YearLength = this.LeapYearFreq1 * this.hYearLength_ms + this.hDayLength_ms;
         this.block2YearLength = Math.floor(this.LeapYearFreq2 / this.LeapYearFreq1) * this.block1YearLength + (this.LeapYearFreq2 % this.LeapYearFreq1) * this.hYearLength_ms + this.hDayLength_ms;
-
-        console.log(this.name + " block 1 length = " + this.block1YearLength / this.hDayLength_ms + " days, block 2 length = " + this.block2YearLength / this.hDayLength_ms + " days");
 
         // Fudge factors
         this.leapSeconds = leapSeconds;
