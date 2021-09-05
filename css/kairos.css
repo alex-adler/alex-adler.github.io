@@ -77,6 +77,37 @@ td p {
 	float: right;
 }
 
+/* Format buttons under the table */
+button.date-selector-buttons {
+	display: inline-block;
+	padding: 0.35em 1.2em;
+	border: 0.1em solid #222222;
+	margin: 0 0.3em 0.3em 0;
+	border-radius: 0.12em;
+	box-sizing: border-box;
+	text-decoration: none;
+	font-family: "Roboto", sans-serif;
+	font-weight: 300;
+	color: #222222;
+	text-align: center;
+	transition: all 0.2s;
+	background-color: #ffffff60;
+}
+
+button.date-selector-buttons:hover {
+	color: #ffffff;
+	background-color: #222222;
+}
+
+@media all and (max-width: 30em) {
+	button.date-selector-buttons {
+		display: block;
+		width: 98%;
+		font-size: 1em;
+		margin: 0.1em 1%;
+	}
+}
+
 /* Controls */
 .controls {
 	width: 100%;
