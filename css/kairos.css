@@ -12,6 +12,8 @@ table {
 	margin-left: auto;
 	margin-right: auto;
 	border-spacing: 0;
+
+	background: #ffffff80;
 }
 
 th {
