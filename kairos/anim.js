@@ -107,10 +107,10 @@ function balls(table, bodies) {
         circles["Titan"] = new Circle(.03, 0, 0, 15.945, .003, 'orange', Math.random() * 360);
 
         circles["Uranus"] = new Circle(.4, sun_x0, sun_y0, 30688.5, .012, 'cyan', 314.20276625);
+        circles["Titania"] = new Circle(.017, 0, 0, 8.706234, .002, 'white', Math.random() * 360);
 
         circles["Neptune"] = new Circle(.45, sun_x0, sun_y0, 60182, .012, 'purple', 304.22289287);
-
-        // circles["Pluto"] = new Circle(250, sun_x0, sun_y0, 90560, 1, 'white', 238.96535011);
+        circles["Triton"] = new Circle(.017, 0, 0, -5.876854, .002, 'white', Math.random() * 360);
 
 
         // Set up a function that runs whenever the mouse moves over the canvas
@@ -225,6 +225,16 @@ function balls(table, bodies) {
                     circles[body].disabled = circles["Jupiter"].smear;
                     circles[body].x0 = circles["Jupiter"].x;
                     circles[body].y0 = circles["Jupiter"].y;
+                }
+                if (body === "Titania") {
+                    circles[body].disabled = circles["Uranus"].smear;
+                    circles[body].x0 = circles["Uranus"].x;
+                    circles[body].y0 = circles["Uranus"].y;
+                }
+                if (body === "Triton") {
+                    circles[body].disabled = circles["Neptune"].smear;
+                    circles[body].x0 = circles["Neptune"].x;
+                    circles[body].y0 = circles["Neptune"].y;
                 }
                 // Calculate the new position for the body and whether it should smear
                 updatePos(circles[body], realTime, scalingFactor);
