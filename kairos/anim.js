@@ -15,6 +15,7 @@ class Circle {
         this.smear = false; // 1 if smeared in the animation
         this.disabled = false;  // 0 if enabled
         this.path = new Path2D();
+        this.clicked = false;
         this.hover = false;
     }
     draw(c, ctx) {
@@ -165,12 +166,20 @@ function balls(table, bodies) {
                         }
                     }
                 }
-
-                if (ctx.isPointInPath(sun.path, mouseX, mouseY)) {
-                    sun.hover = true;
-                    for (var body in circles)
-                        circles[body].hover = true;
+                else if (ctx.isPointInPath(sun.path, mouseX, mouseY)) {
+                    sun.clicked = true;
                 }
+                else {
+                    sun.clicked = false;
+                    for (var body in circles) {
+                        if (ctx.isPointInPath(circles[body].path, mouseX, mouseY))
+                            circles[body].clicked = true;
+                        else
+                            circles[body].clicked = false;
+                    }
+                }
+
+
             }, false)
         });
 
@@ -243,7 +252,7 @@ function balls(table, bodies) {
                 circles[body].draw(canvas, ctx);
 
                 // Display the name of the body if the mouse is hovering it
-                if (circles[body].hover) {
+                if (circles[body].hover || circles[body].clicked || sun.hover || sun.clicked) {
                     if (circles[body].smear === false)
                         drawBodyName(ctx, body, circles[body].x * min, circles[body].y * min - canvas.width / 50);
                     else
@@ -252,7 +261,7 @@ function balls(table, bodies) {
             }
 
             // Display "The Sun" if the mouse is hovering it
-            if (sun.hover)
+            if (sun.hover || sun.clicked)
                 drawBodyName(ctx, "The Sun", sun.x * min, sun.y * min - canvas.width / 40);
 
             // Draw the sun
