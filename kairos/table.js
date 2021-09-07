@@ -445,7 +445,7 @@ var Titania = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0, 0, 0);
 
 var Triton = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0, 0);
 
-var bodies = [Earth, Mars, /*Venus,*/ Europa, Ganymede, Callisto, Titan, Enceladus, Titania, Triton, Ceres];
+var bodies = [Earth, Mars, /*Venus,*/ Ceres, Europa, Ganymede, Callisto, Titan, Enceladus, Titania, Triton];
 
 // Class that can store a date from any of the celestial bodies
 class SpaceDate {
