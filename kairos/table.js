@@ -47,12 +47,12 @@ class Celestial {
 
 
         // ------------------ Months -----------------------------
-
+        // Months are as close as 4 weeks per month as reasonable
         let idealWeeksPerMonth = 4;
-
         let idealDaysPerMonth = idealWeeksPerMonth * this.weekLength_hd;
-        let idealMonthCount = Math.floor(this.yearLength_hd / idealDaysPerMonth);
+        let idealMonthCount = Math.round(this.yearLength_hd / idealDaysPerMonth);
 
+        // Number of months must be a multiple of 4 (so seasons are easier)
         this.monthCount = Math.floor(idealMonthCount / 4) * 4;
         this.nominalMonthLength_hd = Math.floor(this.yearLength_hd / this.monthCount);
         this.nominalMonthLength_ms = this.nominalMonthLength_hd * this.hDayLength_ms;
@@ -652,7 +652,11 @@ function updateFlavour(table, id, data) {
     p.innerHTML = data[2] + " h " + data[3] + " min per day, " + data[4] + " day week";
 
     p = document.getElementById("yearLength" + id);
-    p.innerHTML = data[0] + "'s " + data[5] + " day year is comprised of " + data[6] + " months, each with " + data[7] + " days";
+
+    if (data[0] === "Earth")
+        p.innerHTML = data[0] + "'s " + data[5] + " day year is comprised of " + data[6] + " months, each between " + (data[7] - 2) + " and " + (data[7] + 1) + " days long";
+    else
+        p.innerHTML = data[0] + "'s " + data[5] + " day year is comprised of " + data[6] + " months, each between " + data[7] + " and " + (data[7] + 2) + " days long";
 
     p = document.getElementById("leapYear" + id);
     p.innerHTML = "Leap years every " + data[8] + " and " + data[9] + " years";
