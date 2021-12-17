@@ -41,6 +41,7 @@ class Celestial {
             this.weekLength_d = 7;
             this.weekLength_hd = this.weekLength_d;
         }
+        // console.log(this.name + " has " + this.weekLength_hd + " human days and " + this.weekLength_d + " solar days per week");
         // Calculate year length including rounding to integer days
         this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms)
         this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
@@ -429,7 +430,7 @@ class Celestial {
 
 // Celestial Bodies (name, dayLength, yearLength, leapSeconds, initialYearProgress, initialWeekDay)
 var Earth = new Celestial("Earth", 24, 365.256363004 * 24, 0, 0, 6);
-var Mars = new Celestial("Mars", 24.6230, 668.5991 * 24.6230, 0, 0, 0);
+var Mars = new Celestial("Mars", 24.65979, 668.5991 * 24.6230, 0, 0, 0);
 // var Venus = new Celestial("Venus", 116.75 * 24, 5832.6, 0, 0, 0);
 
 var Ceres = new Celestial("Ceres", 9.074170, 1683.14570801 * 24, 0, 0, 0);
