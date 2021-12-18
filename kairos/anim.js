@@ -90,30 +90,30 @@ function balls(table, bodies) {
 
         circles["Venus"] = new Circle(0.1, sun_x0, sun_y0, 224.701, .008, '#D4CAA3', 181.97970850);
 
-        circles["Earth"] = new Circle(0.15, sun_x0, sun_y0, 365.25, .01, 'blue', 100.46457166);
+        circles["Earth"] = new Circle(0.15, sun_x0, sun_y0, 365.25, .01, 'royalblue', 100.46457166);
         circles["Luna"] = new Circle(0.02, 0, 0, 28, .002, 'white', Math.random() * 360);
 
-        circles["Mars"] = new Circle(.2, sun_x0, sun_y0, 686.971, .008, 'orangered', -4.56813164);
+        circles["Mars"] = new Circle(.2, sun_x0, sun_y0, 686.971, .008, 'coral', -4.56813164);
         circles["Phobos"] = new Circle(.014, 0, 0, 0.3189, .002, 'white', Math.random() * 360);
         circles["Deimos"] = new Circle(.02, 0, 0, 1.263, .002, 'white', Math.random() * 360);
 
-        circles["Ceres"] = new Circle(.25, sun_x0, sun_y0, 1683, .004, 'white', 153.9032);
+        circles["Ceres"] = new Circle(.25, sun_x0, sun_y0, 1683, .004, '#969696', 153.9032);
 
         circles["Jupiter"] = new Circle(.3, sun_x0, sun_y0, 4332.59, .016, 'orange', 34.33479152);
         circles["Io"] = new Circle(.034, 0, 0, 1.769, .002, 'yellow', Math.random() * 360);
-        circles["Europa"] = new Circle(.038, 0, 0, 3.5551, .002, 'white', Math.random() * 360);
-        circles["Ganymede"] = new Circle(.042, 0, 0, 7.155, .002, 'white', Math.random() * 360);
-        circles["Callisto"] = new Circle(.046, 0, 0, 16.69, .002, 'white', Math.random() * 360);
+        circles["Europa"] = new Circle(.038, 0, 0, 3.5551, .002, '#c38d73', Math.random() * 360);
+        circles["Ganymede"] = new Circle(.042, 0, 0, 7.155, .002, '#82786a', Math.random() * 360);
+        circles["Callisto"] = new Circle(.046, 0, 0, 16.69, .002, '#393939', Math.random() * 360);
 
         circles["Saturn"] = new Circle(.35, sun_x0, sun_y0, 10759.22, .014, '#FFFDD0', 50.07571329, true);
-        circles["Enceladus"] = new Circle(.025, 0, 0, 1.37, .002, 'white', Math.random() * 360);
-        circles["Titan"] = new Circle(.03, 0, 0, 15.945, .003, 'orange', Math.random() * 360);
+        circles["Enceladus"] = new Circle(.025, 0, 0, 1.37, .002, '#a8b6bc', Math.random() * 360);
+        circles["Titan"] = new Circle(.03, 0, 0, 15.945, .003, '#b39f58', Math.random() * 360);
 
         circles["Uranus"] = new Circle(.4, sun_x0, sun_y0, 30688.5, .012, 'cyan', 314.20276625);
-        circles["Titania"] = new Circle(.017, 0, 0, 8.706234, .002, 'white', Math.random() * 360);
+        circles["Titania"] = new Circle(.017, 0, 0, 8.706234, .002, '#847975', Math.random() * 360);
 
         circles["Neptune"] = new Circle(.45, sun_x0, sun_y0, 60182, .012, 'purple', 304.22289287);
-        circles["Triton"] = new Circle(.017, 0, 0, -5.876854, .002, 'white', Math.random() * 360);
+        circles["Triton"] = new Circle(.017, 0, 0, -5.876854, .002, '#786a69', Math.random() * 360);
 
 
         // Set up a function that runs whenever the mouse moves over the canvas
