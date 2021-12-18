@@ -7,8 +7,6 @@ class Circle {
         this.period = period * 86400 * 1000; // Orbital Period (ms)
         this.startProgress = omega; // Mean Longitude at Epoch (deg)
         this.progress = omega;  // Mean Longitude (deg)
-        this.x = this.x0;   // x position
-        this.y = this.y0;   // y position
         this.radius = radius;
         this.colour = colour;
         this.ring = ring;   // 0 if body has no rings
@@ -17,22 +15,26 @@ class Circle {
         this.path = new Path2D();
         this.clicked = false;
         this.hover = false;
+
+        this.deltaX = 0;
+        this.deltaY = 0;
     }
     draw(c, ctx) {
         if (!this.disabled) {
             var min = Math.min(c.height, c.width);
+            // var min = c.height;
             this.path = new Path2D();
             // Just draw the orbit
             if (this.smear) {
                 ctx.strokeStyle = this.colour;
                 ctx.lineWidth = 2;
-                this.path.arc(this.x0 * min, this.y0 * min, this.a * min, 0, 2 * Math.PI);
+                this.path.arc(this.x0 * c.width, this.y0 * c.height, this.a * min, 0, 2 * Math.PI);
                 ctx.stroke(this.path);
             }
             // Draw the body
             else {
                 ctx.fillStyle = this.colour;
-                this.path.arc(this.x * min, this.y * min, this.radius * min, 0, 2 * Math.PI);
+                this.path.arc(this.x0 * c.width + this.deltaX, this.y0 * c.height + this.deltaY, this.radius * min, 0, 2 * Math.PI);
                 ctx.fill(this.path);
 
                 //Draw a ring
@@ -40,7 +42,7 @@ class Circle {
                     ctx.strokeStyle = this.colour;
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(this.x * min, this.y * min, this.radius * 1.3 * min, 0, 2 * Math.PI);
+                    ctx.arc(this.x0 * c.width + this.deltaX, this.y0 * c.height + this.deltaY, this.radius * 1.3 * min, 0, 2 * Math.PI);
                     ctx.stroke();
                 }
             }
@@ -217,36 +219,36 @@ function balls(table, bodies) {
             for (var body in circles) {
                 if (body === "Luna") {
                     circles[body].disabled = circles["Earth"].smear;
-                    circles[body].x0 = circles["Earth"].x;
-                    circles[body].y0 = circles["Earth"].y;
+                    circles[body].x0 = circles["Earth"].x0 + circles["Earth"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Earth"].y0 + circles["Earth"].deltaY / canvas.height;
                 }
                 if (body === "Phobos" || body === "Deimos") {
                     circles[body].disabled = circles["Mars"].smear;
-                    circles[body].x0 = circles["Mars"].x;
-                    circles[body].y0 = circles["Mars"].y;
+                    circles[body].x0 = circles["Mars"].x0 + circles["Mars"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Mars"].y0 + circles["Mars"].deltaY / canvas.height;
                 }
                 if (body === "Titan" || body === "Enceladus") {
                     circles[body].disabled = circles["Saturn"].smear;
-                    circles[body].x0 = circles["Saturn"].x;
-                    circles[body].y0 = circles["Saturn"].y;
+                    circles[body].x0 = circles["Saturn"].x0 + circles["Saturn"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Saturn"].y0 + circles["Saturn"].deltaY / canvas.height;
                 }
                 if (body === "Io" || body === "Europa" || body === "Ganymede" || body === "Callisto") {
                     circles[body].disabled = circles["Jupiter"].smear;
-                    circles[body].x0 = circles["Jupiter"].x;
-                    circles[body].y0 = circles["Jupiter"].y;
+                    circles[body].x0 = circles["Jupiter"].x0 + circles["Jupiter"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Jupiter"].y0 + circles["Jupiter"].deltaY / canvas.height;
                 }
                 if (body === "Titania") {
                     circles[body].disabled = circles["Uranus"].smear;
-                    circles[body].x0 = circles["Uranus"].x;
-                    circles[body].y0 = circles["Uranus"].y;
+                    circles[body].x0 = circles["Uranus"].x0 + circles["Uranus"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Uranus"].y0 + circles["Uranus"].deltaY / canvas.height;
                 }
                 if (body === "Triton") {
                     circles[body].disabled = circles["Neptune"].smear;
-                    circles[body].x0 = circles["Neptune"].x;
-                    circles[body].y0 = circles["Neptune"].y;
+                    circles[body].x0 = circles["Neptune"].x0 + circles["Neptune"].deltaX / canvas.width;
+                    circles[body].y0 = circles["Neptune"].y0 + circles["Neptune"].deltaY / canvas.height;
                 }
                 // Calculate the new position for the body and whether it should smear
-                updatePos(circles[body], realTime, scalingFactor);
+                updatePos(circles[body], realTime, scalingFactor, canvas);
 
                 // Draw the body
                 circles[body].draw(canvas, ctx);
@@ -254,15 +256,15 @@ function balls(table, bodies) {
                 // Display the name of the body if the mouse is hovering it
                 if (circles[body].hover || circles[body].clicked || sun.hover || sun.clicked) {
                     if (circles[body].smear === false)
-                        drawBodyName(ctx, body, circles[body].x * min, circles[body].y * min - canvas.width / 50);
+                        drawBodyName(ctx, body, circles[body].x0 * canvas.width + circles[body].deltaX, circles[body].y0 * canvas.height * (49 / 50) + circles[body].deltaY);
                     else
-                        drawBodyName(ctx, body, circles[body].x0 * min, (circles[body].y0 - circles[body].a) * min - canvas.width / 50);
+                        drawBodyName(ctx, body, circles[body].x0 * canvas.width, (circles[body].y0 - circles[body].a - .01) * canvas.height);
                 }
             }
 
             // Display "The Sun" if the mouse is hovering it
             if (sun.hover || sun.clicked)
-                drawBodyName(ctx, "The Sun", sun.x * min, sun.y * min - canvas.width / 40);
+                drawBodyName(ctx, "The Sun", sun.x0 * canvas.width, sun.y0 * canvas.height * (47 / 50));
 
             // Draw the sun
             sun.draw(canvas, ctx);
@@ -285,9 +287,9 @@ function balls(table, bodies) {
 }
 
 // Calculate the new x and y of a body and whether or not it should be smeared
-function updatePos(circle, realTime, scalingFactor = 0) {
-    var x, y;
+function updatePos(circle, realTime, scalingFactor = 0, canvas) {
     var time = realTime % circle.period;
+    var min = Math.min(canvas.width, canvas.height);
 
     // Calculate the mean anomaly of the body
     circle.progress = (time / circle.period) * 360 + circle.startProgress;
@@ -299,13 +301,9 @@ function updatePos(circle, realTime, scalingFactor = 0) {
     else
         circle.smear = false;
 
-    // Calculate new x and y coordinates
-    x = circle.a * Math.sin((circle.progress) * (Math.PI / 180)); // x = ƒ(t)
-    y = circle.a * Math.cos((circle.progress) * (Math.PI / 180)); // y = ƒ(t)
-
-    // Take into account the orbital barycenter position
-    circle.x = circle.x0 + x;
-    circle.y = circle.y0 + y;
+    // Calculate how x and y coordinates change
+    circle.deltaX = circle.a * Math.sin((circle.progress) * (Math.PI / 180)) * min; // x = ƒ(t)
+    circle.deltaY = circle.a * Math.cos((circle.progress) * (Math.PI / 180)) * min; // y = ƒ(t)
 }
 
 // Display the name of a body

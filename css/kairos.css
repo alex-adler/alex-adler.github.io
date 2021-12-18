@@ -226,7 +226,7 @@ button.date-selector-buttons:hover {
 #planets-canvas {
 	position: relative;
 	width: 50vw;
-	height: 50vw;
+	height: 55vh;
 	padding-left: 0;
 	padding-right: 0;
 	margin-left: auto;
