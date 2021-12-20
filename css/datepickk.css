@@ -48,19 +48,19 @@ SOFTWARE.
 }
 #Datepickk.d-show .d-overlay {
   animation-name: show;
-  animation-duration: .2s;
+  animation-duration: 0.2s;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
 }
 #Datepickk.d-hide > * {
   animation-name: DatepickkHide;
-  animation-duration: .2s;
+  animation-duration: 0.2s;
   animation-timing-function: linear;
   animation-fill-mode: both;
 }
 #Datepickk.d-hide .d-overlay {
   animation-name: show;
-  animation-duration: .15s;
+  animation-duration: 0.15s;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
   animation-direction: reverse;
@@ -125,7 +125,7 @@ SOFTWARE.
   font-size: 1em;
   padding: 5px 10px 5px 0;
   box-sizing: border-box;
-  color: #CCC;
+  color: #ccc;
   position: absolute;
   left: 0;
   top: 0;
@@ -157,7 +157,7 @@ SOFTWARE.
 }
 #Datepickk.inline .d-legend,
 #Datepickk.wrapped .d-legend {
-  color: #222!important;
+  color: #222 !important;
   max-width: none;
   max-height: none;
 }
@@ -194,13 +194,13 @@ SOFTWARE.
 #Datepickk .d-legend p {
   backface-visibility: visible !important;
   animation-name: DatepickfadeInUp;
-  animation-duration: .5s;
+  animation-duration: 0.5s;
   animation-fill-mode: both;
   margin: 0;
   padding: 15px;
   transition: background-color 0.2s ease;
   cursor: pointer;
-  color: #1B353F;
+  color: #1b353f;
 }
 #Datepickk .d-legend p:after {
   content: attr(data-legend);
@@ -230,12 +230,12 @@ SOFTWARE.
 }
 #Datepickk .d-header {
   position: relative;
-  background-color: #1B363F;
+  background-color: #222222;
   color: white;
   font-size: 1.5em;
 }
 #Datepickk .d-header p {
-  margin: .5em 0;
+  margin: 0.5em 0;
   text-align: center;
 }
 #Datepickk .d-header i {
@@ -251,7 +251,7 @@ SOFTWARE.
 }
 #Datepickk .d-header i:before,
 #Datepickk .d-header i:after {
-  content: '';
+  content: "";
   width: 0;
   height: 0;
   position: absolute;
@@ -269,12 +269,12 @@ SOFTWARE.
   left: 20px;
 }
 #Datepickk .d-header i#d-previous:before {
-  border-right: 10px solid #FFF;
+  border-right: 10px solid #fff;
   top: 5px;
   left: 7px;
 }
 #Datepickk .d-header i#d-previous:after {
-  border-right: 7px solid #1B363F;
+  border-right: 7px solid #1b363f;
   top: 8px;
   left: 10px;
 }
@@ -282,21 +282,21 @@ SOFTWARE.
   right: 20px;
 }
 #Datepickk .d-header i#d-next:before {
-  border-left: 10px solid #FFF;
+  border-left: 10px solid #fff;
   top: 5px;
   left: 12px;
 }
 #Datepickk .d-header i#d-next:after {
-  border-left: 7px solid #1B363F;
+  border-left: 7px solid #1b363f;
   top: 8px;
   left: 12px;
 }
 #Datepickk .d-header i:hover {
-  background-color: #5E7178;
+  background-color: #5e7178;
 }
 #Datepickk .d-header i:hover:after {
-  border-left-color: #5E7178!important;
-  border-right-color: #5E7178!important;
+  border-left-color: #5e7178 !important;
+  border-right-color: #5e7178 !important;
 }
 #Datepickk .d-month {
   cursor: pointer;
@@ -312,11 +312,11 @@ SOFTWARE.
 #Datepickk .d-month-picker {
   display: flex;
   justify-content: space-between;
-  background-color: rgba(27, 54, 63, 0.9);
+  background-color: #393939;
   height: 0;
   overflow: hidden;
   pointer-events: none;
-  transition: height .2s ease;
+  transition: height 0.2s ease;
 }
 #Datepickk .d-month-picker.d-show {
   height: 44px;
@@ -341,11 +341,11 @@ SOFTWARE.
 #Datepickk .d-year-picker {
   display: flex;
   justify-content: space-between;
-  background-color: rgba(27, 54, 63, 0.9);
+  background-color: #393939;
   height: 0;
   overflow: hidden;
   pointer-events: none;
-  transition: height .2s ease;
+  transition: height 0.2s ease;
 }
 #Datepickk .d-year-picker.d-show {
   height: 44px;
@@ -371,7 +371,7 @@ SOFTWARE.
   display: flex;
 }
 #Datepickk .d-week {
-  background-color: #E95A5A;
+  background-color: #3f5762;
   color: white;
   display: flex;
   width: 100%;
@@ -384,7 +384,7 @@ SOFTWARE.
   text-align: center;
 }
 #Datepickk .d-week > div p {
-  margin: .8em 0;
+  margin: 0.8em 0;
 }
 @media (max-height: 540px) {
   #Datepickk .d-week {
@@ -435,23 +435,23 @@ SOFTWARE.
   text-shadow: 0 0 20px black;
 }
 #Datepickk .d-table input + label.today text:before {
-  content: '';
+  content: "";
   width: 100%;
   height: 2px;
-  background-color: #E95A5A;
+  background-color: #e95a5a;
   position: absolute;
   bottom: -5px;
   left: 0;
 }
 #Datepickk .d-table input + label:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 12.5%;
   left: 12.5%;
   width: 75%;
   height: 75%;
   border-radius: 5px;
-  background-color: #7DD076;
+  background-color: #7dd076;
   transition: transform 0.1s ease-out;
   transform: scaleX(0);
   transform-origin: left;
@@ -476,9 +476,9 @@ SOFTWARE.
   color: #ccc;
 }
 #Datepickk .d-table input + label [data-tooltip]:after {
-  content: '';
+  content: "";
   border-radius: 100%;
-  background-color: #1B363F;
+  background-color: #1b363f;
   width: 5px;
   height: 5px;
   position: absolute;
@@ -487,10 +487,10 @@ SOFTWARE.
 }
 #Datepickk .d-table input + label .d-tooltip {
   position: absolute;
-  background-color: #1B363F;
-  color: #FFF;
+  background-color: #1b363f;
+  color: #fff;
   padding: 7px;
-  font-size: .7em;
+  font-size: 0.7em;
   z-index: 13;
   text-align: center;
   top: 100%;
@@ -499,8 +499,8 @@ SOFTWARE.
   display: none;
 }
 #Datepickk .d-table input + label .d-tooltip:before {
-  content: '';
-  border-bottom: 7px solid #1B363F;
+  content: "";
+  border-bottom: 7px solid #1b363f;
   border-left: 5px solid rgba(0, 0, 0, 0);
   border-right: 5px solid rgba(0, 0, 0, 0);
   top: -7px;
@@ -509,7 +509,7 @@ SOFTWARE.
   margin-left: -5px;
 }
 #Datepickk .d-table input + label .d-tooltip:empty {
-  display: none!important;
+  display: none !important;
 }
 #Datepickk .d-table input + label:hover .d-tooltip {
   display: block;
@@ -524,7 +524,7 @@ SOFTWARE.
   cursor: not-allowed;
 }
 #Datepickk .d-table input:disabled + label:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 20%;
@@ -537,8 +537,8 @@ SOFTWARE.
 }
 #Datepickk .d-table input + label.d-hidden {
   cursor: default;
-  color: #ccc!important;
-  background: #f0f0f0!important;
+  color: #ccc !important;
+  background: #f0f0f0 !important;
   text-decoration: line-through;
 }
 #Datepickk .d-table input + label.d-hidden:after {
@@ -585,7 +585,7 @@ SOFTWARE.
 }
 #Datepickk .d-tables.range:not(.before) input:not(.single):checked ~ input:checked + label:before {
   transform: scaleX(1);
-  background-color: #7DD076;
+  background-color: #7dd076;
 }
 #Datepickk .d-tables.range:not(.before) input:not(.single):checked ~ input:checked + label ~ label {
   color: inherit;
@@ -617,7 +617,7 @@ SOFTWARE.
 #Datepickk .d-fadeInUp {
   backface-visibility: visible !important;
   animation-name: DatepickfadeInUp;
-  animation-duration: .5s;
+  animation-duration: 0.5s;
   animation-fill-mode: both;
 }
 @keyframes DatepickBGShow {
@@ -640,7 +640,7 @@ SOFTWARE.
 }
 #Datepickk.d-show > * {
   animation-name: DatepickkShow;
-  animation-duration: .2s;
+  animation-duration: 0.2s;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
 }

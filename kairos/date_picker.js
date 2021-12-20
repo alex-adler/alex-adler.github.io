@@ -356,6 +356,44 @@ SOFTWARE.
 							document.styleSheets[2].deleteRule(68);
 							document.styleSheets[2].insertRule("#Datepickk .d-table input + label {flex-basis: calc(" + newDayBoxSize + "%);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color 0.2s ease, background 0.2s ease, color 0.2s ease;position: relative;box-sizing: border-box;}", 68);
 
+							// Set colour of the week days at the top to the colour of the body
+							var bodyColour = "#000000"
+							switch (body.name) {
+								case "Earth":
+									bodyColour = "#3f5863";
+									break;
+								case "Mars":
+									bodyColour = "#974f38";
+									break;
+								case "Ceres":
+									bodyColour = "#969696";
+									break;
+								case "Europa":
+									bodyColour = "#c38d73";
+									break;
+								case "Ganymede":
+									bodyColour = "#82786a";
+									break;
+								case "Callisto":
+									bodyColour = "#393939";
+									break;
+								case "Titan":
+									bodyColour = "#b39f58";
+									break;
+								case "Enceladus":
+									bodyColour = "#a8b6bc";
+									break;
+								case "Titania":
+									bodyColour = "#847975";
+									break;
+								case "Triton":
+									bodyColour = "#786a69";
+									break;
+							}
+							document.styleSheets[2].deleteRule(58);
+							document.styleSheets[2].insertRule("#Datepickk .d-week { background-color: " + bodyColour + "; color: white; display: flex; width: 100%; }", 58);
+
+
 							let newYearMonth = bodies[currentBody].getYearMonth(msOfFirstDay);
 							currentYear = newYearMonth[0];
 							currentMonth = newYearMonth[1];
