@@ -1,0 +1,38 @@
+#hide1,
+#hide2,
+#hide3 {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    transition: max-width 0.2s, opacity 0.2s;
+}
+
+#zk-trigger:hover #hide1,
+#zk-trigger:hover #hide2,
+#zk-trigger:hover #hide3 {
+    opacity: 1;
+    transition: max-width 0.2s, opacity 0.2s;
+}
+
+#zk-trigger:hover #hide1 {
+    max-width: 200px;
+}
+
+#zk-trigger:hover #hide2 {
+    max-width: 280px;
+}
+
+#zk-trigger:hover #hide3 {
+    max-width: 200px;
+}
+
+h1 {
+    text-align: center;
+    margin: 10rem auto;
+    margin-bottom: 2rem;
+    padding: 0 2rem;
+}
+
+p {
+    text-align: center;
+}
