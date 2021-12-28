@@ -13,11 +13,6 @@
   --line-height: 1.6;
 }
 
-@viewport {
-  zoom: 1;
-  width: extend-to-zoom;
-}
-
 .main-navigation {
   background-size: cover;
   background-repeat: no-repeat;
@@ -196,7 +191,7 @@ a {
   transition: all 0.5s;
 }
 
-.menu-element-turbine:hover {
+.menu-element-helico:hover {
   color: #1d749c;
   text-shadow: 0 0 15px #1d749c;
   transition: all 0.5s;
@@ -274,12 +269,10 @@ a {
   }
 }
 @keyframes link-appear {
-  0%,
-  25% {
+  0%, 25% {
     transform: translateY(130%);
   }
-  50%,
-  100% {
+  50%, 100% {
     transform: translateY(0);
   }
 }
