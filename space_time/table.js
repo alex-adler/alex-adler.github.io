@@ -593,7 +593,7 @@ function generateTable(table, dataTime, dataFacts) {
 
         // Insert the image placeholder
         let image = document.createElement("img");
-        image.src = "/space_images/Europa.jpg"
+        image.src = "/space_time/space_images/Europa.jpg"
         image.alt = "Galileo image of Europa"
         image.onload = function () {
             imageWidth = this.naturalWidth;
