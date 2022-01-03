@@ -95,7 +95,7 @@ h1 {
 }
 
 a {
-  color: var(--color-primary);
+  color: black;
   text-decoration: none;
   user-select: none;
 }
@@ -130,6 +130,13 @@ a {
   right: calc(var(--space) * 2);
   cursor: pointer;
   z-index: 2;
+}
+
+.base-navigation {
+  fill: var(--color-primary);
+}
+.base-navigation a {
+  color: var(--color-primary);
 }
 
 .main-navigation-toggle {

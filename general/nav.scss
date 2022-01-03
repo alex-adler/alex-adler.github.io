@@ -104,7 +104,7 @@ h1 {
 
 // Make sure links don't look ugly
 a {
-  color: var(--color-primary);
+  color: black;
   text-decoration: none;
   user-select: none;
 }
@@ -145,6 +145,14 @@ a {
   right: calc(var(--space) * 2);
   cursor: pointer;
   z-index: 2;
+}
+
+// Configure the color of Alex Adler, Projects, and About
+.base-navigation {
+  fill: var(--color-primary);
+  a {
+    color: var(--color-primary);
+  }
 }
 
 // Configure the button to open up the menu
