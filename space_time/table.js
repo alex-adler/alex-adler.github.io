@@ -25,7 +25,7 @@ class Celestial {
         this.monthData = [];
 
         // Path to image
-        this.img = "/space_images/" + this.name + ".jpg";
+        this.img = "space_time/space_images/" + this.name + ".jpg";
 
         // ------------------ Days and weeks -----------------------------
 
