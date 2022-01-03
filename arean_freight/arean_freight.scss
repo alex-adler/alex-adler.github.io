@@ -1,5 +1,17 @@
+@use "sass:math";
+
 body {
     margin: 0;
+}
+
+h2 {
+    margin: 5vmin 0;
+    padding-left: 2vw;
+    font-size: 3em;
+}
+p {
+    padding-left: 2vw;
+    font-size: 1em;
 }
 
 // Configure the color of Alex Adler, Projects, and About
@@ -18,7 +30,6 @@ body {
     -webkit-perspective: 1px;
     perspective: 1px;
     scroll-behavior: smooth;
-    // transform-style: preserve-3d;
 }
 
 .layer {
@@ -27,20 +38,6 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    // justify-content: center;
-    // align-items: center;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    h1 {
-        // position: absolute;
-        text-align: center;
-        margin-top: 10vh;
-    }
 }
 
 .layer_0 {
@@ -85,14 +82,106 @@ body {
     right: 0;
 }
 
+// Format each "page"
+#cover {
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 10vh;
+    }
+}
+
 #intro {
     background: #222222;
     color: white;
-    padding-left: 2vw;
-    h2 {
-        font-size: 3em;
+}
+
+.mars-map {
+    position: absolute;
+    // right: 0.5em;
+    // top: 50%;
+    // transform: translateY(-50%);
+    // width: 40vw;
+
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 110vh;
+    width: 70vw;
+}
+
+#year-glitch {
+    $steps: 50;
+    min-width: 2.4em;
+    &,
+    * {
+        animation: cray 6s infinite steps($steps);
+        display: inline-block;
     }
-    p {
-        font-size: 1em;
+
+    @keyframes cray {
+        @for $i from 1 to $steps {
+            $per: math.div(100%, $steps) * $i;
+            $weight: (100, 200, 300, 400, 500, 600, 700);
+            $style: (normal, italic, normal, normal);
+            $decor: (none, none, line-through, underline, none, none, none);
+            $trans: (none, none, uppercase, lowercase, capitalize, none, none, none, none, none, none);
+
+            $arrayW: random(7);
+            $arrayS: random(4);
+            $arrayD: random(7);
+            $arrayT: random(11);
+
+            #{$per} {
+                font-weight: nth($weight, $arrayW);
+                font-style: nth($style, $arrayS);
+                text-decoration: nth($decor, $arrayD);
+                text-transform: nth($trans, $arrayT);
+            }
+        }
+    }
+}
+
+.tooltip {
+    position: relative;
+    &::before {
+        content: attr(data-tooltip); /* here's the magic */
+        position: absolute;
+
+        // Vertical position
+        bottom: 100%;
+
+        // Horizontal Centering
+        left: 50%;
+        transform: translateX(-50%);
+
+        /* basic styles */
+        width: 10em;
+        padding: 0.2em;
+        border-radius: 10px;
+        background: #000;
+        color: #fff;
+        text-align: center;
+
+        display: none; /* hide by default */
+        // display: block;
+    }
+
+    &:hover:before {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 950px) {
+    .mars-map {
+        width: 80%;
+    }
+    h2 {
+        margin: 0;
     }
 }

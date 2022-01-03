@@ -1,5 +1,7 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "noImplicitAny": true
+  },
   "include": [
     "arean_freight/**/*"
   ]
