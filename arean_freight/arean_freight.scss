@@ -220,6 +220,19 @@ p {
     background: var(--orange);
 }
 
+#ground-effect {
+    color: var(--white);
+    background: var(--grey);
+    a {
+        color: var(--white);
+    }
+}
+
+#wip {
+    color: var(--grey);
+    background: var(--orange);
+}
+
 @media screen and (max-width: 950px) {
     .mars-map {
         width: 100%;
