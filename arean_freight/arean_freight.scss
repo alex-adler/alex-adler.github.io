@@ -1,5 +1,11 @@
 @use "sass:math";
 
+:root {
+    --grey: #222222;
+    --white: whitesmoke;
+    --orange: coral;
+}
+
 body {
     margin: 0;
 }
@@ -16,9 +22,9 @@ p {
 
 // Configure the color of Alex Adler, Projects, and About
 .base-navigation {
-    fill: #fff;
+    fill: var(--white);
     a {
-        color: #fff;
+        color: var(--white);
     }
 }
 
@@ -73,7 +79,7 @@ p {
 
 // Format credit line for curiosity image
 .credit {
-    color: whitesmoke;
+    color: var(--white);
     margin: 0;
     margin-right: 0.5em;
     position: absolute;
@@ -97,26 +103,49 @@ p {
 }
 
 #intro {
-    background: #222222;
-    color: white;
+    background: var(--grey);
+    color: var(--white);
+    a {
+        color: var(--white);
+    }
 }
 
 .mars-map {
     position: absolute;
-    // right: 0.5em;
-    // top: 50%;
-    // transform: translateY(-50%);
-    // width: 40vw;
-
     bottom: 1rem;
+    padding-top: 1rem;
     left: 50%;
     transform: translateX(-50%);
     max-width: 110vh;
     width: 70vw;
+    // position: relative;
+    // width: 100%;
+    // vertical-align: middle;
+    // margin: 0;
+    // overflow: hidden;
+}
+
+.mars-map svg {
+    display: inline-block;
+    position: relative;
+    top: 0;
+    left: 0;
+
+    circle {
+        stroke: var(--color-primary);
+        stroke-width: 3;
+        fill: none;
+    }
+
+    path {
+        stroke: var(--color-secondary);
+        stroke-width: 3;
+        fill: none;
+    }
 }
 
 #year-glitch {
-    color: white;
+    color: var(--white);
     $steps: 50;
     min-width: 1.9em;
     &,
@@ -165,8 +194,8 @@ p {
         width: 10em;
         padding: 0.2em;
         border-radius: 10px;
-        background: #000;
-        color: #fff;
+        background: var(--orange);
+        color: var(--grey);
         text-align: center;
 
         display: none; /* hide by default */
@@ -178,10 +207,12 @@ p {
     }
 }
 
+#atmo {
+    color: var(--grey);
+    background: var(--orange);
+}
+
 @media screen and (max-width: 950px) {
-    // .parallax_group {
-    //     height: calc(150vh - 0.5 * 20vw);
-    // }
     .mars-map {
         width: 100%;
         position: relative;
