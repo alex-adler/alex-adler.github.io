@@ -67,7 +67,7 @@ p {
 
 .parallax_group {
     position: relative;
-    height: 100vh;
+    min-height: 100vh;
     transform-style: preserve-3d;
 }
 
@@ -116,8 +116,9 @@ p {
 }
 
 #year-glitch {
+    color: white;
     $steps: 50;
-    min-width: 2.4em;
+    min-width: 1.9em;
     &,
     * {
         animation: cray 6s infinite steps($steps);
@@ -178,10 +179,20 @@ p {
 }
 
 @media screen and (max-width: 950px) {
+    // .parallax_group {
+    //     height: calc(150vh - 0.5 * 20vw);
+    // }
     .mars-map {
-        width: 80%;
+        width: 100%;
+        position: relative;
+    }
+    #intro {
+        position: relative;
     }
     h2 {
         margin: 0;
+    }
+    p {
+        text-align: justify;
     }
 }
