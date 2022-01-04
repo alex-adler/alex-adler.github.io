@@ -141,6 +141,14 @@ p {
         stroke: var(--color-secondary);
         stroke-width: 3;
         fill: none;
+        stroke-dasharray: 30;
+        animation: flight-path 5s infinite linear;
+    }
+}
+
+@keyframes flight-path {
+    to {
+        stroke-dashoffset: -300;
     }
 }
 
