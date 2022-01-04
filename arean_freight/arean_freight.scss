@@ -207,7 +207,6 @@ p {
         text-align: center;
 
         display: none; /* hide by default */
-        // display: block;
     }
 
     &:hover:before {
@@ -218,6 +217,9 @@ p {
 #atmo {
     color: var(--grey);
     background: var(--orange);
+    p {
+        width: calc(95vw - calc(90vh * 0.5625));
+    }
 }
 
 #ground-effect {
@@ -225,6 +227,28 @@ p {
     background: var(--grey);
     a {
         color: var(--white);
+    }
+}
+
+#small-plot {
+    display: none;
+}
+
+#atmo-plot {
+    position: absolute;
+    right: 1vw;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 90vh;
+    width: calc(90vh * 0.5625);
+
+    background: var(--white);
+    background-image: url(plots/big_atmo.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    &:hover {
+        background-image: url(plots/small_atmo.svg);
     }
 }
 
@@ -240,6 +264,21 @@ p {
     }
     #intro {
         position: relative;
+    }
+    #atmo {
+        position: relative;
+        p {
+            width: 100%;
+        }
+        #atmo-plot {
+            position: relative;
+            height: calc(98vw / 0.5625);
+            width: 98vw;
+            margin: auto;
+            right: auto;
+            top: 0;
+            transform: none;
+        }
     }
     h2 {
         margin: 0;

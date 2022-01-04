@@ -148,297 +148,297 @@ p {
 }
 @keyframes cray {
   2% {
-    font-weight: 300;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: uppercase;
+    font-weight: 400;
+    font-style: italic;
+    text-decoration: line-through;
+    text-transform: none;
   }
   4% {
-    font-weight: 300;
+    font-weight: 500;
     font-style: italic;
     text-decoration: none;
     text-transform: none;
   }
   6% {
-    font-weight: 600;
+    font-weight: 200;
     font-style: italic;
-    text-decoration: line-through;
-    text-transform: capitalize;
+    text-decoration: none;
+    text-transform: none;
   }
   8% {
-    font-weight: 700;
-    font-style: italic;
+    font-weight: 300;
+    font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
   10% {
-    font-weight: 400;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-  12% {
-    font-weight: 300;
-    font-style: italic;
-    text-decoration: none;
-    text-transform: none;
-  }
-  14% {
-    font-weight: 400;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  16% {
     font-weight: 100;
     font-style: normal;
     text-decoration: line-through;
+    text-transform: none;
+  }
+  12% {
+    font-weight: 500;
+    font-style: italic;
+    text-decoration: line-through;
+    text-transform: none;
+  }
+  14% {
+    font-weight: 300;
+    font-style: italic;
+    text-decoration: line-through;
+    text-transform: none;
+  }
+  16% {
+    font-weight: 600;
+    font-style: italic;
+    text-decoration: none;
     text-transform: capitalize;
   }
   18% {
-    font-weight: 500;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  20% {
-    font-weight: 500;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-  22% {
-    font-weight: 200;
+    font-weight: 700;
     font-style: normal;
     text-decoration: underline;
+    text-transform: capitalize;
+  }
+  20% {
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: lowercase;
+  }
+  22% {
+    font-weight: 600;
+    font-style: normal;
+    text-decoration: none;
     text-transform: none;
   }
   24% {
-    font-weight: 500;
-    font-style: italic;
-    text-decoration: none;
-    text-transform: none;
+    font-weight: 200;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: uppercase;
   }
   26% {
-    font-weight: 300;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  28% {
-    font-weight: 500;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  30% {
-    font-weight: 500;
-    font-style: italic;
-    text-decoration: underline;
-    text-transform: none;
-  }
-  32% {
     font-weight: 100;
     font-style: normal;
     text-decoration: none;
     text-transform: lowercase;
   }
-  34% {
-    font-weight: 700;
+  28% {
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: none;
+  }
+  30% {
+    font-weight: 600;
     font-style: normal;
     text-decoration: none;
-    text-transform: capitalize;
+    text-transform: none;
+  }
+  32% {
+    font-weight: 600;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: none;
+  }
+  34% {
+    font-weight: 500;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: none;
   }
   36% {
-    font-weight: 300;
-    font-style: italic;
-    text-decoration: underline;
-    text-transform: capitalize;
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: none;
   }
   38% {
-    font-weight: 500;
-    font-style: italic;
-    text-decoration: none;
+    font-weight: 600;
+    font-style: normal;
+    text-decoration: line-through;
     text-transform: none;
   }
   40% {
     font-weight: 200;
     font-style: normal;
     text-decoration: none;
-    text-transform: capitalize;
-  }
-  42% {
-    font-weight: 300;
-    font-style: italic;
-    text-decoration: none;
     text-transform: none;
   }
-  44% {
-    font-weight: 300;
-    font-style: normal;
-    text-decoration: line-through;
-    text-transform: lowercase;
-  }
-  46% {
-    font-weight: 200;
+  42% {
+    font-weight: 700;
     font-style: normal;
     text-decoration: none;
     text-transform: lowercase;
   }
-  48% {
+  44% {
     font-weight: 200;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  46% {
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: capitalize;
+  }
+  48% {
+    font-weight: 600;
     font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
   50% {
     font-weight: 100;
-    font-style: italic;
+    font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
   52% {
-    font-weight: 500;
+    font-weight: 100;
     font-style: normal;
-    text-decoration: line-through;
-    text-transform: lowercase;
+    text-decoration: underline;
+    text-transform: none;
   }
   54% {
-    font-weight: 400;
-    font-style: normal;
-    text-decoration: none;
+    font-weight: 300;
+    font-style: italic;
+    text-decoration: line-through;
     text-transform: none;
   }
   56% {
-    font-weight: 700;
-    font-style: normal;
+    font-weight: 600;
+    font-style: italic;
     text-decoration: none;
     text-transform: none;
   }
   58% {
-    font-weight: 700;
+    font-weight: 100;
     font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
   60% {
-    font-weight: 100;
+    font-weight: 600;
     font-style: normal;
     text-decoration: underline;
     text-transform: uppercase;
   }
   62% {
-    font-weight: 700;
-    font-style: normal;
+    font-weight: 200;
+    font-style: italic;
     text-decoration: none;
-    text-transform: lowercase;
+    text-transform: none;
   }
   64% {
-    font-weight: 100;
-    font-style: italic;
-    text-decoration: underline;
-    text-transform: lowercase;
+    font-weight: 500;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: uppercase;
   }
   66% {
-    font-weight: 700;
+    font-weight: 400;
     font-style: normal;
-    text-decoration: line-through;
+    text-decoration: underline;
     text-transform: none;
   }
   68% {
-    font-weight: 300;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  70% {
     font-weight: 500;
     font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
+  70% {
+    font-weight: 600;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: none;
+  }
   72% {
-    font-weight: 100;
-    font-style: italic;
+    font-weight: 400;
+    font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
   74% {
+    font-weight: 400;
+    font-style: italic;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  76% {
+    font-weight: 500;
+    font-style: normal;
+    text-decoration: none;
+    text-transform: none;
+  }
+  78% {
+    font-weight: 100;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: none;
+  }
+  80% {
     font-weight: 100;
     font-style: normal;
     text-decoration: none;
     text-transform: none;
   }
-  76% {
-    font-weight: 400;
-    font-style: italic;
-    text-decoration: line-through;
-    text-transform: capitalize;
-  }
-  78% {
-    font-weight: 600;
-    font-style: normal;
-    text-decoration: none;
-    text-transform: none;
-  }
-  80% {
-    font-weight: 200;
-    font-style: italic;
-    text-decoration: underline;
-    text-transform: capitalize;
-  }
   82% {
-    font-weight: 300;
-    font-style: normal;
+    font-weight: 700;
+    font-style: italic;
     text-decoration: none;
     text-transform: none;
   }
   84% {
-    font-weight: 300;
+    font-weight: 500;
     font-style: normal;
-    text-decoration: line-through;
-    text-transform: uppercase;
+    text-decoration: none;
+    text-transform: none;
   }
   86% {
     font-weight: 300;
     font-style: normal;
-    text-decoration: none;
-    text-transform: lowercase;
-  }
-  88% {
-    font-weight: 600;
-    font-style: italic;
-    text-decoration: underline;
-    text-transform: lowercase;
-  }
-  90% {
-    font-weight: 700;
-    font-style: normal;
-    text-decoration: none;
+    text-decoration: line-through;
     text-transform: none;
   }
-  92% {
+  88% {
     font-weight: 400;
     font-style: italic;
     text-decoration: none;
-    text-transform: uppercase;
+    text-transform: none;
   }
-  94% {
-    font-weight: 600;
-    font-style: italic;
+  90% {
+    font-weight: 200;
+    font-style: normal;
     text-decoration: underline;
     text-transform: none;
   }
-  96% {
-    font-weight: 600;
+  92% {
+    font-weight: 700;
+    font-style: normal;
+    text-decoration: underline;
+    text-transform: uppercase;
+  }
+  94% {
+    font-weight: 200;
     font-style: normal;
     text-decoration: none;
     text-transform: capitalize;
   }
-  98% {
-    font-weight: 700;
+  96% {
+    font-weight: 200;
     font-style: italic;
     text-decoration: none;
+    text-transform: none;
+  }
+  98% {
+    font-weight: 700;
+    font-style: normal;
+    text-decoration: underline;
     text-transform: none;
   }
 }
@@ -471,6 +471,9 @@ p {
   color: var(--grey);
   background: var(--orange);
 }
+#atmo p {
+  width: calc(95vw - calc(90vh * 0.5625));
+}
 
 #ground-effect {
   color: var(--white);
@@ -478,6 +481,26 @@ p {
 }
 #ground-effect a {
   color: var(--white);
+}
+
+#small-plot {
+  display: none;
+}
+
+#atmo-plot {
+  position: absolute;
+  right: 1vw;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 90vh;
+  width: calc(90vh * 0.5625);
+  background: var(--white);
+  background-image: url(plots/big_atmo.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#atmo-plot:hover {
+  background-image: url(plots/small_atmo.svg);
 }
 
 #wip {
@@ -493,6 +516,22 @@ p {
 
   #intro {
     position: relative;
+  }
+
+  #atmo {
+    position: relative;
+  }
+  #atmo p {
+    width: 100%;
+  }
+  #atmo #atmo-plot {
+    position: relative;
+    height: calc(98vw / 0.5625);
+    width: 98vw;
+    margin: auto;
+    right: auto;
+    top: 0;
+    transform: none;
   }
 
   h2 {
