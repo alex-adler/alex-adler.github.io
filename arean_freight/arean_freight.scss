@@ -11,11 +11,14 @@ body {
 }
 
 h2 {
-    margin: 5vmin 0;
+    // margin: 5vmin 0;
+    margin-top: 0;
+    margin-bottom: 5vmin;
     padding-left: 2vw;
     font-size: 3em;
 }
 p {
+    position: relative;
     padding-left: 2vw;
     font-size: 1em;
 }
@@ -38,12 +41,65 @@ p {
     scroll-behavior: smooth;
 }
 
+.parallax_group {
+    position: relative;
+    min-height: 100vh;
+    transform-style: preserve-3d;
+}
+
 .layer {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+
+    #cover & {
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 10vh;
+        }
+    }
+
+    #intro & {
+        position: relative;
+        background: var(--grey);
+        color: var(--white);
+        a {
+            color: var(--white);
+        }
+    }
+
+    #atmo & {
+        position: relative;
+        color: var(--grey);
+        background: var(--orange);
+        p {
+            position: relative;
+            top: -90vmin;
+            width: calc(94vw - calc(90vmin * 0.5625));
+            margin: 0;
+        }
+    }
+
+    #ground-effect & {
+        color: var(--white);
+        background: var(--grey);
+        a {
+            color: var(--white);
+        }
+    }
+
+    #wip & {
+        color: var(--grey);
+        background: var(--orange);
+    }
 }
 
 .layer_0 {
@@ -71,12 +127,6 @@ p {
     transform: translateZ(-4px) scale(5);
 }
 
-.parallax_group {
-    position: relative;
-    min-height: 100vh;
-    transform-style: preserve-3d;
-}
-
 // Format credit line for curiosity image
 .credit {
     color: var(--white);
@@ -88,28 +138,6 @@ p {
     right: 0;
 }
 
-// Format each "page"
-#cover {
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    h1 {
-        text-align: center;
-        margin-top: 10vh;
-    }
-}
-
-#intro {
-    background: var(--grey);
-    color: var(--white);
-    a {
-        color: var(--white);
-    }
-}
-
 .mars-map {
     position: absolute;
     bottom: 1rem;
@@ -118,11 +146,6 @@ p {
     transform: translateX(-50%);
     max-width: 110vh;
     width: 70vw;
-    // position: relative;
-    // width: 100%;
-    // vertical-align: middle;
-    // margin: 0;
-    // overflow: hidden;
 }
 
 .mars-map svg {
@@ -214,33 +237,14 @@ p {
     }
 }
 
-#atmo {
-    color: var(--grey);
-    background: var(--orange);
-    p {
-        width: calc(95vw - calc(90vh * 0.5625));
-    }
-}
-
-#ground-effect {
-    color: var(--white);
-    background: var(--grey);
-    a {
-        color: var(--white);
-    }
-}
-
-#small-plot {
-    display: none;
-}
-
 #atmo-plot {
-    position: absolute;
-    right: 1vw;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 90vh;
-    width: calc(90vh * 0.5625);
+    position: relative;
+    left: calc(97vw - calc(90vmin * 0.5625));
+    top: -10vmin;
+
+    // transform: translateY(-50%);
+    height: 90vmin;
+    width: calc(90vmin * 0.5625);
 
     background: var(--white);
     background-image: url(plots/big_atmo.svg);
@@ -252,11 +256,7 @@ p {
     }
 }
 
-#wip {
-    color: var(--grey);
-    background: var(--orange);
-}
-
+// Mobile displays
 @media screen and (max-width: 950px) {
     .mars-map {
         width: 100%;
@@ -267,22 +267,24 @@ p {
     }
     #atmo {
         position: relative;
-        p {
+        .layer p {
             width: 100%;
+            top: 0;
         }
         #atmo-plot {
-            position: relative;
+            // position: relative;
             height: calc(98vw / 0.5625);
             width: 98vw;
             margin: auto;
             right: auto;
             top: 0;
+            left: 0;
             transform: none;
         }
     }
-    h2 {
-        margin: 0;
-    }
+    // h2 {
+    //     margin: 0;
+    // }
     p {
         text-align: justify;
     }
