@@ -85,15 +85,17 @@ p {
 
     #intro & {
         position: relative;
+        min-height: 100vh;
         @include theme-grey();
     }
 
     #atmo & {
         position: relative;
+        overflow: auto;
         @include theme-orange();
         p {
             position: relative;
-            top: -90vmin;
+            // top: -90vmin;
             width: calc(94vw - calc(90vmin * 0.5625));
             margin: 0;
         }
@@ -155,10 +157,7 @@ p {
 }
 
 .mars-map svg {
-    display: inline-block;
     position: relative;
-    top: 0;
-    left: 0;
 
     circle {
         stroke: var(--color-primary);
@@ -244,8 +243,9 @@ p {
 
 #atmo-plot {
     position: relative;
-    left: calc(97vw - calc(90vmin * 0.5625));
-    top: -10vmin;
+    float: right;
+    top: -7vmin;
+    margin-right: 2vw;
 
     height: 90vmin;
     width: calc(90vmin * 0.5625);
@@ -276,13 +276,11 @@ p {
             top: 0;
         }
         #atmo-plot {
-            height: calc(98vw / 0.5625);
-            width: 98vw;
-            margin: auto;
-            right: auto;
+            clear: both;
+            height: calc(95vw / 0.5625);
+            width: 95vw;
+            margin: 0 2.5vw;
             top: 0;
-            left: 0;
-            transform: none;
         }
     }
     p {
