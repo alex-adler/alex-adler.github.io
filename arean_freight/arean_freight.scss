@@ -6,6 +6,22 @@
     --orange: coral;
 }
 
+@mixin theme-grey() {
+    background: var(--grey);
+    color: var(--white);
+    a {
+        color: var(--white);
+    }
+}
+
+@mixin theme-orange() {
+    background: var(--orange);
+    color: var(--grey);
+    a {
+        color: var(--grey);
+    }
+}
+
 body {
     margin: 0;
 }
@@ -69,17 +85,12 @@ p {
 
     #intro & {
         position: relative;
-        background: var(--grey);
-        color: var(--white);
-        a {
-            color: var(--white);
-        }
+        @include theme-grey();
     }
 
     #atmo & {
         position: relative;
-        color: var(--grey);
-        background: var(--orange);
+        @include theme-orange();
         p {
             position: relative;
             top: -90vmin;
@@ -89,16 +100,11 @@ p {
     }
 
     #ground-effect & {
-        color: var(--white);
-        background: var(--grey);
-        a {
-            color: var(--white);
-        }
+        @include theme-grey();
     }
 
     #wip & {
-        color: var(--grey);
-        background: var(--orange);
+        @include theme-orange();
     }
 }
 
@@ -176,7 +182,6 @@ p {
 }
 
 #year-glitch {
-    color: var(--white);
     $steps: 50;
     min-width: 1.9em;
     &,
@@ -242,7 +247,6 @@ p {
     left: calc(97vw - calc(90vmin * 0.5625));
     top: -10vmin;
 
-    // transform: translateY(-50%);
     height: 90vmin;
     width: calc(90vmin * 0.5625);
 
@@ -272,7 +276,6 @@ p {
             top: 0;
         }
         #atmo-plot {
-            // position: relative;
             height: calc(98vw / 0.5625);
             width: 98vw;
             margin: auto;
@@ -282,9 +285,6 @@ p {
             transform: none;
         }
     }
-    // h2 {
-    //     margin: 0;
-    // }
     p {
         text-align: justify;
     }
