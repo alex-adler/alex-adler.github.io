@@ -1,3 +1,5 @@
+yearGlitch();
+
 // Generate a random number for the year
 function yearGlitch() {
     var year = document.getElementById("year-glitch");
@@ -15,4 +17,3 @@ function yearGlitch() {
     setTimeout(yearGlitch, 1000);
 }
 
-yearGlitch();
