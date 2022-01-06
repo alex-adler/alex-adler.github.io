@@ -1,5 +1,6 @@
 yearGlitch();
-updateWing(1, 3, 0.1);
+// updateWing(1, 3, 0.1);
+movedSliders();
 
 // Generate a random number for the year
 function yearGlitch() {
@@ -24,17 +25,29 @@ function movedSliders() {
     let alphaSlider = <HTMLInputElement>document.getElementById("slider-alpha");
     let heightSlider = <HTMLInputElement>document.getElementById("slider-height");
 
+    // Apply scaling
+    let m = Number(machSlider.value) / 10;
+    let a = Number(alphaSlider.value) / 10;
+    let h = Number(heightSlider.value) / 100;
+
     // Update the calculations and visualisation
-    updateWing(Number(machSlider.value), Number(alphaSlider.value), Number(heightSlider.value));
+    updateWing(m, a, h);
 }
 
 // Visualise a supersonuc wing in ground effect on an HTML canvas
 function updateWing(mach: number, alpha: number, h: number) {
+    console.log("Updating for M: " + mach + ", alpha: " + alpha + ", h: " + h);
+
     var yPadding = .1;
     var xPadding = .1;
 
-    var yLim = [0, 1];
+
+    var yLim = [0, .2];
     var xLim = [-0.5, 1.5];
+
+    if (h > .15) {
+        yLim[1] = h + .05;
+    }
 
     var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground");
     if (canvas.getContext) {
@@ -49,10 +62,8 @@ function updateWing(mach: number, alpha: number, h: number) {
         alpha *= Math.PI / 180;
         let wing = getWingCoords(h, alpha);
 
-        // ctx.moveTo(processX(canvas, xPadding, wing.x[0]), processY(canvas, yPadding, wing.y[0]));
-        // ctx.lineTo(processX(canvas, xPadding, wing.x[1]), processY(canvas, yPadding, wing.y[1]));
-        ctx.moveTo(processX(0, canvas, xPadding, xLim), processY(.6, canvas, yPadding, yLim));
-        ctx.lineTo(processX(1, canvas, xPadding, xLim), processY(.4, canvas, yPadding, yLim));
+        ctx.moveTo(processX(wing.x[0], canvas, xPadding, xLim), processY(wing.y[0], canvas, yPadding, yLim));
+        ctx.lineTo(processX(wing.x[1], canvas, xPadding, xLim), processY(wing.y[1], canvas, yPadding, yLim));
         ctx.stroke();
     }
 }
@@ -74,6 +85,6 @@ function processX(x: number, canvas: HTMLCanvasElement, xPadding: number, xLim: 
 // Calculate the position of the wing 
 function getWingCoords(h: number, alpha: number) {
     let x = [1 - Math.cos(alpha), 1]
-    let y = [h * (1 + Math.sin(alpha)), h]
+    let y = [h + Math.sin(alpha), h]
     return { x, y };
 }
