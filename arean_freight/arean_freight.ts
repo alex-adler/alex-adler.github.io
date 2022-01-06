@@ -1,7 +1,5 @@
 yearGlitch();
-// updateWing(1, 3, 0.1);
 movedSliders();
-
 
 // Generate a random number for the year
 function yearGlitch() {
@@ -20,6 +18,7 @@ function yearGlitch() {
     setTimeout(yearGlitch, 1000);
 }
 
+// Read all sliders and update the wing canvas whenever any slider moves
 function movedSliders() {
     // Read all the sliders
     let machSlider = <HTMLInputElement>document.getElementById("slider-mach");
@@ -29,7 +28,7 @@ function movedSliders() {
     // Apply scaling
     let m = Number(machSlider.value) / 100;
     let a = Number(alphaSlider.value) / 100;
-    let h = Number(heightSlider.value) / 100;
+    let h = Number(heightSlider.value) / 1000;
 
     // Update the calculations and visualisation
     updateWing(m, a, h);
@@ -39,15 +38,17 @@ function movedSliders() {
 function updateWing(mach: number, alpha: number, h: number) {
     console.log("Updating for M: " + mach + ", alpha: " + alpha + ", h: " + h);
 
+    // Set adiabatic gas constant
     var gamma = 1.31;
 
     var yPadding = .1;
     var xPadding = .1;
 
-
+    // Set the ranges for the x and y axis
     var yLim = [0, .2];
     var xLim = [-0.5, 1.5];
 
+    // If the wing will move out of the canvas, increasy the y limit
     if (h > .15) {
         yLim[1] = h + .05;
     }
@@ -130,8 +131,6 @@ function oblique(beta: number, M: number, gamma: number) {
     return Math.atan((2 * (Math.pow(M, 2) * Math.pow(Math.sin(beta), 2) - 1)) / (Math.tan(beta) * (Math.pow(M, 2) * (gamma + Math.cos(2 * beta)) + 2)));
 }
 
-
-
 // Get the angle of a shock created by a mach M flow being deflected by theta radians
 function getObliqueShockAngle(M: number, theta: number, gamma: number) {
     const betaStart = Math.PI / 180;
@@ -192,7 +191,6 @@ function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m
         }
         else {
             //Bounce up
-
             // Calculate straight line equation for the shock
             let shock_m = Math.tan(shock.beta);
             let shock_c = -shock_m * x1;

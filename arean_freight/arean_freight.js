@@ -1,5 +1,4 @@
 yearGlitch();
-// updateWing(1, 3, 0.1);
 movedSliders();
 // Generate a random number for the year
 function yearGlitch() {
@@ -17,6 +16,7 @@ function yearGlitch() {
     // Change the number every second
     setTimeout(yearGlitch, 1000);
 }
+// Read all sliders and update the wing canvas whenever any slider moves
 function movedSliders() {
     // Read all the sliders
     let machSlider = document.getElementById("slider-mach");
@@ -25,18 +25,21 @@ function movedSliders() {
     // Apply scaling
     let m = Number(machSlider.value) / 100;
     let a = Number(alphaSlider.value) / 100;
-    let h = Number(heightSlider.value) / 100;
+    let h = Number(heightSlider.value) / 1000;
     // Update the calculations and visualisation
     updateWing(m, a, h);
 }
 // Visualise a supersonuc wing in ground effect on an HTML canvas
 function updateWing(mach, alpha, h) {
     console.log("Updating for M: " + mach + ", alpha: " + alpha + ", h: " + h);
+    // Set adiabatic gas constant
     var gamma = 1.31;
     var yPadding = .1;
     var xPadding = .1;
+    // Set the ranges for the x and y axis
     var yLim = [0, .2];
     var xLim = [-0.5, 1.5];
+    // If the wing will move out of the canvas, increasy the y limit
     if (h > .15) {
         yLim[1] = h + .05;
     }
