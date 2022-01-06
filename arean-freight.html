@@ -189,9 +189,12 @@
                 <canvas id="canvas-wing-in-ground"></canvas>
                 <canvas id="canvas-wing-in-ground-graph"></canvas>
                 <div class="sliders">
-                    <input type="range" min="1.2" max="10" value="0" class="slider" id="slider-mach">
-                    <input type="range" min="1" max="15" value="0" class="slider" id="slider-alpha">
-                    <input type="range" min="0" max="10" value="0" class="slider" id="slider-height">
+                    <input type="range" min="1.2" max="10" value="0" class="slider" id="slider-mach"
+                        oninput="movedSliders()">
+                    <input type="range" min="1" max="15" value="0" class="slider" id="slider-alpha"
+                        oninput="movedSliders()">
+                    <input type="range" min="0" max="10" value="0" class="slider" id="slider-height"
+                        oninput="movedSliders()">
                 </div>
             </div>
         </div>
