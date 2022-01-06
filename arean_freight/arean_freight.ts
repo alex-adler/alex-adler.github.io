@@ -1,5 +1,6 @@
 yearGlitch();
 movedSliders();
+updateDataCanvas();
 
 // Generate a random number for the year
 function yearGlitch() {
@@ -16,6 +17,22 @@ function yearGlitch() {
     year.innerHTML = new_year;
     // Change the number every second
     setTimeout(yearGlitch, 1000);
+}
+
+function updateDataCanvas() {
+    var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
+    if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+
+        // Deal with devices with a pixel ratio != 1
+        const pixelRatio = window.devicePixelRatio;
+        canvas.width = canvas.clientWidth * pixelRatio;
+        canvas.height = canvas.clientHeight * pixelRatio;
+
+        ctx.textAlign = 'center';
+        ctx.font = "30px Roboto";
+        ctx.fillText('This page is intentionally left blank', canvas.width / 2, canvas.height / 2);
+    }
 }
 
 // Read all sliders and update the wing canvas whenever any slider moves
