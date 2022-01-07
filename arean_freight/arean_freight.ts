@@ -31,7 +31,14 @@ function updateDataCanvas() {
 
         ctx.textAlign = 'center';
         ctx.font = "30px Roboto";
+        ctx.fillStyle = "#FFFFFF";
         ctx.fillText('This page is intentionally left blank', canvas.width / 2, canvas.height / 2);
+
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.rect(1, 1, canvas.width - 2, canvas.height - 2);
+        ctx.stroke();
     }
 }
 
@@ -55,9 +62,13 @@ function movedSliders() {
 function updateWing(mach: number, alpha: number, h: number) {
     console.log("Updating for M: " + mach + ", alpha: " + alpha + ", h: " + h);
 
+    var orange = "#FF7F50";
+    var white = "#f5f5f5";
+
     // Set adiabatic gas constant
     var gamma = 1.31;
 
+    // Padding as fraction of width or height
     var yPadding = .1;
     var xPadding = .1;
 
@@ -79,11 +90,22 @@ function updateWing(mach: number, alpha: number, h: number) {
         canvas.width = canvas.clientWidth * pixelRatio;
         canvas.height = canvas.clientHeight * pixelRatio;
 
+        // Draw Ground
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = white;
+        ctx.moveTo(processX(xLim[0], canvas, xPadding, xLim), processY(0, canvas, yPadding, yLim));
+        ctx.lineTo(processX(xLim[1], canvas, xPadding, xLim), processY(0, canvas, yPadding, yLim));
+        ctx.stroke();
+
         // Exclusiely use radians from here on
         alpha *= Math.PI / 180;
 
         // Draw wing
         let wing = getWingCoords(h, alpha);
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = orange;
         ctx.moveTo(processX(wing.x[0], canvas, xPadding, xLim), processY(wing.y[0], canvas, yPadding, yLim));
         ctx.lineTo(processX(wing.x[1], canvas, xPadding, xLim), processY(wing.y[1], canvas, yPadding, yLim));
         ctx.stroke();
@@ -98,10 +120,14 @@ function updateWing(mach: number, alpha: number, h: number) {
         var maxShocks = 20;
         var shockCount = 0;
 
+        // Line width of shocks
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = white;
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
             var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
 
+            ctx.beginPath();
             ctx.moveTo(processX(shock.x[0], canvas, xPadding, xLim), processY(shock.y[0], canvas, yPadding, yLim));
             ctx.lineTo(processX(shock.x[1], canvas, xPadding, xLim), processY(shock.y[1], canvas, yPadding, yLim));
             ctx.stroke();

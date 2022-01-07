@@ -274,12 +274,12 @@ canvas {
 
 #canvas-wing-in-ground {
     float: left;
-    background-color: coral;
+    background-color: var(--grey);
 }
 
 #canvas-wing-in-ground-graph {
     float: right;
-    background-color: whitesmoke;
+    background-color: var(--grey);
 }
 
 .slider {
