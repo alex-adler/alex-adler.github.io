@@ -59,12 +59,12 @@ function updateWing(mach, alpha, h) {
     // Padding as fraction of width or height
     var yPadding = .1;
     var xPadding = .1;
-    // Set the ranges for the x and y axis
+    // Set the ranges of the x and y axis that msut be shown
     var yLim = [0, .2];
-    var xLim = [-0.5, 1.5];
+    var xLim = [0, 1];
     // If the wing will move out of the canvas, increasy the y limit
     if (h > .15) {
-        yLim[1] = h + .05;
+        yLim[1] = 2 * h;
     }
     var canvas = document.getElementById("canvas-wing-in-ground");
     if (canvas.getContext) {
@@ -73,12 +73,16 @@ function updateWing(mach, alpha, h) {
         const pixelRatio = window.devicePixelRatio;
         canvas.width = canvas.clientWidth * pixelRatio;
         canvas.height = canvas.clientHeight * pixelRatio;
+        // Pixels per meter
+        var xScale = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
+        var yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
+        var scale = Math.min(xScale, yScale);
         // Draw Ground
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = white;
-        ctx.moveTo(processX(xLim[0], canvas, xPadding, xLim), processY(0, canvas, yPadding, yLim));
-        ctx.lineTo(processX(xLim[1], canvas, xPadding, xLim), processY(0, canvas, yPadding, yLim));
+        ctx.moveTo(0, (1 - (yPadding / 2)) * canvas.height);
+        ctx.lineTo(canvas.width, (1 - (yPadding / 2)) * canvas.height);
         ctx.stroke();
         // Exclusiely use radians from here on
         alpha *= Math.PI / 180;
@@ -87,8 +91,8 @@ function updateWing(mach, alpha, h) {
         ctx.beginPath();
         ctx.lineWidth = 3;
         ctx.strokeStyle = orange;
-        ctx.moveTo(processX(wing.x[0], canvas, xPadding, xLim), processY(wing.y[0], canvas, yPadding, yLim));
-        ctx.lineTo(processX(wing.x[1], canvas, xPadding, xLim), processY(wing.y[1], canvas, yPadding, yLim));
+        ctx.moveTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
+        ctx.lineTo(processX(wing.x[1], canvas.width, xPadding, scale), processY(wing.y[1], canvas.height, yPadding, scale));
         ctx.stroke();
         var x = wing.x[0];
         var y = wing.y[0];
@@ -104,8 +108,8 @@ function updateWing(mach, alpha, h) {
         while (mach > 1) {
             var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
             ctx.beginPath();
-            ctx.moveTo(processX(shock.x[0], canvas, xPadding, xLim), processY(shock.y[0], canvas, yPadding, yLim));
-            ctx.lineTo(processX(shock.x[1], canvas, xPadding, xLim), processY(shock.y[1], canvas, yPadding, yLim));
+            ctx.moveTo(processX(shock.x[0], canvas.width, xPadding, scale), processY(shock.y[0], canvas.height, yPadding, scale));
+            ctx.lineTo(processX(shock.x[1], canvas.width, xPadding, scale), processY(shock.y[1], canvas.height, yPadding, scale));
             ctx.stroke();
             x = shock.x[1];
             y = shock.y[1];
@@ -122,16 +126,16 @@ function updateWing(mach, alpha, h) {
     }
 }
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
-function processY(y, canvas, yPadding, yLim) {
-    let heightPerUnit = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
-    let offset = (1 - yPadding / 2) * canvas.height;
-    return offset - (y - yLim[0]) * heightPerUnit;
+function processY(y, height, padding, scale) {
+    let offset_px = (1 - padding / 2) * height;
+    return offset_px - y * scale;
 }
 // Add padding to x coordinates and scale them to the set limits
-function processX(x, canvas, xPadding, xLim) {
-    let widthPerUnit = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
-    let offset = (xPadding / 2) * canvas.width;
-    return offset + (x - xLim[0]) * widthPerUnit;
+function processX(x, width, padding, scale) {
+    // Make sure the it is centered on x=.5 (halfway along the wing)
+    let x0 = (((1 - padding) * width / scale) - 1) / 2;
+    let offset_px = (padding / 2) * width;
+    return offset_px + (x + x0) * scale;
 }
 // Calculate the position of the wing 
 function getWingCoords(h, alpha) {
