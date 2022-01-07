@@ -60,7 +60,13 @@ function movedSliders() {
 
 // Visualise a supersonuc wing in ground effect on an HTML canvas
 function updateWing(mach: number, alpha: number, h: number) {
-    console.log("Updating for M: " + mach + ", alpha: " + alpha + ", h: " + h);
+    let displayMach = document.getElementById("display-mach");
+    let displayAlpha = document.getElementById("display-alpha");
+    let displayHeight = document.getElementById("display-height");
+
+    displayMach.innerHTML = "Mach: " + mach;
+    displayAlpha.innerHTML = "Angle: " + alpha + "&deg;";
+    displayHeight.innerHTML = "Height: " + h + " m";
 
     var orange = "#FF7F50";
     var white = "#f5f5f5";

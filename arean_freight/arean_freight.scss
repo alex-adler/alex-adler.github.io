@@ -282,8 +282,17 @@ canvas {
     background-color: var(--grey);
 }
 
-.slider {
+.sliders {
+    display: grid;
+    grid-template-columns: 9em auto;
     width: 100%;
+    .slider {
+        width: 100%;
+    }
+    h3 {
+        margin: 0;
+        width: 100%;
+    }
 }
 
 // Mobile displays
