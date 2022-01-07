@@ -1,6 +1,9 @@
 yearGlitch();
 movedSliders();
 updateDataCanvas();
+// Redraw canvas' when they have changed size
+addEventListener("resize", updateDataCanvas);
+addEventListener("resize", movedSliders);
 // Generate a random number for the year
 function yearGlitch() {
     var year = document.getElementById("year-glitch");
