@@ -1,6 +1,18 @@
+class WingGridTickBox {
+    constructor() {
+        this.enabled = true;
+        this.size = 15;
+        this.padding = 5;
+        this.path = new Path2D();
+    }
+    generatePath(canvas) {
+        this.path.rect(canvas.width - (this.size + this.padding), this.padding, this.size, this.size);
+    }
+}
+var wingGridTickBox = new WingGridTickBox();
 yearGlitch();
-movedSliders();
-updateDataCanvas();
+initWingCanvas();
+initDataCanvas();
 // Redraw canvas' when they have changed size
 addEventListener("resize", updateDataCanvas);
 addEventListener("resize", movedSliders);
@@ -20,14 +32,28 @@ function yearGlitch() {
     // Change the number every second
     setTimeout(yearGlitch, 1000);
 }
+function initWingCanvas() {
+    var wingCanvas = document.getElementById("canvas-wing-in-ground");
+    initCanvas(wingCanvas);
+    initWingListeners(wingCanvas);
+    movedSliders();
+}
+function initDataCanvas() {
+    var dataCanvas = document.getElementById("canvas-wing-in-ground-graph");
+    initCanvas(dataCanvas);
+    updateDataCanvas();
+}
+function initCanvas(canvas) {
+    // Deal with devices with a pixel ratio != 1
+    const pixelRatio = window.devicePixelRatio;
+    canvas.width = canvas.clientWidth * pixelRatio;
+    canvas.height = canvas.clientHeight * pixelRatio;
+}
 function updateDataCanvas() {
     var canvas = document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
-        // Deal with devices with a pixel ratio != 1
-        const pixelRatio = window.devicePixelRatio;
-        canvas.width = canvas.clientWidth * pixelRatio;
-        canvas.height = canvas.clientHeight * pixelRatio;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.textAlign = 'center';
         ctx.font = "30px Roboto";
         ctx.fillStyle = "#FFFFFF";
@@ -37,6 +63,25 @@ function updateDataCanvas() {
         ctx.strokeStyle = "#FFFFFF";
         ctx.rect(1, 1, canvas.width - 2, canvas.height - 2);
         ctx.stroke();
+    }
+}
+function initWingListeners(canvas) {
+    wingGridTickBox.generatePath(canvas);
+    if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+        ['click', 'ontouchstart'].forEach(evt => {
+            canvas.addEventListener(evt, (e) => {
+                var rect = canvas.getBoundingClientRect(), // abs. size of element
+                scaleX = canvas.width / rect.width, // relationship bitmap vs. element for X
+                scaleY = canvas.height / rect.height; // relationship bitmap vs. element for Y
+                var mouseX = (e.clientX - rect.left) * scaleX; // scale mouse coordinates after they have
+                var mouseY = (e.clientY - rect.top) * scaleY; // been adjusted to be relative to element
+                if (ctx.isPointInPath(wingGridTickBox.path, mouseX, mouseY)) {
+                    wingGridTickBox.enabled = !wingGridTickBox.enabled;
+                    movedSliders();
+                }
+            }, false);
+        });
     }
 }
 // Read all sliders and update the wing canvas whenever any slider moves
@@ -52,7 +97,7 @@ function movedSliders() {
     // Update the calculations and visualisation
     updateWing(m, a, h);
 }
-// Visualise a supersonuc wing in ground effect on an HTML canvas
+// Visualise a supersonic wing in ground effect on an HTML canvas
 function updateWing(mach, alpha, h) {
     let displayMach = document.getElementById("display-mach");
     let displayAlpha = document.getElementById("display-alpha");
@@ -62,6 +107,7 @@ function updateWing(mach, alpha, h) {
     displayHeight.innerHTML = "Height: " + h + " m";
     var orange = "#FF7F50";
     var white = "#f5f5f5";
+    var lightGrey = "#808080";
     // Set adiabatic gas constant
     var gamma = 1.31;
     // Padding as fraction of width or height
@@ -77,17 +123,37 @@ function updateWing(mach, alpha, h) {
     var canvas = document.getElementById("canvas-wing-in-ground");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
-        // Deal with devices with a pixel ratio != 1
-        const pixelRatio = window.devicePixelRatio;
-        canvas.width = canvas.clientWidth * pixelRatio;
-        canvas.height = canvas.clientHeight * pixelRatio;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         // Pixels per meter
         var xScale = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
         var yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
         var scale = Math.min(xScale, yScale);
+        // Draw tick box to enable grids
+        // ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.stroke(wingGridTickBox.path);
+        if (wingGridTickBox.enabled) {
+            // Draw grid
+            var unitsInX = Math.floor(canvas.width / scale) + 1;
+            var unitsInY = Math.floor(canvas.height / scale) + 1;
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = lightGrey;
+            for (let i = 0; i < unitsInX; i++) {
+                ctx.moveTo(processX(i, canvas.width, xPadding, scale), 0);
+                ctx.lineTo(processX(i, canvas.width, xPadding, scale), canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < unitsInY; i++) {
+                ctx.moveTo(0, processY(i, canvas.height, yPadding, scale));
+                ctx.lineTo(canvas.width, processY(i, canvas.height, yPadding, scale));
+                ctx.stroke();
+            }
+        }
         // Draw Ground
         ctx.beginPath();
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = white;
         ctx.moveTo(0, (1 - (yPadding / 2)) * canvas.height);
         ctx.lineTo(canvas.width, (1 - (yPadding / 2)) * canvas.height);

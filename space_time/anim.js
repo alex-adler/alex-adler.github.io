@@ -37,7 +37,7 @@ class Circle {
                 this.path.arc(this.x0 * c.width + this.deltaX, this.y0 * c.height + this.deltaY, this.radius * min, 0, 2 * Math.PI);
                 ctx.fill(this.path);
 
-                //Draw a ring
+                // Draw a ring
                 if (this.ring) {
                     ctx.strokeStyle = this.colour;
                     ctx.lineWidth = 3;
