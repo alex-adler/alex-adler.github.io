@@ -8,9 +8,9 @@ class WingGridTickBox {
         this.enabled = true;
         this.size = 15;
         this.padding = 5;
-        this.path = new Path2D();
     }
     generatePath(canvas: HTMLCanvasElement) {
+        this.path = new Path2D();
         this.path.rect(canvas.width - (this.size + this.padding), this.padding, this.size, this.size);
     }
 }
@@ -22,8 +22,8 @@ initWingCanvas();
 initDataCanvas();
 
 // Redraw canvas' when they have changed size
-addEventListener("resize", updateDataCanvas);
-addEventListener("resize", movedSliders);
+addEventListener("resize", initDataCanvas);
+addEventListener("resize", initWingCanvas);
 
 // Generate a random number for the year
 function yearGlitch() {
@@ -130,7 +130,8 @@ function updateWing(mach: number, alpha: number, h: number) {
     displayHeight.innerHTML = "Height: " + h + " m";
 
     var orange = "#FF7F50";
-    var white = "#f5f5f5";
+    var white = "#ffffff";
+    var offwhite = "#f5f5f5";
     var lightGrey = "#808080";
 
     // Set adiabatic gas constant
@@ -163,11 +164,26 @@ function updateWing(mach: number, alpha: number, h: number) {
         // Draw tick box to enable grids
 
         // ctx.beginPath();
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = "#FFFFFF";
         ctx.stroke(wingGridTickBox.path);
 
+        ctx.textAlign = 'right';
+        ctx.font = "20px Roboto";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.padding), wingGridTickBox.padding + wingGridTickBox.size);
+
         if (wingGridTickBox.enabled) {
+            // Draw cross on grid tick box
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = white;
+            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.padding), wingGridTickBox.padding);
+            ctx.lineTo(canvas.width - wingGridTickBox.padding, wingGridTickBox.padding + wingGridTickBox.size);
+            ctx.moveTo(canvas.width - wingGridTickBox.padding, wingGridTickBox.padding);
+            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.padding), wingGridTickBox.padding + wingGridTickBox.size);
+            ctx.stroke();
+
             // Draw grid
             var unitsInX = Math.floor(canvas.width / scale) + 1;
             var unitsInY = Math.floor(canvas.height / scale) + 1;
@@ -192,7 +208,7 @@ function updateWing(mach: number, alpha: number, h: number) {
         // Draw Ground
         ctx.beginPath();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = white;
+        ctx.strokeStyle = offwhite;
         ctx.moveTo(0, (1 - (yPadding / 2)) * canvas.height);
         ctx.lineTo(canvas.width, (1 - (yPadding / 2)) * canvas.height);
         ctx.stroke();
@@ -221,7 +237,7 @@ function updateWing(mach: number, alpha: number, h: number) {
 
         // Line width of shocks
         ctx.lineWidth = 2;
-        ctx.strokeStyle = white;
+        ctx.strokeStyle = offwhite;
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
             var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
