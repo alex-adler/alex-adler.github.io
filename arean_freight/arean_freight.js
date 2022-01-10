@@ -130,24 +130,7 @@ function updateWing(mach, alpha, h) {
         var xScale = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
         var yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
         var scale = Math.min(xScale, yScale);
-        // Draw tick box to enable grids
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.stroke(wingGridTickBox.path);
-        ctx.textAlign = 'right';
-        ctx.font = window.devicePixelRatio * 20 + "px Roboto";
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
         if (wingGridTickBox.enabled) {
-            // Draw cross on grid tick box
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = white;
-            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding);
-            ctx.lineTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding + wingGridTickBox.size);
-            ctx.moveTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding);
-            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
-            ctx.stroke();
             // Calculate how many grid lines are required
             var unitsInX = Math.floor(canvas.width / scale) + 1;
             var unitsInY = Math.floor(canvas.height / scale) + 1;
@@ -177,7 +160,24 @@ function updateWing(mach, alpha, h) {
                 // Label each horizontal line
                 ctx.fillText(i + " m", 10, processY(i, canvas.height, yPadding, scale) - 10);
             }
+            // Draw cross on grid tick box
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = white;
+            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding);
+            ctx.lineTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding + wingGridTickBox.size);
+            ctx.moveTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding);
+            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
+            ctx.stroke();
         }
+        // Draw tick box to enable grids
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.stroke(wingGridTickBox.path);
+        ctx.textAlign = 'right';
+        ctx.font = window.devicePixelRatio * 20 + "px Roboto";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
         // Draw Ground
         ctx.beginPath();
         ctx.lineWidth = 2;
