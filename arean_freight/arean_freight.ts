@@ -1,17 +1,19 @@
 class WingGridTickBox {
     enabled: boolean;
     size: number;
-    padding: number;
+    xPadding: number;
+    yPadding: number;
     path: Path2D;
 
     constructor() {
         this.enabled = true;
         this.size = 15 * window.devicePixelRatio;
-        this.padding = 5 * window.devicePixelRatio;
+        this.xPadding = 5 * window.devicePixelRatio;
+        this.yPadding = 20 * window.devicePixelRatio;
     }
     generatePath(canvas: HTMLCanvasElement) {
         this.path = new Path2D();
-        this.path.rect(canvas.width - (this.size + this.padding), this.padding, this.size, this.size);
+        this.path.rect(canvas.width - (this.size + this.xPadding), this.yPadding, this.size, this.size);
     }
 }
 
@@ -169,37 +171,53 @@ function updateWing(mach: number, alpha: number, h: number) {
         ctx.textAlign = 'right';
         ctx.font = window.devicePixelRatio * 20 + "px Roboto";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.padding), wingGridTickBox.padding + wingGridTickBox.size);
+        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
 
         if (wingGridTickBox.enabled) {
             // Draw cross on grid tick box
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = white;
-            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.padding), wingGridTickBox.padding);
-            ctx.lineTo(canvas.width - wingGridTickBox.padding, wingGridTickBox.padding + wingGridTickBox.size);
-            ctx.moveTo(canvas.width - wingGridTickBox.padding, wingGridTickBox.padding);
-            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.padding), wingGridTickBox.padding + wingGridTickBox.size);
+            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding);
+            ctx.lineTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding + wingGridTickBox.size);
+            ctx.moveTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding);
+            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
             ctx.stroke();
 
-            // Draw grid
+            // Calculate how many grid lines are required
             var unitsInX = Math.floor(canvas.width / scale) + 1;
             var unitsInY = Math.floor(canvas.height / scale) + 1;
 
+            // Configure grid lines
             ctx.beginPath();
             ctx.lineWidth = 1;
             ctx.strokeStyle = lightGrey;
 
-            for (let i = 0; i < unitsInX; i++) {
+            // Configure grid label
+            ctx.textAlign = 'left';
+            ctx.font = window.devicePixelRatio * 15 + "px Roboto";
+            ctx.fillStyle = lightGrey;
+
+            // Draw and label a line for each integer x value
+            for (let i = -(Math.floor(unitsInX / 2) - 1); i < Math.floor(unitsInX / 2) + 1; i++) {
+                // Draw each vertical line
                 ctx.moveTo(processX(i, canvas.width, xPadding, scale), 0);
                 ctx.lineTo(processX(i, canvas.width, xPadding, scale), canvas.height);
                 ctx.stroke();
+
+                // Label each vertical line
+                ctx.fillText(i + " m", processX(i, canvas.width, xPadding, scale) + 10, 15 * window.devicePixelRatio);
             }
 
+            // Draw and label a line for each integer y value
             for (let i = 0; i < unitsInY; i++) {
+                // Draw each horizontal line
                 ctx.moveTo(0, processY(i, canvas.height, yPadding, scale));
                 ctx.lineTo(canvas.width, processY(i, canvas.height, yPadding, scale));
                 ctx.stroke();
+
+                // Label each horizontal line
+                ctx.fillText(i + " m", 10, processY(i, canvas.height, yPadding, scale) - 10);
             }
         }
 
