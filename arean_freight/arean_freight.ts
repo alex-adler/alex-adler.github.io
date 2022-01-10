@@ -17,11 +17,22 @@ class WingGridTickBox {
     }
 }
 
+class PointOnWing {
+    x: number;
+    y: number;
+    pressureRatio: number;
+    constructor(x: number, y: number, pressureRatio: number) {
+        this.x = x;
+        this.y = y;
+        this.pressureRatio = pressureRatio;
+    }
+}
+
 var wingGridTickBox = new WingGridTickBox();
 
 yearGlitch();
-initWingCanvas();
 initDataCanvas();
+initWingCanvas();
 
 // Redraw canvas' when they have changed size
 addEventListener("resize", initDataCanvas);
@@ -54,9 +65,9 @@ function initWingCanvas() {
 function initDataCanvas() {
     var dataCanvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
     initCanvas(dataCanvas);
-    updateDataCanvas();
 }
 
+// Set canvas resolution
 function initCanvas(canvas: HTMLCanvasElement) {
     // Deal with devices with a pixel ratio != 1
     const pixelRatio = window.devicePixelRatio;
@@ -64,16 +75,17 @@ function initCanvas(canvas: HTMLCanvasElement) {
     canvas.height = canvas.clientHeight * pixelRatio;
 }
 
-function updateDataCanvas() {
+function updateDataCanvas(liftCoeff: number, dragCoeff: number) {
     var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.textAlign = 'center';
+        ctx.textAlign = 'left';
         ctx.font = "30px Roboto";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText('This page is intentionally left blank', canvas.width / 2, canvas.height / 2);
+        ctx.fillText("Lift coefficient = " + liftCoeff, 0, canvas.height / 3);
+        ctx.fillText("Drag coefficient = " + dragCoeff, 0, 2 * canvas.height / 3);
 
         ctx.beginPath();
         ctx.lineWidth = 1;
@@ -253,6 +265,11 @@ function updateWing(mach: number, alpha: number, h: number) {
         // Line width of shocks
         ctx.lineWidth = 2;
         ctx.strokeStyle = offwhite;
+
+        // Variable for calculating forces
+        var lowerSurface: PointOnWing[] = [new PointOnWing(x, y, 1)];
+        var machInfinity = mach;
+
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
             var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
@@ -266,9 +283,11 @@ function updateWing(mach: number, alpha: number, h: number) {
             y = shock.y[1]
             mach = shock.shock.M2;
 
+            lowerSurface.push(new PointOnWing(x, y, shock.shock.p2_p1));
             // If the shock has passed the wing
             if (y !== 0 && x > 1)
                 break;
+
             shockCount++;
             if (shockCount > maxShocks) {
                 console.log("Too many shocks");
@@ -276,7 +295,11 @@ function updateWing(mach: number, alpha: number, h: number) {
             }
         }
     }
+
+    let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity);
+    updateDataCanvas(coefficients.c_l, coefficients.c_d);
 }
+
 
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
 function processY(y: number, height: number, padding: number, scale: number) {
@@ -384,4 +407,43 @@ function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m
     let x = [x1, x2];
     let y = [y1, y2];
     return { x, y, shock };
+}
+
+function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number) {
+    var xLast = lowerSurface[0].x;
+    var yLast = lowerSurface[0].y;
+
+    var lift = 0;
+    var drag = 0;
+
+    var currentPressureRatio = 1;
+
+    // Loop through each shock
+    for (let i = 0; i < lowerSurface.length; i++) {
+        // Caculate the pressure with respect to freestream
+        currentPressureRatio *= lowerSurface[i].pressureRatio;
+        // If the shock is on the wing
+        if (lowerSurface[i].y !== 0) {
+            let x = lowerSurface[i].x;
+            let y = lowerSurface[i].y;
+
+            // Still take into account influence from the last shock
+            if (x > 1) {
+                x = 1;
+                y = h;
+            }
+            // Create lift and drag per unit area
+            lift += (x - xLast) * currentPressureRatio;
+            drag += (yLast - y) * currentPressureRatio;
+
+            xLast = x;
+            yLast = y;
+        }
+    }
+
+    // Non-dimensionalise
+    var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
+    var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
+
+    return { c_l, c_d };
 }
