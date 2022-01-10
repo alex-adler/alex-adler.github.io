@@ -1,8 +1,8 @@
 class WingGridTickBox {
     constructor() {
         this.enabled = true;
-        this.size = 15;
-        this.padding = 5;
+        this.size = 15 * window.devicePixelRatio;
+        this.padding = 5 * window.devicePixelRatio;
     }
     generatePath(canvas) {
         this.path = new Path2D();
@@ -130,12 +130,11 @@ function updateWing(mach, alpha, h) {
         var yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
         var scale = Math.min(xScale, yScale);
         // Draw tick box to enable grids
-        // ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = "#FFFFFF";
         ctx.stroke(wingGridTickBox.path);
         ctx.textAlign = 'right';
-        ctx.font = "20px Roboto";
+        ctx.font = window.devicePixelRatio * 20 + "px Roboto";
         ctx.fillStyle = "#FFFFFF";
         ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.padding), wingGridTickBox.padding + wingGridTickBox.size);
         if (wingGridTickBox.enabled) {
