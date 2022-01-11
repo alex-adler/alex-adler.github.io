@@ -237,7 +237,7 @@ function updateWing(mach, alpha, h) {
             }
         }
     }
-    let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity);
+    let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha);
     updateDataCanvas(coefficients.c_l, coefficients.c_d);
 }
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
@@ -334,7 +334,7 @@ function getShockCoords(x1, y1, M, theta, wing_m, wing_c, gamma) {
     let y = [y1, y2];
     return { x, y, shock };
 }
-function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity) {
+function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta) {
     var xLast = lowerSurface[0].x;
     var yLast = lowerSurface[0].y;
     var lift = 0;
@@ -360,8 +360,63 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity) {
             yLast = y;
         }
     }
+    // Calculate force on the upper surface using shock expansion method of a flat plate
+    let expansion = calcExpansion(machInfinity, theta, gamma);
+    // Check expansion was successful
+    if (expansion.p2_p1 !== 0) {
+        lift -= (1 - lowerSurface[0].x) * expansion.p2_p1;
+        drag -= (lowerSurface[0].y - 1) * expansion.p2_p1;
+    }
     // Non-dimensionalise
     var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
     var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
     return { c_l, c_d };
+}
+function calcPrandtlMeyer(M, gamma) {
+    let M2 = Math.pow(M, 2);
+    return Math.sqrt((gamma + 1) / (gamma - 1)) * Math.atan(Math.sqrt(((gamma - 1) / (gamma + 1)) * (M2 - 1))) - Math.atan(Math.sqrt(M2 - 1));
+}
+function invPrandtlMeyer(nu, gamma) {
+    let nuMax = (Math.PI / 2) * (Math.sqrt((gamma + 1) / (gamma - 1)) - 1);
+    // Deflection greater than max turning angle
+    if (nu > nuMax)
+        return 0;
+    const machMax = 18;
+    const machStep = .01;
+    var machLeft = 0;
+    var nuLeft = 0;
+    var PMTable = [];
+    // Create the mach - Prandtl Meyer Table
+    const machLength = Math.floor(((machMax - 1) / machStep)) + 1;
+    var machArray = [...Array(machLength).keys()].map(x => (x * machStep) + 1);
+    machArray.forEach(mach => PMTable.push([mach, calcPrandtlMeyer(mach, gamma)]));
+    // Function for performing linear interpolation
+    const interp = (x, xp, fp) => fp[0] + (x - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0]);
+    // Look for theta and interpolate when passed or return 90 deg (normal shock)
+    for (let i = 0; i < PMTable.length; i++) {
+        if (PMTable[i][1] < nu) {
+            nuLeft = PMTable[i][1];
+            machLeft = PMTable[i][0];
+        }
+        else {
+            return interp(nu, [nuLeft, PMTable[i][1]], [machLeft, PMTable[i][0]]);
+        }
+    }
+    console.log("Invalid Prandtl Meyer angle");
+}
+function calcExpansion(M1, theta, gamma) {
+    let nu_M2 = theta + calcPrandtlMeyer(M1, gamma);
+    let M2 = invPrandtlMeyer(nu_M2, gamma);
+    let T2_T1 = 0;
+    let p2_p1 = 0;
+    let rho2_rho1 = 0;
+    // If the expansion was successful
+    if (M2 !== 0) {
+        let numerator = 1 + (gamma - 1) / 2 * Math.pow(M1, 2);
+        let denominator = 1 + (gamma - 1) / 2 * Math.pow(M2, 2);
+        T2_T1 = numerator / denominator;
+        p2_p1 = Math.pow((numerator / denominator), (gamma / (gamma - 1)));
+        rho2_rho1 = Math.pow((numerator / denominator), (1 / (gamma - 1)));
+    }
+    return { M2, T2_T1, p2_p1, rho2_rho1 };
 }
