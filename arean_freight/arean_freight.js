@@ -345,9 +345,7 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta) {
     var drag = 0;
     var currentPressureRatio = 1;
     // Loop through each shock
-    for (let i = 0; i < lowerSurface.length; i++) {
-        // Caculate the pressure with respect to freestream
-        currentPressureRatio *= lowerSurface[i].pressureRatio;
+    for (let i = 1; i < lowerSurface.length; i++) {
         // If the shock is on the wing
         if (lowerSurface[i].y !== 0) {
             let x = lowerSurface[i].x;
@@ -363,17 +361,20 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta) {
             xLast = x;
             yLast = y;
         }
+        // Calculate the pressure with respect to freestream
+        currentPressureRatio *= lowerSurface[i].pressureRatio;
     }
     // Calculate force on the upper surface using shock expansion method of a flat plate
     let expansion = calcExpansion(machInfinity, theta, gamma);
     // Check expansion was successful
     if (expansion.p2_p1 !== 0) {
         lift -= (1 - lowerSurface[0].x) * expansion.p2_p1;
-        drag -= (lowerSurface[0].y - 1) * expansion.p2_p1;
+        drag -= (lowerSurface[0].y - h) * expansion.p2_p1;
     }
     // Non-dimensionalise
     var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
     var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
+    // Calculate free stream values using the supersonic flat plate
     var c_lFreeStream = 4 * theta / Math.sqrt(Math.pow(machInfinity, 2) - 1);
     var c_dFreeStream = 4 * Math.pow(theta, 2) / Math.sqrt(Math.pow(machInfinity, 2) - 1);
     return { c_l, c_d, c_lFreeStream, c_dFreeStream };
