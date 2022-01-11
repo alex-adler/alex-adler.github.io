@@ -57,7 +57,7 @@ function initCanvas(canvas) {
     canvas.width = canvas.clientWidth * pixelRatio;
     canvas.height = canvas.clientHeight * pixelRatio;
 }
-function updateDataCanvas(liftCoeff, dragCoeff) {
+function updateDataCanvas(liftCoeff, dragCoeff, liftCoeffFree, dragCoeffFree) {
     var canvas = document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
@@ -65,8 +65,12 @@ function updateDataCanvas(liftCoeff, dragCoeff) {
         ctx.textAlign = 'left';
         ctx.font = "30px Roboto";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("Lift coefficient = " + liftCoeff, 0, canvas.height / 3);
-        ctx.fillText("Drag coefficient = " + dragCoeff, 0, 2 * canvas.height / 3);
+        ctx.fillText("SWIG Lift coefficient = " + liftCoeff.toFixed(4), 10, canvas.height / 8);
+        ctx.fillText("Free Lift coefficient = " + liftCoeffFree.toFixed(4), 10, 2 * canvas.height / 8);
+        ctx.fillText("Lift coefficient Gain = " + (100 * (liftCoeff - liftCoeffFree) / liftCoeffFree).toFixed(2) + "%", 10, 3 * canvas.height / 8);
+        ctx.fillText("SWIG Drag coefficient = " + dragCoeff.toFixed(4), 10, 5 * canvas.height / 8);
+        ctx.fillText("Free Drag coefficient = " + dragCoeffFree.toFixed(4), 10, 6 * canvas.height / 8);
+        ctx.fillText("Drag coefficient Gain = " + (100 * (dragCoeff - dragCoeffFree) / dragCoeffFree).toFixed(2) + "%", 10, 7 * canvas.height / 8);
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#FFFFFF";
@@ -238,7 +242,7 @@ function updateWing(mach, alpha, h) {
         }
     }
     let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha);
-    updateDataCanvas(coefficients.c_l, coefficients.c_d);
+    updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
 }
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
 function processY(y, height, padding, scale) {
@@ -370,7 +374,9 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta) {
     // Non-dimensionalise
     var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
     var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
-    return { c_l, c_d };
+    var c_lFreeStream = 4 * theta / Math.sqrt(Math.pow(machInfinity, 2) - 1);
+    var c_dFreeStream = 4 * Math.pow(theta, 2) / Math.sqrt(Math.pow(machInfinity, 2) - 1);
+    return { c_l, c_d, c_lFreeStream, c_dFreeStream };
 }
 function calcPrandtlMeyer(M, gamma) {
     let M2 = Math.pow(M, 2);

@@ -75,7 +75,7 @@ function initCanvas(canvas: HTMLCanvasElement) {
     canvas.height = canvas.clientHeight * pixelRatio;
 }
 
-function updateDataCanvas(liftCoeff: number, dragCoeff: number) {
+function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: number, dragCoeffFree: number) {
     var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
@@ -84,8 +84,12 @@ function updateDataCanvas(liftCoeff: number, dragCoeff: number) {
         ctx.textAlign = 'left';
         ctx.font = "30px Roboto";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("Lift coefficient = " + liftCoeff, 0, canvas.height / 3);
-        ctx.fillText("Drag coefficient = " + dragCoeff, 0, 2 * canvas.height / 3);
+        ctx.fillText("SWIG Lift coefficient = " + liftCoeff.toFixed(4), 10, canvas.height / 8);
+        ctx.fillText("Free Lift coefficient = " + liftCoeffFree.toFixed(4), 10, 2 * canvas.height / 8);
+        ctx.fillText("Lift coefficient Gain = " + (100 * (liftCoeff - liftCoeffFree) / liftCoeffFree).toFixed(2) + "%", 10, 3 * canvas.height / 8);
+        ctx.fillText("SWIG Drag coefficient = " + dragCoeff.toFixed(4), 10, 5 * canvas.height / 8);
+        ctx.fillText("Free Drag coefficient = " + dragCoeffFree.toFixed(4), 10, 6 * canvas.height / 8);
+        ctx.fillText("Drag coefficient Gain = " + (100 * (dragCoeff - dragCoeffFree) / dragCoeffFree).toFixed(2) + "%", 10, 7 * canvas.height / 8);
 
         ctx.beginPath();
         ctx.lineWidth = 1;
@@ -297,7 +301,7 @@ function updateWing(mach: number, alpha: number, h: number) {
     }
 
     let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha);
-    updateDataCanvas(coefficients.c_l, coefficients.c_d);
+    updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
 }
 
 
@@ -454,7 +458,10 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
     var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
 
-    return { c_l, c_d };
+    var c_lFreeStream = 4 * theta / Math.sqrt(Math.pow(machInfinity, 2) - 1);
+    var c_dFreeStream = 4 * Math.pow(theta, 2) / Math.sqrt(Math.pow(machInfinity, 2) - 1);
+
+    return { c_l, c_d, c_lFreeStream, c_dFreeStream };
 }
 
 function calcPrandtlMeyer(M: number, gamma: number) {
