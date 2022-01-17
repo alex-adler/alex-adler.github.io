@@ -1,19 +1,46 @@
-class WingGridTickBox {
+class TickBox {
+    name: string;
     enabled: boolean;
+    colour: string;
     size: number;
     xPadding: number;
     yPadding: number;
     path: Path2D;
 
-    constructor() {
+    constructor(name: string, pos: number) {
+        this.name = name;
         this.enabled = true;
+        this.colour = "#FFFFFF"
         this.size = 15 * window.devicePixelRatio;
         this.xPadding = 5 * window.devicePixelRatio;
         this.yPadding = 20 * window.devicePixelRatio;
+
+        // Stack multiple boxes vertically
+        this.yPadding *= pos;
+        this.yPadding += (pos - 1) * this.size;
     }
     generatePath(canvas: HTMLCanvasElement) {
         this.path = new Path2D();
         this.path.rect(canvas.width - (this.size + this.xPadding), this.yPadding, this.size, this.size);
+    }
+    drawBox(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = this.colour;
+        ctx.stroke(this.path);
+        ctx.textAlign = 'right';
+        ctx.font = window.devicePixelRatio * 20 + "px Roboto";
+        ctx.fillStyle = this.colour;
+        ctx.fillText(this.name, canvas.width - (this.size + 2 * this.xPadding), this.yPadding + this.size);
+    }
+    drawCross(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = this.colour;
+        ctx.moveTo(canvas.width - (this.size + this.xPadding), this.yPadding);
+        ctx.lineTo(canvas.width - this.xPadding, this.yPadding + this.size);
+        ctx.moveTo(canvas.width - this.xPadding, this.yPadding);
+        ctx.lineTo(canvas.width - (this.size + this.xPadding), this.yPadding + this.size);
+        ctx.stroke();
     }
 }
 
@@ -28,7 +55,8 @@ class PointOnWing {
     }
 }
 
-var wingGridTickBox = new WingGridTickBox();
+var wingGridTickBox = new TickBox("Grid", 1);
+var wingThicknessTickBox = new TickBox("Thickness", 2);
 
 yearGlitch();
 initDataCanvas();
@@ -101,6 +129,7 @@ function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: n
 
 function initWingListeners(canvas: HTMLCanvasElement) {
     wingGridTickBox.generatePath(canvas);
+    wingThicknessTickBox.generatePath(canvas);
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
         ['click', 'ontouchstart'].forEach(evt => {
@@ -116,6 +145,11 @@ function initWingListeners(canvas: HTMLCanvasElement) {
                     wingGridTickBox.enabled = !wingGridTickBox.enabled;
                     movedSliders();
                 }
+
+                if (ctx.isPointInPath(wingThicknessTickBox.path, mouseX, mouseY)) {
+                    wingThicknessTickBox.enabled = !wingThicknessTickBox.enabled;
+                    movedSliders();
+                }
             }, false)
         });
     }
@@ -127,6 +161,7 @@ function movedSliders() {
     let machSlider = <HTMLInputElement>document.getElementById("slider-mach");
     let alphaSlider = <HTMLInputElement>document.getElementById("slider-alpha");
     let heightSlider = <HTMLInputElement>document.getElementById("slider-height");
+    let kinkSlider = <HTMLInputElement>document.getElementById("slider-kink");
 
     // Apply scaling
     let m = Number(machSlider.value) / 100;
@@ -134,11 +169,11 @@ function movedSliders() {
     let h = Number(heightSlider.value) / 1000;
 
     // Update the calculations and visualisation
-    updateWing(m, a, h);
+    updateWing(m, a, h, kinkSlider);
 }
 
 // Visualise a supersonic wing in ground effect on an HTML canvas
-function updateWing(mach: number, alpha: number, h: number) {
+function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInputElement) {
     let displayMach = document.getElementById("display-mach");
     let displayAlpha = document.getElementById("display-alpha");
     let displayHeight = document.getElementById("display-height");
@@ -180,6 +215,8 @@ function updateWing(mach: number, alpha: number, h: number) {
         var scale = Math.min(xScale, yScale);
 
         if (wingGridTickBox.enabled) {
+            // Draw cross on grid tick box
+            wingGridTickBox.drawCross(canvas, ctx);
             // Calculate how many grid lines are required
             var unitsInX = Math.floor(canvas.width / scale) + 1;
             var unitsInY = Math.floor(canvas.height / scale) + 1;
@@ -215,26 +252,12 @@ function updateWing(mach: number, alpha: number, h: number) {
                 // Label each horizontal line
                 ctx.fillText(i + " m", 10, processY(i, canvas.height, yPadding, scale) - 10);
             }
-
-            // Draw cross on grid tick box
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = white;
-            ctx.moveTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding);
-            ctx.lineTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding + wingGridTickBox.size);
-            ctx.moveTo(canvas.width - wingGridTickBox.xPadding, wingGridTickBox.yPadding);
-            ctx.lineTo(canvas.width - (wingGridTickBox.size + wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
-            ctx.stroke();
         }
 
         // Draw tick box to enable grids
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.stroke(wingGridTickBox.path);
-        ctx.textAlign = 'right';
-        ctx.font = window.devicePixelRatio * 20 + "px Roboto";
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText('Grid', canvas.width - (wingGridTickBox.size + 2 * wingGridTickBox.xPadding), wingGridTickBox.yPadding + wingGridTickBox.size);
+        wingGridTickBox.drawBox(canvas, ctx);
+        // Draw tick box to enable thickness
+        wingThicknessTickBox.drawBox(canvas, ctx);
 
         // Draw Ground
         ctx.beginPath();
@@ -249,21 +272,65 @@ function updateWing(mach: number, alpha: number, h: number) {
 
         // Draw wing
         let wing = getWingCoords(h, alpha);
-        ctx.beginPath();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = orange;
-        ctx.moveTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
-        ctx.lineTo(processX(wing.x[1], canvas.width, xPadding, scale), processY(wing.y[1], canvas.height, yPadding, scale));
-        ctx.stroke();
+        const xLeadingEdge = wing.x[0];
+        const yLeadingEdge = wing.y[0];
 
-        var x = wing.x[0];
-        var y = wing.y[0];
+        const xTrailingEdge = wing.x[1];
+        const yTrailingEdge = wing.y[1];
+
+        // Get the text by the slider
+        var kinkSliderText = document.getElementById("display-kink");
+
+        var kinkAngle = 0;
+        var xKink = 0;
+
+        // Check if we are displaying the wing with thickness
+        if (wingThicknessTickBox.enabled) {
+            // Tick the box
+            wingThicknessTickBox.drawCross(canvas, ctx);
+
+            // Set the range of the slider to the physical limits 
+            kinkSlider.min = (alpha * 100).toString();
+            kinkSlider.max = ((Math.min(Math.PI / 2, calcMaxTurnAngle(mach, gamma)) - .1) * 100).toString();
+
+            kinkAngle = Number(kinkSlider.value) / 100;
+            xKink = 1 - (yLeadingEdge - h) / Math.atan(kinkAngle);
+
+            // Draw top surface of the wing
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.fillStyle = orange;
+            ctx.moveTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
+            ctx.lineTo(processX(xKink, canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
+            ctx.lineTo(processX(wing.x[1], canvas.width, xPadding, scale), processY(wing.y[1], canvas.height, yPadding, scale));
+            ctx.lineTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
+            ctx.closePath();
+            ctx.fill();
+
+            // Display slider and text
+            kinkSliderText.hidden = false;
+            kinkSlider.hidden = false;
+        } else {
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = orange;
+            ctx.moveTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
+            ctx.lineTo(processX(wing.x[1], canvas.width, xPadding, scale), processY(wing.y[1], canvas.height, yPadding, scale));
+            ctx.stroke();
+
+            // Hide everything 
+            kinkSliderText.hidden = true;
+            kinkSlider.hidden = true;
+        }
+
+        var x = xLeadingEdge;
+        var y = yLeadingEdge;
 
         // Straight line equation for the wing
-        var wingM = (wing.y[0] - wing.y[1]) / (wing.x[0] - wing.x[1]);
-        var wingC = wing.y[0] - wing.x[0] * wingM;
+        const wingM = (yLeadingEdge - yTrailingEdge) / (xLeadingEdge - xTrailingEdge);
+        const wingC = yLeadingEdge - xLeadingEdge * wingM;
 
-        var maxShocks = 20;
+        const maxShocks = 20;
         var shockCount = 0;
 
         // Line width of shocks
@@ -271,8 +338,8 @@ function updateWing(mach: number, alpha: number, h: number) {
         ctx.strokeStyle = offwhite;
 
         // Variable for calculating forces
-        var lowerSurface: PointOnWing[] = [new PointOnWing(x, y, 1)];
-        var machInfinity = mach;
+        var lowerSurface: PointOnWing[] = [new PointOnWing(xLeadingEdge, yLeadingEdge, 1)];
+        const machInfinity = mach;
 
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
@@ -298,10 +365,9 @@ function updateWing(mach: number, alpha: number, h: number) {
                 break;
             }
         }
+        let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
+        updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
     }
-
-    let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha);
-    updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
 }
 
 
@@ -399,7 +465,7 @@ function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m
 
             // If the shock will miss the wing, draw it off the canvas
             if (x2 > 1)
-                x2 = 2;
+                x2 = 10;
             y2 = shock_m * x2 + shock_c;
 
         }
@@ -413,7 +479,7 @@ function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m
     return { x, y, shock };
 }
 
-function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number, theta: number) {
+function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number, theta: number, kinkAngle: number, xKink: number) {
     var xLast = lowerSurface[0].x;
     var yLast = lowerSurface[0].y;
 
@@ -446,11 +512,16 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     }
 
     // Calculate force on the upper surface using shock expansion method of a flat plate
-    let expansion = calcExpansion(machInfinity, theta, gamma);
+    let expansion = calcExpansion(machInfinity, kinkAngle, gamma);
 
     // Check expansion was successful
     if (expansion.p2_p1 !== 0) {
-        lift -= (1 - lowerSurface[0].x) * expansion.p2_p1;
+        if (xKink != 0) {
+            lift -= (xKink - lowerSurface[0].x) * 1;
+            lift -= (1 - xKink) * expansion.p2_p1;
+        }
+        else
+            lift -= (1 - lowerSurface[0].x) * expansion.p2_p1;
         drag -= (lowerSurface[0].y - h) * expansion.p2_p1;
     }
 
@@ -470,14 +541,14 @@ function calcPrandtlMeyer(M: number, gamma: number) {
     return Math.sqrt((gamma + 1) / (gamma - 1)) * Math.atan(Math.sqrt(((gamma - 1) / (gamma + 1)) * (M2 - 1))) - Math.atan(Math.sqrt(M2 - 1));
 }
 
-function invPrandtlMeyer(nu: number, gamma: number) {
+function calcMaxTurnAngle(M: number, gamma: number) {
     let nuMax = (Math.PI / 2) * (Math.sqrt((gamma + 1) / (gamma - 1)) - 1);
-    // Deflection greater than max turning angle
-    if (nu > nuMax)
-        return 0;
+    return nuMax - calcPrandtlMeyer(M, gamma);
+}
 
-    const machMax = 18;
-    const machStep = .01;
+function invPrandtlMeyer(nu: number, gamma: number) {
+    const machMax = 65;
+    const machStep = .1;
     var machLeft = 0;
     var nuLeft = 0;
     var PMTable: number[][] = [];
