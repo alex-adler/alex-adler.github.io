@@ -259,6 +259,8 @@ function updateWing(mach, alpha, h, kinkSlider) {
             ctx.moveTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
             ctx.lineTo(processX(wing.x[1], canvas.width, xPadding, scale), processY(wing.y[1], canvas.height, yPadding, scale));
             ctx.stroke();
+            // Used for the turn angle in the expansion
+            kinkAngle = alpha;
             // Hide everything 
             kinkSliderText.hidden = true;
             kinkSlider.hidden = true;
