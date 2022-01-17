@@ -134,12 +134,12 @@ function initWingListeners(canvas: HTMLCanvasElement) {
         var ctx = canvas.getContext('2d');
         ['click', 'ontouchstart'].forEach(evt => {
             canvas.addEventListener(evt, (e: MouseEvent) => {
-                var rect = canvas.getBoundingClientRect(), // abs. size of element
+                const rect = canvas.getBoundingClientRect(), // abs. size of element
                     scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
                     scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
 
-                var mouseX = (e.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
-                var mouseY = (e.clientY - rect.top) * scaleY;   // been adjusted to be relative to element
+                const mouseX = (e.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
+                const mouseY = (e.clientY - rect.top) * scaleY;   // been adjusted to be relative to element
 
                 if (ctx.isPointInPath(wingGridTickBox.path, mouseX, mouseY)) {
                     wingGridTickBox.enabled = !wingGridTickBox.enabled;
@@ -158,15 +158,15 @@ function initWingListeners(canvas: HTMLCanvasElement) {
 // Read all sliders and update the wing canvas whenever any slider moves
 function movedSliders() {
     // Read all the sliders
-    let machSlider = <HTMLInputElement>document.getElementById("slider-mach");
-    let alphaSlider = <HTMLInputElement>document.getElementById("slider-alpha");
-    let heightSlider = <HTMLInputElement>document.getElementById("slider-height");
-    let kinkSlider = <HTMLInputElement>document.getElementById("slider-kink");
+    const machSlider = <HTMLInputElement>document.getElementById("slider-mach");
+    const alphaSlider = <HTMLInputElement>document.getElementById("slider-alpha");
+    const heightSlider = <HTMLInputElement>document.getElementById("slider-height");
+    const kinkSlider = <HTMLInputElement>document.getElementById("slider-kink");
 
     // Apply scaling
-    let m = Number(machSlider.value) / 100;
-    let a = Number(alphaSlider.value) / 100;
-    let h = Number(heightSlider.value) / 1000;
+    const m = Number(machSlider.value) / 100;
+    const a = Number(alphaSlider.value) / 100;
+    const h = Number(heightSlider.value) / 1000;
 
     // Update the calculations and visualisation
     updateWing(m, a, h, kinkSlider);
@@ -188,11 +188,11 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
     var lightGrey = "#808080";
 
     // Set adiabatic gas constant
-    var gamma = 1.31;
+    const gamma = 1.31;
 
     // Padding as fraction of width or height
-    var yPadding = .1;
-    var xPadding = .1;
+    const yPadding = .1;
+    const xPadding = .1;
 
     // Set the ranges of the x and y axis that msut be shown
     var yLim = [0, .2];
@@ -209,10 +209,10 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Pixels per meter
-        var xScale = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
-        var yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
+        const xScale = (1 - xPadding) * canvas.width / (xLim[1] - xLim[0]);
+        const yScale = (1 - yPadding) * canvas.height / (yLim[1] - yLim[0]);
 
-        var scale = Math.min(xScale, yScale);
+        const scale = Math.min(xScale, yScale);
 
         if (wingGridTickBox.enabled) {
             // Draw cross on grid tick box
@@ -365,30 +365,29 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
                 break;
             }
         }
-        let coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
+        const coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
         updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
     }
 }
 
-
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
 function processY(y: number, height: number, padding: number, scale: number) {
-    let offset_px = (1 - padding / 2) * height;
+    const offset_px = (1 - padding / 2) * height;
     return offset_px - y * scale;
 }
 
 // Add padding to x coordinates and scale them to the set limits
 function processX(x: number, width: number, padding: number, scale: number) {
     // Make sure the it is centered on x=.5 (halfway along the wing)
-    let x0 = (((1 - padding) * width / scale) - 1) / 2;
-    let offset_px = (padding / 2) * width;
+    const x0 = (((1 - padding) * width / scale) - 1) / 2;
+    const offset_px = (padding / 2) * width;
     return offset_px + (x + x0) * scale;
 }
 
 // Calculate the position of the wing 
 function getWingCoords(h: number, alpha: number) {
-    let x = [1 - Math.cos(alpha), 1]
-    let y = [h + Math.sin(alpha), h]
+    const x = [1 - Math.cos(alpha), 1]
+    const y = [h + Math.sin(alpha), h]
     return { x, y };
 }
 
