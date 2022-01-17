@@ -394,7 +394,18 @@ function getShockCoords(x1, y1, M, theta, wing_m, wing_c, gamma) {
     let y = [y1, y2];
     return { x, y, shock };
 }
-function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta, kinkAngle, xKink) {
+function calcFreeStreamFlatPlate(mach, alpha, gamma) {
+    const shock = calcObliqueShock(mach, alpha, gamma);
+    const expansion = calcExpansion(mach, alpha, gamma);
+    const normal = shock.p2_p1 - expansion.p2_p1;
+    const lift = normal * Math.cos(alpha);
+    const drag = normal * Math.sin(alpha);
+    const M2 = Math.pow(mach, 2);
+    const c_l = lift / (0.5 * gamma * M2);
+    const c_d = drag / (0.5 * gamma * M2);
+    return { c_l, c_d };
+}
+function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink) {
     var xLast = lowerSurface[0].x;
     var yLast = lowerSurface[0].y;
     var lift = 0;
@@ -433,19 +444,19 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, theta, kinkAngle,
         drag -= (lowerSurface[0].y - h) * expansion.p2_p1;
     }
     // Non-dimensionalise
-    var c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
-    var c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
-    // Calculate free stream values using the supersonic flat plate
-    var c_lFreeStream = 4 * theta / Math.sqrt(Math.pow(machInfinity, 2) - 1);
-    var c_dFreeStream = 4 * Math.pow(theta, 2) / Math.sqrt(Math.pow(machInfinity, 2) - 1);
+    const c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
+    const c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
+    const freestream = calcFreeStreamFlatPlate(machInfinity, alpha, gamma);
+    const c_lFreeStream = freestream.c_l;
+    const c_dFreeStream = freestream.c_d;
     return { c_l, c_d, c_lFreeStream, c_dFreeStream };
 }
 function calcPrandtlMeyer(M, gamma) {
-    let M2 = Math.pow(M, 2);
+    const M2 = Math.pow(M, 2);
     return Math.sqrt((gamma + 1) / (gamma - 1)) * Math.atan(Math.sqrt(((gamma - 1) / (gamma + 1)) * (M2 - 1))) - Math.atan(Math.sqrt(M2 - 1));
 }
 function calcMaxTurnAngle(M, gamma) {
-    let nuMax = (Math.PI / 2) * (Math.sqrt((gamma + 1) / (gamma - 1)) - 1);
+    const nuMax = (Math.PI / 2) * (Math.sqrt((gamma + 1) / (gamma - 1)) - 1);
     return nuMax - calcPrandtlMeyer(M, gamma);
 }
 function invPrandtlMeyer(nu, gamma) {
