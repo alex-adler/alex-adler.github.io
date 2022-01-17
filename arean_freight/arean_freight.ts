@@ -103,7 +103,7 @@ function initCanvas(canvas: HTMLCanvasElement) {
     canvas.height = canvas.clientHeight * pixelRatio;
 }
 
-function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: number, dragCoeffFree: number) {
+function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: number, dragCoeffFree: number, valid: boolean) {
     var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
@@ -119,6 +119,17 @@ function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: n
         ctx.fillText("Free Drag coefficient = " + dragCoeffFree.toFixed(4), 10, 6 * canvas.height / 8);
         ctx.fillText("Drag coefficient Gain = " + (100 * (dragCoeff - dragCoeffFree) / dragCoeffFree).toFixed(2) + "%", 10, 7 * canvas.height / 8);
 
+        if (!valid) {
+            ctx.textAlign = 'center';
+            ctx.font = "100px Roboto";
+            ctx.fillStyle = "#FF0000";
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(-Math.PI / 4);
+            ctx.fillText("INVALID", 0, 0);
+            ctx.restore();
+        }
+        // Draw outline
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#FFFFFF";
@@ -344,6 +355,9 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
         var lowerSurface: PointOnWing[] = [new PointOnWing(xLeadingEdge, yLeadingEdge, 1)];
         const machInfinity = mach;
 
+        // Variable for keeping track of whether the assumptions are still valid and the result is useful 
+        var valid = true;
+
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
             var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
@@ -362,14 +376,19 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
             if (y !== 0 && x > 1)
                 break;
 
+            // I don't know what happens if the flow goes subsonic under the wing (choked flow?)
+            if (mach < 1 && x < 1)
+                valid = false;
+
             shockCount++;
             if (shockCount > maxShocks) {
+                valid = false;
                 console.log("Too many shocks");
                 break;
             }
         }
         const coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
-        updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream);
+        updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream, valid);
     }
 }
 
