@@ -1,7 +1,7 @@
 class TickBox {
-    constructor(name, pos) {
+    constructor(name, pos, initialState) {
         this.name = name;
-        this.enabled = true;
+        this.enabled = initialState;
         this.colour = "#FFFFFF";
         this.size = 15 * window.devicePixelRatio;
         this.xPadding = 5 * window.devicePixelRatio;
@@ -41,8 +41,8 @@ class PointOnWing {
         this.pressureRatio = pressureRatio;
     }
 }
-var wingGridTickBox = new TickBox("Grid", 1);
-var wingThicknessTickBox = new TickBox("Thickness", 2);
+var wingGridTickBox = new TickBox("Grid", 1, true);
+var wingThicknessTickBox = new TickBox("Thickness", 2, false);
 yearGlitch();
 initDataCanvas();
 initWingCanvas();

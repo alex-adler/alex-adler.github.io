@@ -7,9 +7,9 @@ class TickBox {
     yPadding: number;
     path: Path2D;
 
-    constructor(name: string, pos: number) {
+    constructor(name: string, pos: number, initialState: boolean) {
         this.name = name;
-        this.enabled = true;
+        this.enabled = initialState;
         this.colour = "#FFFFFF"
         this.size = 15 * window.devicePixelRatio;
         this.xPadding = 5 * window.devicePixelRatio;
@@ -55,8 +55,8 @@ class PointOnWing {
     }
 }
 
-var wingGridTickBox = new TickBox("Grid", 1);
-var wingThicknessTickBox = new TickBox("Thickness", 2);
+var wingGridTickBox = new TickBox("Grid", 1, true);
+var wingThicknessTickBox = new TickBox("Thickness", 2, false);
 
 yearGlitch();
 initDataCanvas();
