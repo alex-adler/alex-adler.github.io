@@ -315,8 +315,12 @@ function updateWing(mach, alpha, h, kinkSlider) {
                 break;
             }
         }
-        const coefficients = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
-        updateDataCanvas(coefficients.c_l, coefficients.c_d, coefficients.c_lFreeStream, coefficients.c_dFreeStream, valid);
+        const wingProperties = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
+        let CoP = new Path2D();
+        ctx.fillStyle = "#4FFFDC";
+        CoP.arc(processX(wingProperties.centerOfPressure.x, canvas.width, xPadding, scale), processY(wingProperties.centerOfPressure.y, canvas.height, yPadding, scale), 3, 0, 2 * Math.PI);
+        ctx.fill(CoP);
+        updateDataCanvas(wingProperties.c_l, wingProperties.c_d, wingProperties.c_lFreeStream, wingProperties.c_dFreeStream, valid);
     }
 }
 // Canvas has 0,0 at the top left but I need it at the bottom left with a bit of padding and scaling
@@ -425,11 +429,16 @@ function calcFreeStreamFlatPlate(mach, alpha, gamma) {
     return { c_l, c_d };
 }
 function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink) {
-    var xLast = lowerSurface[0].x;
-    var yLast = lowerSurface[0].y;
+    const x_LE = lowerSurface[0].x;
+    const y_LE = lowerSurface[0].y;
+    var xLast = x_LE;
+    var yLast = y_LE;
     var lift = 0;
     var drag = 0;
     var currentPressureRatio = 1;
+    let xP = 0;
+    let yP = 0;
+    let P = 0;
     // Loop through each shock
     for (let i = 1; i < lowerSurface.length; i++) {
         // If the shock is on the wing
@@ -444,6 +453,10 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle,
             // Create lift and drag per unit area
             lift += (x - xLast) * currentPressureRatio;
             drag += (yLast - y) * currentPressureRatio;
+            // Integrate pressure for center of pressure calculations
+            xP += ((x - xLast) / 2 + xLast) * currentPressureRatio;
+            yP += ((yLast - y) / 2 + y) * currentPressureRatio;
+            P += currentPressureRatio;
             xLast = x;
             yLast = y;
         }
@@ -451,16 +464,23 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle,
         currentPressureRatio *= lowerSurface[i].pressureRatio;
     }
     // Calculate force on the upper surface using shock expansion method of a flat plate
-    let expansion = calcExpansion(machInfinity, kinkAngle, gamma);
+    const expansion = calcExpansion(machInfinity, kinkAngle, gamma);
     // Check expansion was successful
     if (expansion.p2_p1 !== 0) {
         if (xKink != 0) {
             lift -= (xKink - lowerSurface[0].x) * 1;
             lift -= (1 - xKink) * expansion.p2_p1;
+            // For center of pressure
+            xP += ((1 - xKink) / 2 + xKink) * expansion.p2_p1;
         }
-        else
+        else {
             lift -= (1 - lowerSurface[0].x) * expansion.p2_p1;
+            // For center of pressure
+            xP += ((1 - x_LE) / 2 + x_LE) * expansion.p2_p1;
+        }
         drag -= (lowerSurface[0].y - h) * expansion.p2_p1;
+        yP += ((y_LE - h) / 2 + h) * expansion.p2_p1;
+        P += expansion.p2_p1;
     }
     // Non-dimensionalise
     const c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
@@ -468,7 +488,8 @@ function calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle,
     const freestream = calcFreeStreamFlatPlate(machInfinity, alpha, gamma);
     const c_lFreeStream = freestream.c_l;
     const c_dFreeStream = freestream.c_d;
-    return { c_l, c_d, c_lFreeStream, c_dFreeStream };
+    const centerOfPressure = { x: xP / P, y: yP / P };
+    return { c_l, c_d, c_lFreeStream, c_dFreeStream, centerOfPressure };
 }
 function calcPrandtlMeyer(M, gamma) {
     const M2 = Math.pow(M, 2);
