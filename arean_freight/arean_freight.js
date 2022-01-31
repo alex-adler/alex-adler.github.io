@@ -259,6 +259,16 @@ function updateWing(mach, alpha, h, kinkSlider) {
             ctx.lineTo(processX(wing.x[0], canvas.width, xPadding, scale), processY(wing.y[0], canvas.height, yPadding, scale));
             ctx.closePath();
             ctx.fill();
+            // Calculate centroid of the triangle (center of mass if homogeneous)
+            let centroid = {
+                x: (wing.x[0] + wing.x[1] + xKink) / 3,
+                y: (2 * wing.y[0] + wing.y[1]) / 3
+            };
+            // Draw center of mass/gravity
+            let CoG = new Path2D();
+            ctx.fillStyle = "#a40e4c";
+            CoG.arc(processX(centroid.x, canvas.width, xPadding, scale), processY(centroid.y, canvas.height, yPadding, scale), 3, 0, 2 * Math.PI);
+            ctx.fill(CoG);
             // Display slider and text
             kinkSliderText.hidden = false;
             kinkSlider.hidden = false;
