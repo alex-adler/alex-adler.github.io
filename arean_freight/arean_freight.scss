@@ -4,6 +4,7 @@
     --grey: #222222;
     --white: whitesmoke;
     --orange: coral;
+    --max-width: 1500px;
 }
 
 @mixin theme-grey() {
@@ -40,8 +41,9 @@ h2 {
 }
 p {
     position: relative;
-    padding-left: 2vw;
+    padding: 0 2vw;
     font-size: 1em;
+    text-align: justify;
 }
 
 // Configure the color of Alex Adler, Projects, and About
@@ -93,18 +95,16 @@ p {
         position: relative;
         min-height: 100vh;
         @include theme-grey();
+        p {
+            margin: auto;
+            max-width: var(--max-width);
+        }
     }
 
     #atmo & {
         position: relative;
-        overflow: auto;
+        overflow: hidden;
         @include theme-orange();
-        p {
-            position: relative;
-            // top: -90vmin;
-            width: calc(94vw - calc(90vmin * 0.5625));
-            margin: 0;
-        }
     }
 
     #ground-effect & {
@@ -248,22 +248,38 @@ p {
     }
 }
 
+.atmo-flex {
+    display: flex;
+    justify-content: center;
+    max-width: var(--max-width);
+    margin: auto;
+    * {
+        flex-grow: 1;
+    }
+}
+
 #atmo-plot {
-    position: relative;
     float: right;
-    top: -7vmin;
-    margin-right: 2vw;
+    aspect-ratio: 9/16;
+    flex-grow: 2;
+    min-width: 300px;
 
-    height: 90vmin;
-    width: calc(90vmin * 0.5625);
+    input[type="checkbox"] {
+        appearance: none;
+        display: block;
 
-    background: var(--white);
-    background-image: url(plots/big_atmo.svg);
-    background-repeat: no-repeat;
-    background-size: cover;
+        height: 100%;
 
-    &:hover {
-        background-image: url(plots/small_atmo.svg);
+        // content: url(plots/big_atmo.svg);
+        background: var(--white);
+        background-image: url(plots/big_atmo.svg);
+        background-repeat: no-repeat;
+        background-size: contain;
+        &:checked {
+            // background: var(--grey);
+            // content: url(plots/small_atmo.svg);
+            background-image: url(plots/small_atmo.svg);
+        }
     }
 }
 
@@ -315,12 +331,9 @@ canvas {
             width: 100%;
             top: 0;
         }
-        #atmo-plot {
-            clear: both;
-            height: calc(95vw / 0.5625);
-            width: 95vw;
-            margin: 0 2.5vw;
-            top: 0;
+        .atmo-flex {
+            flex-direction: column;
+            align-items: center;
         }
     }
     p {
