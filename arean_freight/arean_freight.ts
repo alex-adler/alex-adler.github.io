@@ -103,21 +103,29 @@ function initCanvas(canvas: HTMLCanvasElement) {
     canvas.height = canvas.clientHeight * pixelRatio;
 }
 
-function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: number, dragCoeffFree: number, valid: boolean) {
+function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: number, dragCoeffFree: number, momentCoeff: number, valid: boolean) {
     var canvas = <HTMLCanvasElement>document.getElementById("canvas-wing-in-ground-graph");
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        let divisor = 8
+
+        if (momentCoeff !== 0) {
+            divisor = 10;
+            ctx.fillText("Pitching Moment coefficient = " + momentCoeff.toFixed(4), 10, 9 * canvas.height / divisor);
+        }
+
         ctx.textAlign = 'left';
         ctx.font = "30px Roboto";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("SWIG Lift coefficient = " + liftCoeff.toFixed(4), 10, canvas.height / 8);
-        ctx.fillText("Free Lift coefficient = " + liftCoeffFree.toFixed(4), 10, 2 * canvas.height / 8);
-        ctx.fillText("Lift coefficient Gain = " + (100 * (liftCoeff - liftCoeffFree) / liftCoeffFree).toFixed(2) + "%", 10, 3 * canvas.height / 8);
-        ctx.fillText("SWIG Drag coefficient = " + dragCoeff.toFixed(4), 10, 5 * canvas.height / 8);
-        ctx.fillText("Free Drag coefficient = " + dragCoeffFree.toFixed(4), 10, 6 * canvas.height / 8);
-        ctx.fillText("Drag coefficient Gain = " + (100 * (dragCoeff - dragCoeffFree) / dragCoeffFree).toFixed(2) + "%", 10, 7 * canvas.height / 8);
+        ctx.fillText("SWIG Lift coefficient = " + liftCoeff.toFixed(4), 10, canvas.height / divisor);
+        ctx.fillText("Free Lift coefficient = " + liftCoeffFree.toFixed(4), 10, 2 * canvas.height / divisor);
+        ctx.fillText("Lift coefficient Gain = " + (100 * (liftCoeff - liftCoeffFree) / liftCoeffFree).toFixed(2) + "%", 10, 3 * canvas.height / divisor);
+        ctx.fillText("SWIG Drag coefficient = " + dragCoeff.toFixed(4), 10, 5 * canvas.height / divisor);
+        ctx.fillText("Free Drag coefficient = " + dragCoeffFree.toFixed(4), 10, 6 * canvas.height / divisor);
+        ctx.fillText("Drag coefficient Gain = " + (100 * (dragCoeff - dragCoeffFree) / dragCoeffFree).toFixed(2) + "%", 10, 7 * canvas.height / divisor);
+
 
         if (!valid) {
             ctx.textAlign = 'center';
@@ -295,6 +303,8 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
         var kinkAngle = 0;
         var xKink = 0;
 
+        let centroid = { x: 0, y: 0 };
+
         // Check if we are displaying the wing with thickness
         if (wingThicknessTickBox.enabled) {
             // Tick the box
@@ -319,7 +329,7 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
             ctx.fill();
 
             // Calculate centroid of the triangle (center of mass if homogeneous)
-            let centroid = {
+            centroid = {
                 x: (wing.x[0] + wing.x[1] + xKink) / 3,
                 y: (2 * wing.y[0] + wing.y[1]) / 3
             }
@@ -399,12 +409,13 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
                 break;
             }
         }
-        const wingProperties = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink);
+        const wingProperties = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink, centroid.x, centroid.y);
         let CoP = new Path2D();
         ctx.fillStyle = "#4FFFDC";
         CoP.arc(processX(wingProperties.centerOfPressure.x, canvas.width, xPadding, scale), processY(wingProperties.centerOfPressure.y, canvas.height, yPadding, scale), 3, 0, 2 * Math.PI);
         ctx.fill(CoP);
-        updateDataCanvas(wingProperties.c_l, wingProperties.c_d, wingProperties.c_lFreeStream, wingProperties.c_dFreeStream, valid);
+
+        updateDataCanvas(wingProperties.c_l, wingProperties.c_d, wingProperties.c_lFreeStream, wingProperties.c_dFreeStream, wingProperties.c_m, valid);
     }
 }
 
@@ -533,7 +544,7 @@ function calcFreeStreamFlatPlate(mach: number, alpha: number, gamma: number) {
     return { c_l, c_d };
 }
 
-function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number, alpha: number, kinkAngle: number, xKink: number) {
+function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number, alpha: number, kinkAngle: number, xKink: number, centroidX: number, centroidY: number) {
     const x_LE = lowerSurface[0].x;
     const y_LE = lowerSurface[0].y;
 
@@ -606,9 +617,28 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     const c_lFreeStream = freestream.c_l;
     const c_dFreeStream = freestream.c_d;
 
+    const pressureMagnitude = Math.sqrt(Math.pow(lift, 2) + Math.pow(drag, 2));
     const centerOfPressure = { x: xP / P, y: yP / P };
 
-    return { c_l, c_d, c_lFreeStream, c_dFreeStream, centerOfPressure };
+    let c_m = 0;
+
+    // Calculate the pitching moment about the center of gravity
+    if (xKink !== 0) {
+        const momentArmLength = Math.sqrt(Math.pow(centroidX - centerOfPressure.x, 2) + Math.pow(centroidY - centerOfPressure.y, 2));
+        const momentArmAngle = - Math.atan((centroidY - centerOfPressure.y) / (centroidX - centerOfPressure.x));
+        const pressureAngle = Math.atan(lift / drag);
+
+        const torqueForceAngle = Math.PI / 2 - momentArmAngle;
+        const torqueForceMagnitude = pressureMagnitude * Math.cos(Math.PI / 2 - momentArmAngle - pressureAngle);
+        let moment = Math.abs(torqueForceMagnitude * momentArmLength);
+
+        // If anticlockwise make the moment negative
+        if (torqueForceMagnitude * Math.cos(torqueForceAngle) > 0)
+            moment = -moment;
+
+        c_m = moment / (0.5 * gamma * Math.pow(machInfinity, 2));
+    }
+    return { c_l, c_d, c_lFreeStream, c_dFreeStream, centerOfPressure, c_m };
 }
 
 function calcPrandtlMeyer(M: number, gamma: number) {
