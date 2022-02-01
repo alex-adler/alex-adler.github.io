@@ -11,6 +11,11 @@
     color: var(--white);
     a {
         color: var(--white);
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        &:hover {
+            text-decoration-style: solid;
+        }
     }
 }
 
