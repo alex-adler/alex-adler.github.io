@@ -88,13 +88,13 @@ function updateDataCanvas(liftCoeff, dragCoeff, liftCoeffFree, dragCoeffFree, mo
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let divisor = 8;
+        ctx.textAlign = 'left';
+        ctx.font = "30px Roboto";
+        ctx.fillStyle = "#FFFFFF";
         if (momentCoeff !== 0) {
             divisor = 10;
             ctx.fillText("Pitching Moment coefficient = " + momentCoeff.toFixed(4), 10, 9 * canvas.height / divisor);
         }
-        ctx.textAlign = 'left';
-        ctx.font = "30px Roboto";
-        ctx.fillStyle = "#FFFFFF";
         ctx.fillText("SWIG Lift coefficient = " + liftCoeff.toFixed(4), 10, canvas.height / divisor);
         ctx.fillText("Free Lift coefficient = " + liftCoeffFree.toFixed(4), 10, 2 * canvas.height / divisor);
         ctx.fillText("Lift coefficient Gain = " + (100 * (liftCoeff - liftCoeffFree) / liftCoeffFree).toFixed(2) + "%", 10, 3 * canvas.height / divisor);
