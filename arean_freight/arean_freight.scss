@@ -270,15 +270,9 @@ p {
 
         height: 100%;
 
-        // content: url(plots/big_atmo.svg);
-        background: var(--white);
-        background-image: url(plots/big_atmo.svg);
-        background-repeat: no-repeat;
-        background-size: contain;
+        content: url(plots/big_atmo.svg);
         &:checked {
-            // background: var(--grey);
-            // content: url(plots/small_atmo.svg);
-            background-image: url(plots/small_atmo.svg);
+            content: url(plots/small_atmo.svg);
         }
     }
 }

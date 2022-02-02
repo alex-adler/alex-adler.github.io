@@ -526,13 +526,10 @@ p {
   appearance: none;
   display: block;
   height: 100%;
-  background: var(--white);
-  background-image: url(plots/big_atmo.svg);
-  background-repeat: no-repeat;
-  background-size: contain;
+  content: url(plots/big_atmo.svg);
 }
 #atmo-plot input[type=checkbox]:checked {
-  background-image: url(plots/small_atmo.svg);
+  content: url(plots/small_atmo.svg);
 }
 
 canvas {
