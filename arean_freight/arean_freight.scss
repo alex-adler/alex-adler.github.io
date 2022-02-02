@@ -253,22 +253,18 @@ p {
     justify-content: center;
     max-width: var(--max-width);
     margin: auto;
-    * {
-        flex-grow: 1;
-    }
 }
 
 #atmo-plot {
     float: right;
     aspect-ratio: 9/16;
-    flex-grow: 2;
     min-width: 300px;
 
     input[type="checkbox"] {
         appearance: none;
         display: block;
 
-        height: 100%;
+        width: 100%;
 
         content: url(plots/big_atmo.svg);
         &:checked {
