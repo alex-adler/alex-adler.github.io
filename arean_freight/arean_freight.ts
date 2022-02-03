@@ -193,33 +193,39 @@ function updateDataCanvas(liftCoeff: number, dragCoeff: number, liftCoeffFree: n
     }
 }
 
+function wingClick(e: MouseEvent) {
+    let canvas = <HTMLCanvasElement>e.currentTarget;
+    var ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect(), // abs. size of element
+        scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
+        scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+    const mouseX = (e.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
+    const mouseY = (e.clientY - rect.top) * scaleY;   // been adjusted to be relative to element
+
+    // Clicked on the grid tick box
+    if (ctx.isPointInPath(wingGridTickBox.path, mouseX, mouseY)) {
+        wingGridTickBox.enabled = !wingGridTickBox.enabled;
+        movedSliders();
+    }
+
+    // Clicked on the thickness tick box
+    if (ctx.isPointInPath(wingThicknessTickBox.path, mouseX, mouseY)) {
+        wingThicknessTickBox.enabled = !wingThicknessTickBox.enabled;
+        movedSliders();
+    }
+}
+
 function initWingListeners(canvas: HTMLCanvasElement) {
     wingGridTickBox.generatePath(canvas);
     wingThicknessTickBox.generatePath(canvas);
     if (canvas.getContext) {
-        var ctx = canvas.getContext('2d');
         ['click', 'ontouchstart'].forEach(evt => {
-            canvas.addEventListener(evt, (e: MouseEvent) => {
-                const rect = canvas.getBoundingClientRect(), // abs. size of element
-                    scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for X
-                    scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for Y
-
-                const mouseX = (e.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
-                const mouseY = (e.clientY - rect.top) * scaleY;   // been adjusted to be relative to element
-
-                if (ctx.isPointInPath(wingGridTickBox.path, mouseX, mouseY)) {
-                    wingGridTickBox.enabled = !wingGridTickBox.enabled;
-                    movedSliders();
-                }
-
-                if (ctx.isPointInPath(wingThicknessTickBox.path, mouseX, mouseY)) {
-                    wingThicknessTickBox.enabled = !wingThicknessTickBox.enabled;
-                    movedSliders();
-                }
-            }, false)
+            canvas.addEventListener(evt, wingClick)
         });
     }
 }
+
 
 // Read all sliders and update the wing canvas whenever any slider moves
 function movedSliders() {
