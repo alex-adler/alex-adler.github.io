@@ -219,6 +219,21 @@
             <h3 id="display-kink">Kink Position</h3>
             <input type="range" min="0" max="90" value="45" class="slider" id="slider-kink" oninput="movedSliders()">
         </div>
+        <p> The orange line is a 2D wing section (imagine looking at a wing from the side) and it's flying a certain
+            height above the ground. Because it is going supersonic (the speed from the Mach slider),
+            shock waves are formed, represented by white lines. Whenever they hit something, they bounce. Each shock
+            changes the pressure under the wing, affecting how much lift and drag it produces.
+            <br><br>
+            You can give the wing
+            thickness with the toggle and adjust the position of where the top corner is. This position will affect the
+            center of mass (purple dot) and the <a
+                href="https://en.wikipedia.org/wiki/Prandtl%E2%80%93Meyer_expansion_fan" target="_blank"
+                rel="nofollow">expansion fan</a> which will slightly change the forces on the wing.
+            <br><br>
+            The blue dot is the <a href="https://www.grc.nasa.gov/www/k-12/airplane/cp.html" target="_blank"
+                rel="nofollow">center of pressure</a> and the distance between the two dots is representative of the
+            pitching moment on the wing or how much the wing wants to spin.
+        </p>
     </div>
     <div id="wip">
         <h2>Coming soon&trade;</h2>
