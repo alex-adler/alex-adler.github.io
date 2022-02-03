@@ -25,6 +25,26 @@
     color: var(--grey);
     a {
         color: var(--grey);
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        &:hover {
+            text-decoration-style: solid;
+        }
+    }
+}
+
+#arean-freight-navbar {
+    .home-navigation {
+        position: absolute;
+    }
+    .about-navigation {
+        position: absolute;
+    }
+    .main-navigation-toggle {
+        position: absolute;
+        + label {
+            position: absolute;
+        }
     }
 }
 
@@ -33,7 +53,6 @@ body {
 }
 
 h2 {
-    // margin: 5vmin 0;
     margin-top: 0;
     margin-bottom: 5vmin;
     padding-left: 2vw;
@@ -54,92 +73,46 @@ p {
     }
 }
 
-.parallax {
+#cover {
     height: 100vh;
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-perspective: 1px;
-    perspective: 1px;
-    scroll-behavior: smooth;
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #baccd8;
+    background-image: url("../arean_freight/naukluft_plateau/BG.png");
+
+    h1 {
+        text-align: center;
+        padding-top: 10vh;
+        margin-top: 0;
+    }
 }
 
-.parallax_group {
+#intro {
     position: relative;
     min-height: 100vh;
-    transform-style: preserve-3d;
-}
-
-.layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    min-height: 100vh;
-
-    #cover & {
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        h1 {
-            text-align: center;
-            margin-top: 10vh;
-        }
-    }
-
-    #intro & {
-        position: relative;
-        min-height: 100vh;
-        @include theme-grey();
-        p {
-            margin: auto;
-            max-width: var(--max-width);
-        }
-    }
-
-    #atmo & {
-        position: relative;
-        overflow: hidden;
-        @include theme-orange();
-    }
-
-    #ground-effect & {
-        position: relative;
-        @include theme-grey();
-    }
-
-    #wip & {
-        @include theme-orange();
+    @include theme-grey();
+    p {
+        margin: auto;
+        max-width: var(--max-width);
     }
 }
 
-.layer_0 {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+#atmo {
+    position: relative;
+    overflow: hidden;
+    @include theme-orange();
 }
 
-.layer_-1 {
-    -webkit-transform: translateZ(-1px) scale(2);
-    transform: translateZ(-1px) scale(2);
+#ground-effect {
+    position: relative;
+    @include theme-grey();
 }
 
-.layer_-2 {
-    -webkit-transform: translateZ(-2px) scale(3.1);
-    transform: translateZ(-2px) scale(3.1);
-}
-
-.layer_-3 {
-    -webkit-transform: translateZ(-3px) scale(4);
-    transform: translateZ(-3px) scale(4);
-}
-
-.layer_-4 {
-    -webkit-transform: translateZ(-4px) scale(5);
-    transform: translateZ(-4px) scale(5);
+#wip {
+    @include theme-orange();
+    height: 100vh;
 }
 
 // Format credit line for curiosity image
@@ -317,7 +290,7 @@ canvas {
     }
     #atmo {
         position: relative;
-        .layer p {
+        p {
             width: 100%;
             top: 0;
         }
