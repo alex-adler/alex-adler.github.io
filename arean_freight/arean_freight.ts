@@ -58,6 +58,52 @@ class PointOnWing {
 var wingGridTickBox = new TickBox("Grid", 1, true);
 var wingThicknessTickBox = new TickBox("Thickness", 2, false);
 
+
+// Set adiabatic gas constant
+const gamma = 1.31;
+
+// Generate a Mach number - Prandtl Meyer table
+var PMTable: number[][] = [];
+{
+    const machMax = 65;
+    const machStep = .1;
+
+    // Create the array storing the values  
+    const machLength = Math.floor(((machMax - 1) / machStep)) + 1;
+    const machArray = [...Array(machLength).keys()].map(x => (x * machStep) + 1);
+    machArray.forEach(mach => PMTable.push([mach, calcPrandtlMeyer(mach)]));
+}
+
+// Generate an Oblique Shock angle look up table [mach, shockwave angle, deflection angle]
+var shockTable: number[][][] = [];
+{
+    const machMax = 10.1;
+    const machStep = .1;
+    const betaStart = Math.PI / 180;
+    const betaMax = Math.PI / 2;
+    const betaStep = .05;
+
+    const machCount = Math.ceil(((machMax - 1) / machStep)) + 1;
+    const betaCount = Math.floor(((betaMax - betaStart) / betaStep)) + 1;
+
+    // Populate array
+    for (let i = 0; i < machCount; i++) {
+        const mach = i * machStep + 1;
+        // Add empty value to the array
+        shockTable.push([[]]);
+        for (let j = 0; j < betaCount; j++) {
+            const beta = j * betaStep + betaStart;
+            // Replace empty value with useful data
+            shockTable[i][j] = [mach, beta, oblique(beta, mach)];
+        }
+
+    }
+}
+// console.log(shockTable);
+
+// Function for performing linear interpolation
+const interp = (x: number, xp: number[], fp: number[]) => fp[0] + (x - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0]);
+
 yearGlitch();
 initDataCanvas();
 initWingCanvas();
@@ -207,9 +253,6 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
     var offwhite = "#f5f5f5";
     var lightGrey = "#808080";
 
-    // Set adiabatic gas constant
-    const gamma = 1.31;
-
     // Padding as fraction of width or height
     const yPadding = .1;
     const xPadding = .1;
@@ -313,7 +356,7 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
 
             // Set the range of the slider to the physical limits 
             kinkSlider.min = (alpha * 100).toString();
-            kinkSlider.max = ((Math.min(Math.PI / 2, calcMaxTurnAngle(mach, gamma)) - .1) * 100).toString();
+            kinkSlider.max = ((Math.min(Math.PI / 2, calcMaxTurnAngle(mach)) - .1) * 100).toString();
 
             kinkAngle = Number(kinkSlider.value) / 100;
             xKink = 1 - (yLeadingEdge - h) / Math.atan(kinkAngle);
@@ -383,7 +426,7 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
 
         // Loop until flow is no longer supersonic or it has reached the end of the wing
         while (mach > 1) {
-            var shock = getShockCoords(x, y, mach, alpha, wingM, wingC, gamma);
+            var shock = getShockCoords(x, y, mach, alpha, wingM, wingC);
 
             ctx.beginPath();
             ctx.moveTo(processX(shock.x[0], canvas.width, xPadding, scale), processY(shock.y[0], canvas.height, yPadding, scale));
@@ -410,7 +453,7 @@ function updateWing(mach: number, alpha: number, h: number, kinkSlider: HTMLInpu
                 break;
             }
         }
-        const wingProperties = calcLiftAndDrag(h, lowerSurface, gamma, machInfinity, alpha, kinkAngle, xKink, centroid.x, centroid.y);
+        const wingProperties = calcLiftAndDrag(h, lowerSurface, machInfinity, alpha, kinkAngle, xKink, centroid.x, centroid.y);
         let CoP = new Path2D();
         ctx.fillStyle = "#4FFFDC";
         CoP.arc(processX(wingProperties.centerOfPressure.x, canvas.width, xPadding, scale), processY(wingProperties.centerOfPressure.y, canvas.height, yPadding, scale), 3, 0, 2 * Math.PI);
@@ -442,43 +485,54 @@ function getWingCoords(h: number, alpha: number) {
 }
 
 // Calculates the deflection required for a given Mach number and shock angle beta
-function oblique(beta: number, M: number, gamma: number) {
+function oblique(beta: number, M: number) {
     return Math.atan((2 * (Math.pow(M, 2) * Math.pow(Math.sin(beta), 2) - 1)) / (Math.tan(beta) * (Math.pow(M, 2) * (gamma + Math.cos(2 * beta)) + 2)));
 }
 
 // Get the angle of a shock created by a mach M flow being deflected by theta radians
-function getObliqueShockAngle(M: number, theta: number, gamma: number) {
-    const betaStart = Math.PI / 180;
-    const betaMax = Math.PI / 2;
-    const betaStep = .001;
-    var thetaLeft = 0;
-    var betaLeft = 0;
-    var shockTable: number[][] = [];
-
-    // Create the theta - beta plot
-    const betaArrayLength = Math.floor(((betaMax - betaStart) / betaStep)) + 1;
-    var betaArray = [...Array(betaArrayLength).keys()].map(x => (x * betaStep) + betaStart);
-    betaArray.forEach(beta => shockTable.push([beta, oblique(beta, M, gamma)]));
-
-    // Function for performing linear interpolation
-    const interp = (x: number, xp: number[], fp: number[]) => fp[0] + (x - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0]);
-
-    // Look for theta and interpolate when passed or return 90 deg (normal shock)
+function getObliqueShockAngle(M: number, theta: number) {
+    let machBounds = [0, 0];
+    // Look for mach number
     for (let i = 0; i < shockTable.length; i++) {
-        if (shockTable[i][1] < theta) {
-            thetaLeft = shockTable[i][1];
-            betaLeft = shockTable[i][0];
+        if (shockTable[i][0][0] > M) {
+            machBounds[1] = i;
+            break;
         }
         else {
-            return interp(theta, [thetaLeft, shockTable[i][1]], [betaLeft, shockTable[i][0]])
+            machBounds[0] = i;
         }
     }
-    return Math.PI / 2;
+
+    let betaBounds = [0, 0];
+    // Try for each mach bound
+    for (let i = 0; i < 2; i++) {
+        const mach = machBounds[i];
+        let thetaLeft = 0;
+        let betaLeft = 0;
+        // Look for theta (deflection angle) and interpolate when passed
+        for (let j = 0; j < shockTable[mach].length; j++) {
+            if (shockTable[mach][j][2] < theta) {
+                thetaLeft = shockTable[mach][j][2];
+                betaLeft = shockTable[mach][j][1];
+            }
+            else {
+                betaBounds[i] = interp(theta, [thetaLeft, shockTable[mach][j][2]], [betaLeft, shockTable[mach][j][1]]);
+                break;
+            }
+        }
+    }
+    // If the value awsn't found, retrn 90 deg (normal shock)
+    if (betaBounds[0] === 0 || betaBounds[1] === 0)
+        return Math.PI / 2;
+    else {
+        // Interpolate between mach bounds
+        return interp(M, [shockTable[machBounds[0]][0][0], shockTable[machBounds[1]][0][0]], [betaBounds[0], betaBounds[1]]);
+    }
 }
 
 // Returns (M2, shock angle, p2/p1, p02/p01, rho2/rho1, T2/T1)
-function calcObliqueShock(M1: number, theta: number, gamma: number) {
-    let beta = getObliqueShockAngle(M1, theta, gamma);
+function calcObliqueShock(M1: number, theta: number) {
+    let beta = getObliqueShockAngle(M1, theta);
     let M1n2 = Math.pow(M1, 2) * Math.pow(Math.sin(beta), 2);
     let M2 = Math.sqrt(((gamma - 1) * M1n2 + 2) / ((2 * gamma * M1n2 - (gamma - 1)) * Math.pow(Math.sin(beta - theta), 2)));
     let p2_p1 = (2 * gamma * M1n2 - (gamma - 1)) / (gamma + 1);
@@ -489,8 +543,8 @@ function calcObliqueShock(M1: number, theta: number, gamma: number) {
 }
 
 // Get the coordinates needed to draw a shock wave
-function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m: number, wing_c: number, gamma: number) {
-    var shock = calcObliqueShock(M, theta, gamma);
+function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m: number, wing_c: number) {
+    var shock = calcObliqueShock(M, theta);
 
     var x2, y2;
 
@@ -528,9 +582,9 @@ function getShockCoords(x1: number, y1: number, M: number, theta: number, wing_m
     return { x, y, shock };
 }
 
-function calcFreeStreamFlatPlate(mach: number, alpha: number, gamma: number) {
-    const shock = calcObliqueShock(mach, alpha, gamma);
-    const expansion = calcExpansion(mach, alpha, gamma);
+function calcFreeStreamFlatPlate(mach: number, alpha: number) {
+    const shock = calcObliqueShock(mach, alpha);
+    const expansion = calcExpansion(mach, alpha);
 
     const normal = shock.p2_p1 - expansion.p2_p1;
 
@@ -545,7 +599,7 @@ function calcFreeStreamFlatPlate(mach: number, alpha: number, gamma: number) {
     return { c_l, c_d };
 }
 
-function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, machInfinity: number, alpha: number, kinkAngle: number, xKink: number, centroidX: number, centroidY: number) {
+function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], machInfinity: number, alpha: number, kinkAngle: number, xKink: number, centroidX: number, centroidY: number) {
     const x_LE = lowerSurface[0].x;
     const y_LE = lowerSurface[0].y;
 
@@ -590,7 +644,7 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     }
 
     // Calculate force on the upper surface using shock expansion method of a flat plate
-    const expansion = calcExpansion(machInfinity, kinkAngle, gamma);
+    const expansion = calcExpansion(machInfinity, kinkAngle);
 
     // Check expansion was successful
     if (expansion.p2_p1 !== 0) {
@@ -614,7 +668,7 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     const c_l = lift / (0.5 * gamma * Math.pow(machInfinity, 2));
     const c_d = drag / (0.5 * gamma * Math.pow(machInfinity, 2));
 
-    const freestream = calcFreeStreamFlatPlate(machInfinity, alpha, gamma);
+    const freestream = calcFreeStreamFlatPlate(machInfinity, alpha);
     const c_lFreeStream = freestream.c_l;
     const c_dFreeStream = freestream.c_d;
 
@@ -642,31 +696,19 @@ function calcLiftAndDrag(h: number, lowerSurface: PointOnWing[], gamma: number, 
     return { c_l, c_d, c_lFreeStream, c_dFreeStream, centerOfPressure, c_m };
 }
 
-function calcPrandtlMeyer(M: number, gamma: number) {
+function calcPrandtlMeyer(M: number) {
     const M2 = Math.pow(M, 2);
     return Math.sqrt((gamma + 1) / (gamma - 1)) * Math.atan(Math.sqrt(((gamma - 1) / (gamma + 1)) * (M2 - 1))) - Math.atan(Math.sqrt(M2 - 1));
 }
 
-function calcMaxTurnAngle(M: number, gamma: number) {
+function calcMaxTurnAngle(M: number) {
     const nuMax = (Math.PI / 2) * (Math.sqrt((gamma + 1) / (gamma - 1)) - 1);
-    return nuMax - calcPrandtlMeyer(M, gamma);
+    return nuMax - calcPrandtlMeyer(M);
 }
 
-function invPrandtlMeyer(nu: number, gamma: number) {
-    const machMax = 65;
-    const machStep = .1;
-    var machLeft = 0;
-    var nuLeft = 0;
-    var PMTable: number[][] = [];
-
-    // Create the mach - Prandtl Meyer Table
-    const machLength = Math.floor(((machMax - 1) / machStep)) + 1;
-    var machArray = [...Array(machLength).keys()].map(x => (x * machStep) + 1);
-    machArray.forEach(mach => PMTable.push([mach, calcPrandtlMeyer(mach, gamma)]));
-
-    // Function for performing linear interpolation
-    const interp = (x: number, xp: number[], fp: number[]) => fp[0] + (x - xp[0]) * (fp[1] - fp[0]) / (xp[1] - xp[0]);
-
+function invPrandtlMeyer(nu: number) {
+    let machLeft = 0;
+    let nuLeft = 0;
     // Look for theta and interpolate when passed or return 90 deg (normal shock)
     for (let i = 0; i < PMTable.length; i++) {
         if (PMTable[i][1] < nu) {
@@ -680,9 +722,9 @@ function invPrandtlMeyer(nu: number, gamma: number) {
     console.log("Invalid Prandtl Meyer angle");
 }
 
-function calcExpansion(M1: number, theta: number, gamma: number) {
-    let nu_M2 = theta + calcPrandtlMeyer(M1, gamma);
-    let M2 = invPrandtlMeyer(nu_M2, gamma);
+function calcExpansion(M1: number, theta: number) {
+    let nu_M2 = theta + calcPrandtlMeyer(M1);
+    let M2 = invPrandtlMeyer(nu_M2);
     let T2_T1 = 0;
     let p2_p1 = 0;
     let rho2_rho1 = 0;
