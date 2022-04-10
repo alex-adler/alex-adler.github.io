@@ -292,9 +292,6 @@ let dragStart = { x: 0, y: 0 };
 
 let mouseMovement = { x: 0, y: 0 };
 
-// Redraw canvas when it has changed size
-addEventListener("resize", draw);
-
 function draw() {
     canvas.width = canvas.clientWidth * pixelRatio;
     canvas.height = canvas.clientHeight * pixelRatio;
@@ -358,7 +355,7 @@ function onPointerUp(e: MouseEvent | TouchEvent) {
     // Only open or close if the user isn't panning
     mouseMovement.x -= getEventLocation(e).x / cameraZoom;
     mouseMovement.y -= getEventLocation(e).y / cameraZoom;
-    if (mouseMovement.x == 0 && mouseMovement.y == 0) {
+    if (Math.abs(mouseMovement.x) < 10 && Math.abs(mouseMovement.y) < 10) {
         projects.forEach(p => {
             p.checkClick(getEventLocation(e).x, getEventLocation(e).y);
         });
@@ -424,6 +421,7 @@ function adjustZoom(zoomAmount: number, zoomFactor?: number) {
     }
 }
 
+canvas.addEventListener("resize", draw);
 canvas.addEventListener('mousedown', onPointerDown);
 canvas.addEventListener('touchstart', (e) => handleTouch(e, onPointerDown));
 canvas.addEventListener('mouseup', onPointerUp);
