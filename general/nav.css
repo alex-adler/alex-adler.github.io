@@ -204,6 +204,12 @@ a {
   transition: all 0.5s;
 }
 
+.menu-element-projects:hover {
+  color: #ffffff;
+  text-shadow: 0 0 15px #ffffff;
+  transition: all 0.5s;
+}
+
 .main-content {
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);

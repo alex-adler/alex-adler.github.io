@@ -220,6 +220,10 @@ a {
   @include menu-element($colour: #1d749c);
 }
 
+.menu-element-projects:hover {
+  @include menu-element($colour: #ffffff);
+}
+
 .main-content {
   transform: translateX(0);
   transition: transform calc(var(--nav-duration) * 2) var(--ease);

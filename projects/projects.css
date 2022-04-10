@@ -1,0 +1,26 @@
+:root {
+  --grey: #222222;
+  --white: whitesmoke;
+  --orange: coral;
+}
+
+body {
+  margin: 0;
+  background-color: var(--grey);
+}
+
+.base-navigation {
+  fill: var(--white);
+}
+.base-navigation a {
+  color: var(--white);
+}
+
+canvas {
+  position: absolute;
+  background-color: var(--grey);
+  width: 100vw;
+  height: 100vh;
+}
+
+/*# sourceMappingURL=projects.css.map */
