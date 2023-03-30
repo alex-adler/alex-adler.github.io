@@ -446,8 +446,8 @@ function calcObliqueShock(M1, theta) {
     let M2 = Math.sqrt(((gamma - 1) * M1n2 + 2) / ((2 * gamma * M1n2 - (gamma - 1)) * Math.pow(Math.sin(beta - theta), 2)));
     let p2_p1 = (2 * gamma * M1n2 - (gamma - 1)) / (gamma + 1);
     let rho2_rho1 = ((gamma + 1) * M1n2) / ((gamma - 1) * M1n2 + 2);
-    let T2_T1 = ((2 * gamma * M1n2 - (gamma - 1)) * ((gamma - 1) * M1n2 + 2)) / (Math.pow((gamma + 1), 2) * M1n2);
-    let p02_p01 = Math.pow(rho2_rho1, (gamma / (gamma - 1))) * Math.pow((p2_p1), (-1 / (gamma - 1)));
+    let T2_T1 = ((2 * gamma * M1n2 - (gamma - 1)) * ((gamma - 1) * M1n2 + 2)) / ((gamma + 1) ** 2 * M1n2);
+    let p02_p01 = rho2_rho1 ** (gamma / (gamma - 1)) * (p2_p1) ** (-1 / (gamma - 1));
     return { M2, beta, p2_p1, p02_p01, rho2_rho1, T2_T1 };
 }
 // Get the coordinates needed to draw a shock wave

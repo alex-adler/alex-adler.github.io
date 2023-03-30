@@ -5,6 +5,7 @@
   },
   "include": [
     "arean_freight/**/*",
+    "trains/**/*",
     "projects/**/*",
     "testing/**/*"
   ]
