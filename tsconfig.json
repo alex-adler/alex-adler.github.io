@@ -1,12 +1,7 @@
 {
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "target": "ES2017"
-  },
-  "include": [
-    "arean_freight/**/*",
-    "trains/**/*",
-    "projects/**/*",
-    "testing/**/*"
-  ]
+	"compilerOptions": {
+		"noImplicitAny": true,
+		"target": "ES2017"
+	},
+	"include": ["arean_freight/**/*", "space_time/**/*", "trains/**/*", "projects/**/*", "testing/**/*"]
 }
