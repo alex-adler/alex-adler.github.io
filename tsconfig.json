@@ -3,5 +3,5 @@
 		"noImplicitAny": true,
 		"target": "ES2017"
 	},
-	"include": ["arean_freight/**/*", "space_time/**/*", "trains/**/*", "projects/**/*", "testing/**/*"]
+	"include": ["arean_freight/**/*", "space_time/**/*", "trains/**/*", "transit/**/*", "projects/**/*", "testing/**/*"]
 }

@@ -7,7 +7,7 @@
 		<link rel="stylesheet" href="general/nav.css" />
 		<link rel="stylesheet" href="transit/transit.css" />
 		<script src="general/nav.js"></script>
-		<!-- <script src="transit/transit.js"></script> -->
+		<script type="module" src="transit/transit.js"></script>
 
 		<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
@@ -123,6 +123,11 @@
 
 	<main class="main-content">
 		<h1>Transit</h1>
+
+		<div class="drop-down">
+			<label for="location">Select your location:</label>
+			<select name="location" id="location-drop-down"></select>
+		</div>
 
 		<body>
 			<table id="output-table">

@@ -22,6 +22,15 @@ class Celestial {
 
 	leapYearFreq_hd: number[]; // Human days between leap years for each interval
 	leapYearBlocks_ms: number[]; // For each leap year interval, how many ms between a leap year
+
+	// Physical properties
+	radius: number;
+	gravity: number;
+
+	// Orbital properties
+	semiMajorAxis_km: number;
+	period_ms: number;
+	meanLongitude: number;
 	constructor(name: string, dayLength_h: number, yearLength_h: number, initialYearProgress = 0, initialWeekDay = 0) {
 		this.name = name;
 
