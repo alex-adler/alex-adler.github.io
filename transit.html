@@ -5,16 +5,16 @@
 		<meta name="viewport" content="initial-scale=1.0" />
 
 		<link rel="stylesheet" href="general/nav.css" />
-		<link rel="stylesheet" href="trains/trains.css" />
-		<script type="application/javascript" src="general/nav.js"></script>
-		<script type="application/javascript" src="trains/trains.js"></script>
+		<link rel="stylesheet" href="transit/transit.css" />
+		<script src="general/nav.js"></script>
+		<!-- <script src="transit/transit.js"></script> -->
 
 		<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
 		<link rel="manifest" href="/favicon/site.webmanifest" />
 
-		<title>Trains</title>
+		<title>Transit</title>
 	</head>
 
 	<nav class="home-navigation base-navigation">
@@ -122,17 +122,15 @@
 	</nav>
 
 	<main class="main-content">
-		<h1>Space Train</h1>
+		<h1>Transit</h1>
 
-		<body onload="generate()">
+		<body>
 			<table id="output-table">
 				<tr>
-					<th>Celestial Body</th>
-					<th>Escape Velocity (km/s)</th>
-					<th>Vertical Acceleration (m/s)</th>
-					<th>Vertical Acceleration (g)</th>
-					<th>Acceleration Time (s)</th>
-					<th>Acceleration Distance (circumferences)</th>
+					<th>Destination</th>
+					<th>Journey type</th>
+					<th>Transit time (Earth Days)</th>
+					<th>Δv requirment (km/s)</th>
 				</tr>
 			</table>
 		</body>

@@ -192,7 +192,7 @@ a {
   transition: all 0.5s;
 }
 
-.menu-element-pit:hover {
+.menu-element-transit:hover {
   color: #cc75d4;
   text-shadow: 0 0 15px #cc75d4;
   transition: all 0.5s;
