@@ -24,11 +24,25 @@ class Celestial {
 	leapYearBlocks_ms: number[]; // For each leap year interval, how many ms between a leap year
 
 	// Physical properties
-	radius: number;
-	gravity: number;
+	radius_km: number;
+	surface_gravity_ms: number;
+	GM_km3_s2: number;
 
-	// Orbital properties
-	semiMajorAxis_km: number;
+	// Orbital elements at J2000
+	semiMajorAxis_0_km: number;
+	eccentricity_0: number;
+	inclination_0_deg: number;
+	longitudOfAscendingNode_0_deg: number;
+	argumentOfPeriapsis_0_deg: number;
+	trueAnomaly_0_deg: number;
+	// Orbital elements centeniary rates
+	semiMajorAxis_km_Cy: number;
+	eccentricity_Cy: number;
+	inclination_sec_Cy: number;
+	longitudOfAscendingNode_sec_Cy: number;
+	argumentOfPeriapsis_sec_Cy: number;
+	trueAnomaly_sec_Cy: number;
+
 	period_ms: number;
 	meanLongitude: number;
 	constructor(name: string, dayLength_h: number, yearLength_h: number, initialYearProgress = 0, initialWeekDay = 0) {
@@ -118,6 +132,30 @@ class Celestial {
 			}
 		}
 	}
+	setPhysicalParameters(GM_km3_S2: number, radius_km: number) {
+		this.GM_km3_s2 = GM_km3_S2;
+		this.radius_km = radius_km;
+		this.surface_gravity_ms = (GM_km3_S2 / radius_km ** 2) * 1000;
+	}
+	setJ2000OrbitalElements(a_km: number, e: number, i_deg: number, longitudeOfAscendingNode_deg: number, argumentOfPeriapsis_deg: number) {
+		this.semiMajorAxis_0_km = a_km;
+		this.eccentricity_0 = e;
+		this.inclination_0_deg = i_deg;
+		this.longitudOfAscendingNode_0_deg = longitudeOfAscendingNode_deg;
+		this.argumentOfPeriapsis_0_deg = argumentOfPeriapsis_deg;
+		this.trueAnomaly_0_deg = 0;
+
+		this.semiMajorAxis_km_Cy = 0;
+		this.eccentricity_Cy = 0;
+		this.inclination_sec_Cy = 0;
+		this.longitudOfAscendingNode_sec_Cy = 0;
+		this.argumentOfPeriapsis_sec_Cy = 0;
+		this.trueAnomaly_sec_Cy = 0;
+	}
+	setTrueAnomaly(trueAnomaly_deg: number, trueAnomaly_sec_Cy: number = 0) {
+		this.trueAnomaly_0_deg = trueAnomaly_deg;
+		this.trueAnomaly_sec_Cy = trueAnomaly_sec_Cy;
+	}
 }
 
 let bodies: { [name: string]: Celestial } = {};
@@ -139,6 +177,15 @@ bodies["Enceladus"] = new Celestial("Enceladus", 1.370218 * 24, 10759.22 * 24, 0
 bodies["Titania"] = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0, 0);
 
 bodies["Triton"] = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0);
+
+// Data from https://ssd.jpl.nasa.gov/horizons/app.html#/
+bodies["Earth"].setPhysicalParameters(398600.435436, 6378.137);
+bodies["Earth"].setJ2000OrbitalElements(1.496534962738141e8, 1.704239718110438e-2, 2.668809336274974e-4, 1.639748712430063e2, 2.977671795415902e2);
+bodies["Earth"].setTrueAnomaly(3.581260865474801e2);
+
+bodies["Mars"].setPhysicalParameters(42828.375214, 3396.19);
+bodies["Mars"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
+bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
 
 let jsonString = "export const space_time = ";
 jsonString += JSON.stringify(bodies);
