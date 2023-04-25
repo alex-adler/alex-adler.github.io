@@ -31,3 +31,18 @@ td {
 	font-family: "Roboto Mono", monospace;
 	text-align: center;
 }
+
+canvas {
+	width: 100vmin;
+	height: 100vmin;
+	background: #222222;
+
+	padding: 0;
+	margin: auto;
+	display: block;
+	position: relative;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
