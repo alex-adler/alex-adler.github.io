@@ -1,5 +1,0 @@
-Compiler for scss:
-sass --watch css/
-
-Compiler for typescript (after ensuring tsconfig.json is correct):
-tsc -w
