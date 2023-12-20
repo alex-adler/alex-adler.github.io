@@ -1,4 +1,4 @@
-const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,':()&!?+-";
+const LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,':()&!?+-/";
 
 export class DepartureBoard {
 	_element: HTMLElement;

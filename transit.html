@@ -125,27 +125,34 @@
 		<h1>Transit</h1>
 
 		<div class="drop-down">
-			<label for="location">Select your location:</label>
+			<label for="location">Detected location:</label>
 			<select name="location" id="location-drop-down"></select>
 		</div>
 
 		<body>
 			<div class="grid-container">
 				<div class="board">
-					<span class="board-header">Time Destination Service Flight Gate Remarks</span>
+					<span class="board-header">
+						<span style="padding-right: 3vw">Time</span>
+						<span style="padding-right: 4vw">Destination</span>
+						<span>Sevice</span>
+						<span style="padding-right: 3vw">Flight</span>
+						<span>Gate</span>
+						<span style="padding-right: 7vw">Remarks</span>
+					</span>
 					<div id="departure"></div>
 				</div>
 				<div class="board">
+					<span class="board-header">
+						<span style="padding-right: 3vw">Time</span>
+						<span style="padding-right: 8vw">From</span>
+						<span>Sevice</span>
+						<span style="padding-right: 3vw">Flight</span>
+						<span>Gate</span>
+						<span style="padding-right: 7vw">Remarks</span>
+					</span>
 					<div id="arrival"></div>
 				</div>
-				<!-- <table id="output-table">
-					<tr>
-						<th>Destination</th>
-						<th>Journey type</th>
-						<th>Transit time (Earth Days)</th>
-						<th>Δv requirment (km/s)</th>
-					</tr>
-				</table> -->
 				<canvas class="map" id="orbital-canvas"></canvas>
 			</div>
 		</body>

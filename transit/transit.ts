@@ -9,6 +9,12 @@ function generate() {
 	let dropDown = document.getElementById("location-drop-down") as HTMLSelectElement;
 	let canvas = document.getElementById("orbital-canvas") as HTMLCanvasElement;
 
+	var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
+	var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
+
+	for (let i = 0; i < 11; i++) departureBoard.setValue(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
+	for (let i = 0; i < 11; i++) arrivalBoard.setValue(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
+
 	let orbits: Orbit[] = [];
 
 	for (const key in body_data.space_time) {
@@ -51,6 +57,9 @@ function generate() {
 	// 		row.insertCell().innerText = b.acceleration_distance_circ.toPrecision(2);
 	// 	}
 	// }
+
+	window.setTimeout(spinDeparture, 20000, departureBoard);
+	window.setTimeout(spinArrival, 30000, arrivalBoard);
 }
 
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
@@ -73,18 +82,116 @@ function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	});
 }
 
-function buildDepartureBoard() {
-	var board = new DepartureBoard(document.getElementById("departure"), 2, 25);
-	board.setValue(0, "19:30 London King's Cross");
-	board.setValue(1, "19:42 Sheffield");
+// Each service must occupy 4 characters
+const services = ["Spin", "1/3g", " 1g "];
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const hexCharacters = "0123456789ABCDEF";
 
-	window.setTimeout(function () {
-		board.setValue(0, "19:42 Sheffield");
-		board.setValue(1, "");
-	}, 12000);
+function spinDeparture(board: DepartureBoard) {
+	const changingOdds = 0.3;
+
+	for (let row = 0; row < board._letters.length; row++) {
+		// We don't want all of the rows to update at the same time
+		if (Math.random() > changingOdds) continue;
+
+		// Time
+		let stringOut;
+		let hour = Math.floor(Math.random() * 24);
+		let minute = Math.floor(Math.random() * 60);
+
+		stringOut = hour > 9 ? String(hour) : "0" + hour;
+		stringOut += ":";
+		stringOut += minute > 9 ? String(minute) : "0" + minute;
+		stringOut += " ";
+
+		let randomBody = function (object: typeof body_data.space_time) {
+			var keys = Object.keys(object);
+			return object[keys[Math.floor(keys.length * Math.random())]];
+		};
+		let randomBodyName = randomBody(body_data.space_time).name;
+		stringOut += randomBodyName;
+		for (let i = randomBodyName.length; i < 10; i++) {
+			stringOut += " ";
+		}
+
+		stringOut += services[Math.floor(Math.random() * services.length)];
+		stringOut += " ";
+
+		// Flight Number
+		for (let i = 0; i < 2; i++) stringOut += characters[Math.floor(Math.random() * characters.length)];
+		for (let i = 0; i < 4; i++) stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+		stringOut += " ";
+
+		// Gate
+		for (let i = 0; i < 2; i++) stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+		stringOut += " ";
+
+		const remarks = ["", "Boarding", "Final Call", "Delayed", "Cancelled", "Departing"];
+		stringOut += remarks[Math.floor(Math.random() * remarks.length)];
+
+		board.setValue(row, stringOut);
+	}
+
+	window.setTimeout(spinDeparture, 20000, board);
 }
 
+function spinArrival(board: DepartureBoard) {
+	const changingOdds = 0.3;
+
+	for (let row = 0; row < board._letters.length; row++) {
+		// We don't want all of the rows to update at the same time
+		if (Math.random() > changingOdds) continue;
+
+		// Time
+		let stringOut;
+		let hour = Math.floor(Math.random() * 24);
+		let minute = Math.floor(Math.random() * 60);
+
+		stringOut = hour > 9 ? String(hour) : "0" + hour;
+		stringOut += ":";
+		stringOut += minute > 9 ? String(minute) : "0" + minute;
+		stringOut += " ";
+
+		let randomBody = function (object: typeof body_data.space_time) {
+			var keys = Object.keys(object);
+			return object[keys[Math.floor(keys.length * Math.random())]];
+		};
+		let randomBodyName = randomBody(body_data.space_time).name;
+		stringOut += randomBodyName;
+		for (let i = randomBodyName.length; i < 10; i++) {
+			stringOut += " ";
+		}
+
+		stringOut += services[Math.floor(Math.random() * services.length)];
+		stringOut += " ";
+
+		// Flight Number
+		for (let i = 0; i < 2; i++) stringOut += characters[Math.floor(Math.random() * characters.length)];
+		for (let i = 0; i < 4; i++) stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+		stringOut += " ";
+
+		// Gate
+		for (let i = 0; i < 2; i++) stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+		stringOut += " ";
+
+		const remarks = ["", "Docking", "Delayed", "Cancelled", "Docked"];
+		stringOut += remarks[Math.floor(Math.random() * remarks.length)];
+
+		board.setValue(row, stringOut);
+	}
+
+	// board.setValue(0, "14:58 Ganymede  Spin WA0002 08");
+	// board.setValue(1, "10:03 Luna      1g   LA7290 00 Delayed");
+
+	window.setTimeout(spinArrival, 20000, board);
+}
+
+// function buildDepartureBoard() {
+// 	var board = new DepartureBoard(document.getElementById("departure"), 11, 41);
+// 	spin(board);
+// }
+
 window.onload = function () {
-	buildDepartureBoard();
-	// generate();
+	// buildDepartureBoard();
+	generate();
 };
