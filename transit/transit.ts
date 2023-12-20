@@ -1,5 +1,6 @@
 import * as body_data from "../space_time/data/celestial_data.js";
 import { Orbit } from "./map.ts";
+import { DepartureBoard } from "./board.ts";
 
 const AU_km = 1.496e8;
 
@@ -72,6 +73,18 @@ function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	});
 }
 
+function buildDepartureBoard() {
+	var board = new DepartureBoard(document.getElementById("departure"), 2, 25);
+	board.setValue(0, "19:30 London King's Cross");
+	board.setValue(1, "19:42 Sheffield");
+
+	window.setTimeout(function () {
+		board.setValue(0, "19:42 Sheffield");
+		board.setValue(1, "");
+	}, 12000);
+}
+
 window.onload = function () {
-	generate();
+	buildDepartureBoard();
+	// generate();
 };

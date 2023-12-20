@@ -130,15 +130,24 @@
 		</div>
 
 		<body>
-			<table id="output-table">
-				<tr>
-					<th>Destination</th>
-					<th>Journey type</th>
-					<th>Transit time (Earth Days)</th>
-					<th>Δv requirment (km/s)</th>
-				</tr>
-			</table>
-			<canvas id="orbital-canvas"></canvas>
+			<div class="grid-container">
+				<div class="board">
+					<span class="board-header">Time Destination Service Flight Gate Remarks</span>
+					<div id="departure"></div>
+				</div>
+				<div class="board">
+					<div id="arrival"></div>
+				</div>
+				<!-- <table id="output-table">
+					<tr>
+						<th>Destination</th>
+						<th>Journey type</th>
+						<th>Transit time (Earth Days)</th>
+						<th>Δv requirment (km/s)</th>
+					</tr>
+				</table> -->
+				<canvas class="map" id="orbital-canvas"></canvas>
+			</div>
 		</body>
 	</main>
 </html>
