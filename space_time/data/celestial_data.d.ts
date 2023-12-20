@@ -22,6 +22,10 @@ declare type body_type = {
 	longitudOfAscendingNode_0_deg: number;
 	argumentOfPeriapsis_0_deg: number;
 	trueAnomaly_0_deg: number;
+
+	GM_km3_s2: number;
+
+	period_ms: number;
 };
 export type body_dict_type = { [name: string]: body_type };
 export const space_time: body_dict_type;

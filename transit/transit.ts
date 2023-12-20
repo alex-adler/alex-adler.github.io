@@ -1,75 +1,7 @@
 import * as body_data from "../space_time/data/celestial_data.js";
+import { Orbit } from "./map.ts";
 
 const AU_km = 1.496e8;
-
-class Orbit {
-	scale: number; // pixels per km
-
-	semiMajorAxis_km: number;
-	eccentricity: number;
-	inclination_deg: number;
-	longitudOfAscendingNode_deg: number;
-	argumentOfPeriapsis_deg: number;
-	trueAnomaly_deg: number;
-
-	semiMinorAxis_km: number;
-	constructor(
-		a_km: number,
-		e: number,
-		i_deg: number,
-		longitudeOfAscendingNode_deg: number,
-		argumentOfPeriapsis_deg: number,
-		trueAnomaly_deg: number,
-		scale: number
-	) {
-		this.semiMajorAxis_km = a_km;
-		this.eccentricity = e;
-		this.inclination_deg = i_deg;
-		this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
-		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
-		this.trueAnomaly_deg = trueAnomaly_deg;
-
-		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
-
-		this.scale = scale;
-	}
-	draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
-		if (this.semiMajorAxis_km == undefined) return;
-		ctx.beginPath();
-		ctx.ellipse(
-			0.5 * canvas.width +
-				Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			0.5 * canvas.height +
-				Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			this.semiMajorAxis_km * this.scale,
-			this.semiMinorAxis_km * this.scale,
-			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
-			0,
-			2 * Math.PI
-		);
-		ctx.strokeStyle = "white";
-		ctx.stroke();
-	}
-}
-
-function degToRad(degrees: number) {
-	return degrees * (Math.PI / 180);
-}
-
-function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
-	if (!canvas.getContext) return;
-
-	let ctx = canvas.getContext("2d");
-
-	// Deal with devices with a pixel ratio != 1
-	const pixelRatio = window.devicePixelRatio;
-	canvas.width = canvas.clientWidth * pixelRatio;
-	canvas.height = canvas.clientHeight * pixelRatio;
-
-	orbits.forEach((o) => {
-		o.draw(canvas, ctx);
-	});
-}
 
 function generate() {
 	let table = document.getElementById("output-table") as HTMLTableElement;
@@ -93,9 +25,15 @@ function generate() {
 				body.longitudOfAscendingNode_0_deg,
 				body.argumentOfPeriapsis_0_deg,
 				body.trueAnomaly_0_deg,
+				body.GM_km3_s2,
 				canvas.clientWidth / (5 * AU_km)
 			)
 		);
+
+		console.log(body.name);
+		console.log(orbits.at(-1));
+		orbits.at(-1).updatePosition(0);
+		orbits.at(-1).updatePosition(Date.now() - 946684800000);
 	}
 
 	generateCanvas(canvas, orbits);
@@ -112,6 +50,26 @@ function generate() {
 	// 		row.insertCell().innerText = b.acceleration_distance_circ.toPrecision(2);
 	// 	}
 	// }
+}
+
+function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
+	if (!canvas.getContext) return;
+
+	let ctx = canvas.getContext("2d");
+
+	// Deal with devices with a pixel ratio != 1
+	const pixelRatio = window.devicePixelRatio;
+	canvas.width = canvas.clientWidth * pixelRatio;
+	canvas.height = canvas.clientHeight * pixelRatio;
+
+	ctx.beginPath();
+	ctx.fillStyle = "white";
+	ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
+	ctx.fill(this);
+
+	orbits.forEach((o) => {
+		o.draw(canvas, ctx);
+	});
 }
 
 window.onload = function () {

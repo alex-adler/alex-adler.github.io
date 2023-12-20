@@ -35,6 +35,7 @@ class Celestial {
 	longitudOfAscendingNode_0_deg: number;
 	argumentOfPeriapsis_0_deg: number;
 	trueAnomaly_0_deg: number;
+	meanAnomaly_0_deg: number;
 	// Orbital elements centeniary rates
 	semiMajorAxis_km_Cy: number;
 	eccentricity_Cy: number;
@@ -44,7 +45,6 @@ class Celestial {
 	trueAnomaly_sec_Cy: number;
 
 	period_ms: number;
-	meanLongitude: number;
 	constructor(name: string, dayLength_h: number, yearLength_h: number, initialYearProgress = 0, initialWeekDay = 0) {
 		this.name = name;
 
@@ -136,6 +136,8 @@ class Celestial {
 		this.GM_km3_s2 = GM_km3_S2;
 		this.radius_km = radius_km;
 		this.surface_gravity_ms = (GM_km3_S2 / radius_km ** 2) * 1000;
+
+		if (this.semiMajorAxis_0_km != undefined) this.period_ms = 2 * Math.PI * (this.semiMajorAxis_0_km ** 3 / this.GM_km3_s2) ** 0.5 * 1000;
 	}
 	setJ2000OrbitalElements(a_km: number, e: number, i_deg: number, longitudeOfAscendingNode_deg: number, argumentOfPeriapsis_deg: number) {
 		this.semiMajorAxis_0_km = a_km;
@@ -151,11 +153,26 @@ class Celestial {
 		this.longitudOfAscendingNode_sec_Cy = 0;
 		this.argumentOfPeriapsis_sec_Cy = 0;
 		this.trueAnomaly_sec_Cy = 0;
+
+		if (this.GM_km3_s2 != undefined) this.period_ms = 2 * Math.PI * (this.semiMajorAxis_0_km ** 3 / this.GM_km3_s2) ** 0.5 * 1000;
 	}
 	setTrueAnomaly(trueAnomaly_deg: number, trueAnomaly_sec_Cy: number = 0) {
 		this.trueAnomaly_0_deg = trueAnomaly_deg;
 		this.trueAnomaly_sec_Cy = trueAnomaly_sec_Cy;
+
+		let eccentricAnomaly_deg = Math.acos(
+			(this.eccentricity_0 + Math.cos(degToRad(this.meanAnomaly_0_deg))) / (1 + this.eccentricity_0 * Math.cos(this.meanAnomaly_0_deg))
+		);
+		this.meanAnomaly_0_deg = eccentricAnomaly_deg - this.eccentricity_0 * Math.cos(degToRad(eccentricAnomaly_deg));
 	}
+}
+
+function degToRad(degrees: number) {
+	return degrees * (Math.PI / 180);
+}
+
+function radToDeg(degrees: number) {
+	return degrees * (180 / Math.PI);
 }
 
 let bodies: { [name: string]: Celestial } = {};
@@ -186,6 +203,10 @@ bodies["Earth"].setTrueAnomaly(3.581260865474801e2);
 bodies["Mars"].setPhysicalParameters(42828.375214, 3396.19);
 bodies["Mars"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
 bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
+
+bodies["Ceres"].setPhysicalParameters(42828.375214, 3396.19);
+bodies["Ceres"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
+bodies["Ceres"].setTrueAnomaly(2.302024685501411e1);
 
 let jsonString = "export const space_time = ";
 jsonString += JSON.stringify(bodies);
