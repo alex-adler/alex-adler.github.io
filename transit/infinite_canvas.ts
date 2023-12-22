@@ -1,3 +1,62 @@
+const view = (() => {
+	const matrix = [1, 0, 0, 1, 0, 0]; // current view transform
+	var m = matrix; // alias
+	var scale = 1; // current scale
+	var ctx: CanvasRenderingContext2D; // reference to the 2D context
+	const pos = { x: 0, y: 0 }; // current position of origin
+	var dirty = true;
+	const API = {
+		set context(_ctx: CanvasRenderingContext2D) {
+			ctx = _ctx;
+			dirty = true;
+		},
+		apply() {
+			if (dirty) {
+				this.update();
+			}
+			ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+		},
+		get scale() {
+			return scale;
+		},
+		get position() {
+			return pos;
+		},
+		setDirty() {
+			dirty = true;
+		},
+		isDirty() {
+			return dirty;
+		},
+		update() {
+			dirty = false;
+			m[3] = m[0] = scale;
+			m[2] = m[1] = 0;
+			m[4] = pos.x;
+			m[5] = pos.y;
+		},
+		pan(amount: { x: number; y: number }) {
+			if (dirty) {
+				this.update();
+			}
+			pos.x += amount.x;
+			pos.y += amount.y;
+			dirty = true;
+		},
+		scaleAt(at: { x: number; y: number }, amount: number) {
+			// at in screen coords
+			if (dirty) {
+				this.update();
+			}
+			scale *= amount;
+			pos.x = at.x - (at.x - pos.x) * amount;
+			pos.y = at.y - (at.y - pos.y) * amount;
+			dirty = true;
+		},
+	};
+	return API;
+})();
+
 export class InfiniteCanvas {
 	canvas: HTMLCanvasElement;
 	context: CanvasRenderingContext2D;
@@ -13,12 +72,25 @@ export class InfiniteCanvas {
 	dragStart = { x: 0, y: 0 };
 	cameraOffset = { x: 0, y: 0 };
 	initialPinchDistance: number = null;
-	lastZoom: number;
+	lastZoom: number = 1;
+	lastDrawnZoom: number = 1;
+
+	#pointerPos = { x: 0, y: 0 };
+	mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
 
 	#drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void;
+	#needsUpdating: () => boolean;
 
-	constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void) {
+	constructor(
+		canvas: HTMLCanvasElement,
+		context: CanvasRenderingContext2D,
+		drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void,
+		needsUpdating: () => boolean
+	) {
 		this.#drawFunction = drawFunction;
+		this.#needsUpdating = needsUpdating;
+
+		view.context = context;
 
 		this.canvas = canvas;
 		this.#setupEvents(canvas);
@@ -30,94 +102,133 @@ export class InfiniteCanvas {
 		this.cameraOffset.y = this.canvas.height / 2;
 
 		this.context = context;
+
+		view.pan({ x: this.canvas.width / 2, y: this.canvas.height / 2 });
+
 		this.#draw();
 	}
 	#draw(): void {
-		this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
-		this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
+		if (view.isDirty() || this.#needsUpdating()) {
+			this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
+			this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
+			this.context.setTransform(1, 0, 0, 1, 0, 0);
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-		this.context.translate(window.innerWidth / 2, window.innerHeight / 2);
-		this.context.scale(this.cameraZoom, this.cameraZoom);
-		this.context.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
-		this.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+			view.apply(); // set the 2D context transform to the view
 
-		// Call the user defined function that draws the canvas
-		this.#drawFunction(this.context, this.canvas.width);
-
+			// Call the user defined function that draws the canvas
+			this.#drawFunction(this.context, this.canvas.width / 2);
+		}
+		// TODO: Get mouse position
+		// this.context.beginPath();
+		// this.context.ellipse(this.mouse.x - this.canvas.width / 2, this.mouse.y - this.canvas.height / 2, 10, 10, 0, 0, 2 * Math.PI);
+		// this.context.strokeStyle = "red";
+		// this.context.stroke();
 		requestAnimationFrame(this.#draw.bind(this));
 	}
 	#setupEvents(canvas: HTMLCanvasElement): void {
-		canvas.addEventListener("mousedown", this.#onPointerDown.bind(this));
-		canvas.addEventListener("touchstart", (e) => this.#handleTouch(e, this.#onPointerDown));
-		canvas.addEventListener("mouseup", this.#onPointerUp.bind(this));
-		canvas.addEventListener("touchend", (e) => this.#handleTouch(e, this.#onPointerUp));
-		canvas.addEventListener("mousemove", this.#onPointerMove.bind(this));
-		canvas.addEventListener("touchmove", (e) => this.#handleTouch(e, this.#onPointerMove));
-		canvas.addEventListener("wheel", (e) => {
-			this.#adjustZoom(-e.deltaY * this.SCROLL_SENSITIVITY);
-			e.preventDefault();
-		});
+		// TODO: Touch compatibility
+		// canvas.addEventListener("touchstart", (e) => this.#handleTouch(e, this.#onPointerDown));
+		// canvas.addEventListener("touchend", (e) => this.#handleTouch(e, this.#onPointerUp));
+		// canvas.addEventListener("touchmove", (e) => this.#handleTouch(e, this.#onPointerMove));
 
-		window.addEventListener("resize", () => this.#draw());
+		canvas.addEventListener("mousemove", this.mouseEvent.bind(this), { passive: true });
+		canvas.addEventListener("mousedown", this.mouseEvent.bind(this), { passive: true });
+		canvas.addEventListener("mouseup", this.mouseEvent.bind(this), { passive: true });
+		canvas.addEventListener("mouseout", this.mouseEvent.bind(this), { passive: true });
+		canvas.addEventListener("wheel", this.mouseWheelEvent.bind(this), { passive: false });
+
+		window.addEventListener("resize", () => view.setDirty());
+	}
+	mouseEvent(event: MouseEvent) {
+		if (event.type === "mousedown") {
+			this.mouse.button = true;
+		}
+		if (event.type === "mouseup" || event.type === "mouseout") {
+			this.mouse.button = false;
+		}
+		this.mouse.oldX = this.mouse.x;
+		this.mouse.oldY = this.mouse.y;
+		this.mouse.x = event.offsetX;
+		this.mouse.y = event.offsetY;
+		if (this.mouse.button) {
+			// pan
+			view.pan({ x: this.mouse.x - this.mouse.oldX, y: this.mouse.y - this.mouse.oldY });
+		}
+	}
+	mouseWheelEvent(event: WheelEvent) {
+		var x = event.offsetX;
+		var y = event.offsetY;
+		if (event.deltaY < 0) {
+			view.scaleAt({ x, y }, 1.1);
+		} else {
+			view.scaleAt({ x, y }, 1 / 1.1);
+		}
+		event.preventDefault();
 	}
 	// Gets the relevant location from a mouse or single touch event
-	#getEventLocation(e: TouchEvent | MouseEvent): { x: number; y: number } {
-		if (e instanceof MouseEvent && e.clientX && e.clientY) {
-			return { x: e.clientX, y: e.clientY };
-		} else if (e instanceof TouchEvent && e.touches && e.touches.length == 1) {
-			return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-		} else return { x: 0, y: 0 };
-	}
-	#onPointerDown(e: TouchEvent | MouseEvent): void {
-		this.isDragging = true;
-		this.dragStart.x = this.#getEventLocation(e).x / this.cameraZoom - this.cameraOffset.x;
-		this.dragStart.y = this.#getEventLocation(e).y / this.cameraZoom - this.cameraOffset.y;
-	}
-	#onPointerUp(e: TouchEvent | MouseEvent): void {
-		this.isDragging = false;
-		this.initialPinchDistance = null;
-		this.lastZoom = this.cameraZoom;
-	}
-	#onPointerMove(e: TouchEvent | MouseEvent): void {
-		if (this.isDragging) {
-			this.cameraOffset.x = this.#getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
-			this.cameraOffset.y = this.#getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
-		}
-	}
-	#handleTouch(e: TouchEvent, singleTouchHandler: (e: TouchEvent) => void) {
-		if (e.touches.length == 1) {
-			singleTouchHandler(e);
-		} else if (e.type == "touchmove" && e.touches.length == 2) {
-			this.isDragging = false;
-			this.#handlePinch(e);
-		}
-	}
-	#handlePinch(e: TouchEvent) {
-		e.preventDefault();
+	// #getEventLocation(e: TouchEvent | MouseEvent): { x: number; y: number } {
+	// 	if (e instanceof MouseEvent && e.clientX && e.clientY) {
+	// 		return { x: e.clientX, y: e.clientY };
+	// 	} else if (e instanceof TouchEvent && e.touches && e.touches.length == 1) {
+	// 		return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+	// 	} else return { x: 0, y: 0 };
+	// }
+	// #onPointerDown(e: TouchEvent | MouseEvent): void {
+	// 	this.isDragging = true;
+	// 	this.dragStart.x = this.#getEventLocation(e).x / this.cameraZoom - this.cameraOffset.x;
+	// 	this.dragStart.y = this.#getEventLocation(e).y / this.cameraZoom - this.cameraOffset.y;
+	// }
+	// #onPointerUp(e: TouchEvent | MouseEvent): void {
+	// 	this.isDragging = false;
+	// 	this.initialPinchDistance = null;
+	// 	this.lastZoom = this.cameraZoom;
+	// }
+	// #onPointerMove(e: TouchEvent | MouseEvent): void {
+	// 	if (this.isDragging) {
+	// 		this.cameraOffset.x = this.#getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
+	// 		this.cameraOffset.y = this.#getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
+	// 	}
+	// 	var rect = this.canvas.getBoundingClientRect();
+	// 	this.#pointerPos.x =
+	// 		(((this.#getEventLocation(e).x - rect.left) / (rect.right - rect.left)) * this.canvas.width) / this.cameraZoom - this.cameraOffset.x;
+	// 	this.#pointerPos.y =
+	// 		(((this.#getEventLocation(e).y - rect.top) / (rect.bottom - rect.top)) * this.canvas.height) / this.cameraZoom - this.cameraOffset.y;
+	// }
+	// #handleTouch(e: TouchEvent, singleTouchHandler: (e: TouchEvent) => void) {
+	// 	if (e.touches.length == 1) {
+	// 		singleTouchHandler(e);
+	// 	} else if (e.type == "touchmove" && e.touches.length == 2) {
+	// 		this.isDragging = false;
+	// 		this.#handlePinch(e);
+	// 	}
+	// }
+	// #handlePinch(e: TouchEvent) {
+	// 	e.preventDefault();
 
-		let touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-		let touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+	// 	let touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+	// 	let touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
 
-		// This is distance squared, but no need for an expensive sqrt as it's only used in ratio
-		let currentDistance = (touch1.x - touch2.x) ** 2 + (touch1.y - touch2.y) ** 2;
+	// 	// This is distance squared, but no need for an expensive sqrt as it's only used in ratio
+	// 	let currentDistance = (touch1.x - touch2.x) ** 2 + (touch1.y - touch2.y) ** 2;
 
-		if (initialPinchDistance == null) {
-			initialPinchDistance = currentDistance;
-		} else {
-			this.#adjustZoom(null, currentDistance / initialPinchDistance);
-		}
-	}
-	#adjustZoom(zoomAmount: number, zoomFactor: number = null): void {
-		if (!this.isDragging) {
-			if (zoomAmount) {
-				this.cameraZoom += zoomAmount;
-			} else if (zoomFactor) {
-				console.log(zoomFactor);
-				this.cameraZoom = zoomFactor * lastZoom;
-			}
+	// 	if (initialPinchDistance == null) {
+	// 		initialPinchDistance = currentDistance;
+	// 	} else {
+	// 		this.#adjustZoom(null, currentDistance / initialPinchDistance);
+	// 	}
+	// }
+	// #adjustZoom(zoomAmount: number, zoomFactor: number = null): void {
+	// 	if (!this.isDragging) {
+	// 		if (zoomAmount) {
+	// 			this.cameraZoom += zoomAmount;
+	// 		} else if (zoomFactor) {
+	// 			console.log(zoomFactor);
+	// 			this.cameraZoom = zoomFactor * lastZoom;
+	// 		}
 
-			this.cameraZoom = Math.min(this.cameraZoom, this.MAX_ZOOM);
-			this.cameraZoom = Math.max(this.cameraZoom, this.MIN_ZOOM);
-		}
-	}
+	// 		this.cameraZoom = Math.min(this.cameraZoom, this.MAX_ZOOM);
+	// 		this.cameraZoom = Math.max(this.cameraZoom, this.MIN_ZOOM);
+	// 	}
+	// }
 }

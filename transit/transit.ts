@@ -75,10 +75,19 @@ function drawCircle(context: CanvasRenderingContext2D, displayUnit: number): voi
 	context.stroke();
 }
 
+let initialDraw = false;
+function checkIfCanvasNeedsUpdating(): boolean {
+	if (initialDraw) return false;
+	else {
+		initialDraw = true;
+		return true;
+	}
+}
+
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	if (!canvas.getContext) return;
 
-	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle);
+	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle, checkIfCanvasNeedsUpdating);
 	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
 	// let ctx = canvas.getContext("2d");
