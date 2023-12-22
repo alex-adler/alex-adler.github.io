@@ -107,20 +107,20 @@ class Letter {
 	getElement() {
 		return this._element;
 	}
-	spin = function (clear: boolean) {
+	spin(clear: boolean) {
 		if (clear !== false) this._stopAt = null;
 
 		var me = this;
 		this._interval = window.setInterval(function () {
 			me._tick();
 		}, this.DROP_TIME * 1.1);
-	};
-	setValue = function (value: string) {
+	}
+	setValue(value: string) {
 		this._stopAt = LETTERS.indexOf(value);
 
 		if (this._stopAt < 0) this._stopAt = 0;
 		if (!this._interval && this._index != this._stopAt) this.spin(false);
-	};
+	}
 	_tick = function () {
 		var me = this,
 			oldValue = LETTERS.charAt(this._index),

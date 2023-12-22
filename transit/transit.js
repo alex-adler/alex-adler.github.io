@@ -369,21 +369,6 @@
   };
   var Letter = class {
     constructor() {
-      this.spin = function(clear) {
-        if (clear !== false)
-          this._stopAt = null;
-        var me = this;
-        this._interval = window.setInterval(function() {
-          me._tick();
-        }, this.DROP_TIME * 1.1);
-      };
-      this.setValue = function(value) {
-        this._stopAt = LETTERS.indexOf(value);
-        if (this._stopAt < 0)
-          this._stopAt = 0;
-        if (!this._interval && this._index != this._stopAt)
-          this.spin(false);
-      };
       this._tick = function() {
         var me = this, oldValue = LETTERS.charAt(this._index), fallingStyle = this._falling.style, fallingTextStyle = this._fallingText.style;
         this._index = (this._index + 1) % LETTERS.length;
@@ -446,6 +431,126 @@
     getElement() {
       return this._element;
     }
+    spin(clear) {
+      if (clear !== false)
+        this._stopAt = null;
+      var me = this;
+      this._interval = window.setInterval(function() {
+        me._tick();
+      }, this.DROP_TIME * 1.1);
+    }
+    setValue(value) {
+      this._stopAt = LETTERS.indexOf(value);
+      if (this._stopAt < 0)
+        this._stopAt = 0;
+      if (!this._interval && this._index != this._stopAt)
+        this.spin(false);
+    }
+  };
+
+  // transit/infinite_canvas.ts
+  var InfiniteCanvas = class {
+    constructor(canvas, context, drawFunction) {
+      this.#pixelRatio = window.devicePixelRatio;
+      this.cameraZoom = 1;
+      this.MAX_ZOOM = 5;
+      this.MIN_ZOOM = 0.1;
+      this.SCROLL_SENSITIVITY = 5e-4;
+      this.isDragging = false;
+      this.dragStart = { x: 0, y: 0 };
+      this.cameraOffset = { x: 0, y: 0 };
+      this.initialPinchDistance = null;
+      this.#drawFunction = drawFunction;
+      this.canvas = canvas;
+      this.#setupEvents(canvas);
+      this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
+      this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
+      this.cameraOffset.x = this.canvas.width / 2;
+      this.cameraOffset.y = this.canvas.height / 2;
+      this.context = context;
+      this.#draw();
+    }
+    #pixelRatio;
+    #drawFunction;
+    #draw() {
+      this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
+      this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
+      this.context.translate(window.innerWidth / 2, window.innerHeight / 2);
+      this.context.scale(this.cameraZoom, this.cameraZoom);
+      this.context.translate(-window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y);
+      this.context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      this.#drawFunction(this.context, this.canvas.width);
+      requestAnimationFrame(this.#draw.bind(this));
+    }
+    #setupEvents(canvas) {
+      canvas.addEventListener("mousedown", this.#onPointerDown.bind(this));
+      canvas.addEventListener("touchstart", (e) => this.#handleTouch(e, this.#onPointerDown));
+      canvas.addEventListener("mouseup", this.#onPointerUp.bind(this));
+      canvas.addEventListener("touchend", (e) => this.#handleTouch(e, this.#onPointerUp));
+      canvas.addEventListener("mousemove", this.#onPointerMove.bind(this));
+      canvas.addEventListener("touchmove", (e) => this.#handleTouch(e, this.#onPointerMove));
+      canvas.addEventListener("wheel", (e) => {
+        this.#adjustZoom(-e.deltaY * this.SCROLL_SENSITIVITY);
+        e.preventDefault();
+      });
+      window.addEventListener("resize", () => this.#draw());
+    }
+    // Gets the relevant location from a mouse or single touch event
+    #getEventLocation(e) {
+      if (e instanceof MouseEvent && e.clientX && e.clientY) {
+        return { x: e.clientX, y: e.clientY };
+      } else if (e instanceof TouchEvent && e.touches && e.touches.length == 1) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else
+        return { x: 0, y: 0 };
+    }
+    #onPointerDown(e) {
+      this.isDragging = true;
+      this.dragStart.x = this.#getEventLocation(e).x / this.cameraZoom - this.cameraOffset.x;
+      this.dragStart.y = this.#getEventLocation(e).y / this.cameraZoom - this.cameraOffset.y;
+    }
+    #onPointerUp(e) {
+      this.isDragging = false;
+      this.initialPinchDistance = null;
+      this.lastZoom = this.cameraZoom;
+    }
+    #onPointerMove(e) {
+      if (this.isDragging) {
+        this.cameraOffset.x = this.#getEventLocation(e).x / this.cameraZoom - this.dragStart.x;
+        this.cameraOffset.y = this.#getEventLocation(e).y / this.cameraZoom - this.dragStart.y;
+      }
+    }
+    #handleTouch(e, singleTouchHandler) {
+      if (e.touches.length == 1) {
+        singleTouchHandler(e);
+      } else if (e.type == "touchmove" && e.touches.length == 2) {
+        this.isDragging = false;
+        this.#handlePinch(e);
+      }
+    }
+    #handlePinch(e) {
+      e.preventDefault();
+      let touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      let touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+      let currentDistance = (touch1.x - touch2.x) ** 2 + (touch1.y - touch2.y) ** 2;
+      if (initialPinchDistance == null) {
+        initialPinchDistance = currentDistance;
+      } else {
+        this.#adjustZoom(null, currentDistance / initialPinchDistance);
+      }
+    }
+    #adjustZoom(zoomAmount, zoomFactor = null) {
+      if (!this.isDragging) {
+        if (zoomAmount) {
+          this.cameraZoom += zoomAmount;
+        } else if (zoomFactor) {
+          console.log(zoomFactor);
+          this.cameraZoom = zoomFactor * lastZoom;
+        }
+        this.cameraZoom = Math.min(this.cameraZoom, this.MAX_ZOOM);
+        this.cameraZoom = Math.max(this.cameraZoom, this.MIN_ZOOM);
+      }
+    }
   };
 
   // transit/transit.ts
@@ -456,10 +561,6 @@
     let canvas = document.getElementById("orbital-canvas");
     var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
     var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
-    for (let i = 0; i < 11; i++)
-      departureBoard.setValue(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
-    for (let i = 0; i < 11; i++)
-      arrivalBoard.setValue(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
     let orbits = [];
     for (const key in space_time) {
       let opt = document.createElement("option");
@@ -485,100 +586,22 @@
       orbits.at(-1).updatePosition(Date.now() - 9466848e5);
     }
     generateCanvas(canvas, orbits);
-    window.setTimeout(spinDeparture, 2e4, departureBoard);
-    window.setTimeout(spinArrival, 3e4, arrivalBoard);
+  }
+  function drawCircle(context, displayUnit) {
+    context.fillStyle = "#eecc77";
+    context.fillRect(0, 0, displayUnit, displayUnit);
+    context.fillStyle = "#77ccee";
+    context.fillRect(0, 0, -displayUnit, -displayUnit);
+    context.beginPath();
+    context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
+    context.strokeStyle = "white";
+    context.stroke();
   }
   function generateCanvas(canvas, orbits) {
     if (!canvas.getContext)
       return;
-    let ctx = canvas.getContext("2d");
-    const pixelRatio = window.devicePixelRatio;
-    canvas.width = canvas.clientWidth * pixelRatio;
-    canvas.height = canvas.clientHeight * pixelRatio;
-    ctx.beginPath();
-    ctx.fillStyle = "white";
-    ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
-    ctx.fill(this);
-    orbits.forEach((o) => {
-      o.draw(canvas, ctx);
-    });
-  }
-  var services = ["Spin", "1/3g", " 1g "];
-  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  var hexCharacters = "0123456789ABCDEF";
-  function spinDeparture(board) {
-    const changingOdds = 0.3;
-    for (let row = 0; row < board._letters.length; row++) {
-      if (Math.random() > changingOdds)
-        continue;
-      let stringOut;
-      let hour = Math.floor(Math.random() * 24);
-      let minute = Math.floor(Math.random() * 60);
-      stringOut = hour > 9 ? String(hour) : "0" + hour;
-      stringOut += ":";
-      stringOut += minute > 9 ? String(minute) : "0" + minute;
-      stringOut += " ";
-      let randomBody = function(object) {
-        var keys = Object.keys(object);
-        return object[keys[Math.floor(keys.length * Math.random())]];
-      };
-      let randomBodyName = randomBody(space_time).name;
-      stringOut += randomBodyName;
-      for (let i = randomBodyName.length; i < 10; i++) {
-        stringOut += " ";
-      }
-      stringOut += services[Math.floor(Math.random() * services.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += characters[Math.floor(Math.random() * characters.length)];
-      for (let i = 0; i < 4; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      const remarks = ["", "Boarding", "Final Call", "Delayed", "Cancelled", "Departing"];
-      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
-      board.setValue(row, stringOut);
-    }
-    window.setTimeout(spinDeparture, 2e4, board);
-  }
-  function spinArrival(board) {
-    const changingOdds = 0.3;
-    for (let row = 0; row < board._letters.length; row++) {
-      if (Math.random() > changingOdds)
-        continue;
-      let stringOut;
-      let hour = Math.floor(Math.random() * 24);
-      let minute = Math.floor(Math.random() * 60);
-      stringOut = hour > 9 ? String(hour) : "0" + hour;
-      stringOut += ":";
-      stringOut += minute > 9 ? String(minute) : "0" + minute;
-      stringOut += " ";
-      let randomBody = function(object) {
-        var keys = Object.keys(object);
-        return object[keys[Math.floor(keys.length * Math.random())]];
-      };
-      let randomBodyName = randomBody(space_time).name;
-      stringOut += randomBodyName;
-      for (let i = randomBodyName.length; i < 10; i++) {
-        stringOut += " ";
-      }
-      stringOut += services[Math.floor(Math.random() * services.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += characters[Math.floor(Math.random() * characters.length)];
-      for (let i = 0; i < 4; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      const remarks = ["", "Docking", "Delayed", "Cancelled", "Docked"];
-      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
-      board.setValue(row, stringOut);
-    }
-    window.setTimeout(spinArrival, 2e4, board);
+    const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle);
+    document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
   }
   window.onload = function() {
     generate();

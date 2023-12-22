@@ -1,6 +1,7 @@
 import * as body_data from "../space_time/data/celestial_data.js";
 import { Orbit } from "./map.ts";
 import { DepartureBoard } from "./board.ts";
+import { InfiniteCanvas } from "./infinite_canvas.ts";
 
 const AU_km = 1.496e8;
 
@@ -12,8 +13,8 @@ function generate() {
 	var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
 	var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
 
-	for (let i = 0; i < 11; i++) departureBoard.setValue(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
-	for (let i = 0; i < 11; i++) arrivalBoard.setValue(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
+	// for (let i = 0; i < 11; i++) departureBoard.setValue(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
+	// for (let i = 0; i < 11; i++) arrivalBoard.setValue(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
 
 	let orbits: Orbit[] = [];
 
@@ -58,28 +59,43 @@ function generate() {
 	// 	}
 	// }
 
-	window.setTimeout(spinDeparture, 20000, departureBoard);
-	window.setTimeout(spinArrival, 30000, arrivalBoard);
+	// window.setTimeout(spinDeparture, 20000, departureBoard);
+	// window.setTimeout(spinArrival, 30000, arrivalBoard);
+}
+
+function drawCircle(context: CanvasRenderingContext2D, displayUnit: number): void {
+	context.fillStyle = "#eecc77";
+	context.fillRect(0, 0, displayUnit, displayUnit);
+	context.fillStyle = "#77ccee";
+	context.fillRect(0, 0, -displayUnit, -displayUnit);
+
+	context.beginPath();
+	context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
+	context.strokeStyle = "white";
+	context.stroke();
 }
 
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	if (!canvas.getContext) return;
 
-	let ctx = canvas.getContext("2d");
+	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle);
+	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
-	// Deal with devices with a pixel ratio != 1
-	const pixelRatio = window.devicePixelRatio;
-	canvas.width = canvas.clientWidth * pixelRatio;
-	canvas.height = canvas.clientHeight * pixelRatio;
+	// let ctx = canvas.getContext("2d");
 
-	ctx.beginPath();
-	ctx.fillStyle = "white";
-	ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
-	ctx.fill(this);
+	// // Deal with devices with a pixel ratio != 1
+	// const pixelRatio = window.devicePixelRatio;
+	// canvas.width = canvas.clientWidth * pixelRatio;
+	// canvas.height = canvas.clientHeight * pixelRatio;
 
-	orbits.forEach((o) => {
-		o.draw(canvas, ctx);
-	});
+	// ctx.beginPath();
+	// ctx.fillStyle = "white";
+	// ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
+	// ctx.fill(this);
+
+	// orbits.forEach((o) => {
+	// 	o.draw(canvas, ctx);
+	// });
 }
 
 // Each service must occupy 4 characters
