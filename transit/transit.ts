@@ -34,7 +34,7 @@ function generate() {
 				body.argumentOfPeriapsis_0_deg,
 				body.trueAnomaly_0_deg,
 				body.GM_km3_s2,
-				canvas.clientWidth / (5 * AU_km)
+				1 / (5 * AU_km)
 			)
 		);
 
@@ -106,9 +106,10 @@ function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	// ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
 	// ctx.fill(this);
 
-	// orbits.forEach((o) => {
-	// 	o.draw(canvas, ctx);
-	// });
+	orbits.forEach((o) => {
+		infiniteCanvas.addDrawFunction(o.draw.bind(o), () => true);
+		// o.draw(canvas, ctx);
+	});
 }
 
 // Each service must occupy 4 characters

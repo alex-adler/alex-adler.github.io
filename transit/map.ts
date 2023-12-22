@@ -45,8 +45,8 @@ export class Orbit {
 		ctx.ellipse(
 			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
 			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			this.semiMajorAxis_km * this.scale,
-			this.semiMinorAxis_km * this.scale,
+			this.semiMajorAxis_km * canvasUnit * this.scale,
+			this.semiMinorAxis_km * canvasUnit * this.scale,
 			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
 			0,
 			2 * Math.PI

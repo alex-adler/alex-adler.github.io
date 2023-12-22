@@ -234,8 +234,8 @@
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
         Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-        this.semiMajorAxis_km * this.scale,
-        this.semiMinorAxis_km * this.scale,
+        this.semiMajorAxis_km * canvasUnit * this.scale,
+        this.semiMinorAxis_km * canvasUnit * this.scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
         0,
         2 * Math.PI
@@ -692,7 +692,7 @@
           body.argumentOfPeriapsis_0_deg,
           body.trueAnomaly_0_deg,
           body.GM_km3_s2,
-          canvas.clientWidth / (5 * AU_km2)
+          1 / (5 * AU_km2)
         )
       );
       console.log(body.name);
@@ -732,6 +732,9 @@
     infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
     infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
+    orbits.forEach((o) => {
+      infiniteCanvas.addDrawFunction(o.draw.bind(o), () => true);
+    });
   }
   var services = ["Spin", "1/3g", " 1g "];
   var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
