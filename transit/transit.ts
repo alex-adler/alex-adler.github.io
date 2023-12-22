@@ -33,8 +33,7 @@ function generate() {
 				body.longitudOfAscendingNode_0_deg,
 				body.argumentOfPeriapsis_0_deg,
 				body.trueAnomaly_0_deg,
-				body.GM_km3_s2,
-				1 / (5 * AU_km)
+				body.GM_km3_s2
 			)
 		);
 
@@ -90,7 +89,7 @@ function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	if (!canvas.getContext) return;
 
 	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"));
-	infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
+	// infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
 	infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
 	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 

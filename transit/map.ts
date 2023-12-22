@@ -1,8 +1,7 @@
 const AU_km = 1.496e8;
+const scale = 1 / (5 * AU_km);
 
 export class Orbit {
-	scale: number; // pixels per km
-
 	GM_km3_s2: number;
 
 	semiMajorAxis_km: number;
@@ -23,8 +22,7 @@ export class Orbit {
 		longitudeOfAscendingNode_deg: number,
 		argumentOfPeriapsis_deg: number,
 		meanAnomaly_deg: number,
-		GM_km3_s2: number,
-		scale: number
+		GM_km3_s2: number
 	) {
 		this.semiMajorAxis_km = a_km;
 		this.eccentricity = e;
@@ -36,23 +34,84 @@ export class Orbit {
 		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
 
 		this.GM_km3_s2 = GM_km3_s2;
-
-		this.scale = scale;
 	}
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number) {
 		if (this.semiMajorAxis_km == undefined) return;
+
+		// this.meanAnomaly_deg
+
+		let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
+		var width = 0.5;
+		ctx.lineWidth = width;
+
+		var brightHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
+		brightHalf.addColorStop(0, "white");
+		brightHalf.addColorStop(1, "gray");
+
+		var darkHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
+		darkHalf.addColorStop(0, "#242424");
+		darkHalf.addColorStop(1, "gray");
+
+		// ctx.rotate(degToRad(this.meanAnomaly_deg));
+		// First we make a clipping region for the left half
+		ctx.save();
+		ctx.beginPath();
+		ctx.strokeStyle = brightHalf;
+		ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
+		ctx.clip();
+		// ctx.stroke();
+		// ctx.setTransform(1, 0, 0, 1, 0, 0);
+		// Then we draw the left half
 		ctx.beginPath();
 		ctx.ellipse(
-			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			this.semiMajorAxis_km * canvasUnit * this.scale,
-			this.semiMinorAxis_km * canvasUnit * this.scale,
+			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			this.semiMajorAxis_km * canvasUnit * scale,
+			this.semiMinorAxis_km * canvasUnit * scale,
 			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
-			0,
+			0 * Math.PI,
 			2 * Math.PI
 		);
-		ctx.strokeStyle = "white";
 		ctx.stroke();
+
+		ctx.restore(); // restore clipping region to default
+
+		// Then we make a clipping region for the right half
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(-largeSide - width, 0, (largeSide + width) * 2, largeSide + width * 2);
+		// ctx.stroke();
+		ctx.clip();
+
+		// Then we draw the right half
+		ctx.strokeStyle = darkHalf;
+		ctx.beginPath();
+		ctx.ellipse(
+			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			this.semiMajorAxis_km * canvasUnit * scale,
+			this.semiMinorAxis_km * canvasUnit * scale,
+			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+			0 * Math.PI,
+			2 * Math.PI
+		);
+		ctx.stroke();
+
+		// ctx.beginPath();
+		// ctx.rect(-largeSide, -largeSide, largeSide * 2, largeSide * 2);
+		// ctx.ellipse(
+		// 	Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+		// 	Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+		// 	this.semiMajorAxis_km * canvasUnit * scale,
+		// 	this.semiMinorAxis_km * canvasUnit * scale,
+		// 	degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+		// 	0 * Math.PI,
+		// 	1 * Math.PI
+		// );
+		// ctx.strokeStyle = "white";
+		// ctx.stroke();
+
+		ctx.restore(); // restore clipping region to default
 	}
 	keplersEquation(E_rad: number): number {
 		return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);

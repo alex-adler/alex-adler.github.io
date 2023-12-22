@@ -215,8 +215,9 @@
 
   // transit/map.ts
   var AU_km = 1496e5;
+  var scale = 1 / (5 * AU_km);
   var Orbit = class {
-    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, scale) {
+    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2) {
       this.semiMajorAxis_km = a_km;
       this.eccentricity = e;
       this.inclination_deg = i_deg;
@@ -225,23 +226,53 @@
       this.meanAnomaly_0_deg = meanAnomaly_deg;
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
-      this.scale = scale;
     }
     draw(ctx, canvasUnit) {
       if (this.semiMajorAxis_km == void 0)
         return;
+      let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
+      var width = 0.5;
+      ctx.lineWidth = width;
+      var brightHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
+      brightHalf.addColorStop(0, "white");
+      brightHalf.addColorStop(1, "gray");
+      var darkHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
+      darkHalf.addColorStop(0, "#242424");
+      darkHalf.addColorStop(1, "gray");
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = brightHalf;
+      ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
+      ctx.clip();
       ctx.beginPath();
       ctx.ellipse(
-        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-        this.semiMajorAxis_km * canvasUnit * this.scale,
-        this.semiMinorAxis_km * canvasUnit * this.scale,
+        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        this.semiMajorAxis_km * canvasUnit * scale,
+        this.semiMinorAxis_km * canvasUnit * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
-        0,
+        0 * Math.PI,
         2 * Math.PI
       );
-      ctx.strokeStyle = "white";
       ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(-largeSide - width, 0, (largeSide + width) * 2, largeSide + width * 2);
+      ctx.clip();
+      ctx.strokeStyle = darkHalf;
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        this.semiMajorAxis_km * canvasUnit * scale,
+        this.semiMinorAxis_km * canvasUnit * scale,
+        degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+        0 * Math.PI,
+        2 * Math.PI
+      );
+      ctx.stroke();
+      ctx.restore();
     }
     keplersEquation(E_rad) {
       return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);
@@ -465,7 +496,7 @@
   var view = /* @__PURE__ */ (() => {
     const matrix = [1, 0, 0, 1, 0, 0];
     var m = matrix;
-    var scale = 1;
+    var scale2 = 1;
     var ctx;
     const pos = { x: 0, y: 0 };
     var dirty = true;
@@ -481,7 +512,7 @@
         ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
       },
       get scale() {
-        return scale;
+        return scale2;
       },
       get position() {
         return pos;
@@ -494,7 +525,7 @@
       },
       update() {
         dirty = false;
-        m[3] = m[0] = scale;
+        m[3] = m[0] = scale2;
         m[2] = m[1] = 0;
         m[4] = pos.x;
         m[5] = pos.y;
@@ -511,7 +542,7 @@
         if (dirty) {
           this.update();
         }
-        scale *= amount;
+        scale2 *= amount;
         pos.x = at.x - (at.x - pos.x) * amount;
         pos.y = at.y - (at.y - pos.y) * amount;
         dirty = true;
@@ -665,7 +696,6 @@
   };
 
   // transit/transit.ts
-  var AU_km2 = 1496e5;
   function generate() {
     let table = document.getElementById("output-table");
     let dropDown = document.getElementById("location-drop-down");
@@ -691,8 +721,7 @@
           body.longitudOfAscendingNode_0_deg,
           body.argumentOfPeriapsis_0_deg,
           body.trueAnomaly_0_deg,
-          body.GM_km3_s2,
-          1 / (5 * AU_km2)
+          body.GM_km3_s2
         )
       );
       console.log(body.name);
@@ -710,12 +739,6 @@
     context.strokeStyle = "white";
     context.stroke();
   }
-  function drawSquares(context, displayUnit) {
-    context.fillStyle = "#eecc77";
-    context.fillRect(0, 0, displayUnit, displayUnit);
-    context.fillStyle = "#77ccee";
-    context.fillRect(0, 0, -displayUnit, -displayUnit);
-  }
   var initialDraw = false;
   function checkIfCanvasNeedsUpdating() {
     if (initialDraw)
@@ -729,7 +752,6 @@
     if (!canvas.getContext)
       return;
     const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"));
-    infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
     infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
     orbits.forEach((o) => {
