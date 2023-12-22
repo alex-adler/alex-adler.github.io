@@ -230,20 +230,7 @@
     draw(ctx, canvasUnit) {
       if (this.semiMajorAxis_km == void 0)
         return;
-      let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
-      var width = 0.5;
-      ctx.lineWidth = width;
-      var brightHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
-      brightHalf.addColorStop(0, "white");
-      brightHalf.addColorStop(1, "gray");
-      var darkHalf = ctx.createLinearGradient(0, 0, largeSide, 0);
-      darkHalf.addColorStop(0, "#242424");
-      darkHalf.addColorStop(1, "gray");
-      ctx.save();
-      ctx.beginPath();
-      ctx.strokeStyle = brightHalf;
-      ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
-      ctx.clip();
+      ctx.lineWidth = 0.1;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -254,25 +241,8 @@
         0 * Math.PI,
         2 * Math.PI
       );
+      ctx.strokeStyle = "white";
       ctx.stroke();
-      ctx.restore();
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(-largeSide - width, 0, (largeSide + width) * 2, largeSide + width * 2);
-      ctx.clip();
-      ctx.strokeStyle = darkHalf;
-      ctx.beginPath();
-      ctx.ellipse(
-        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        this.semiMajorAxis_km * canvasUnit * scale,
-        this.semiMinorAxis_km * canvasUnit * scale,
-        degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
-        0 * Math.PI,
-        2 * Math.PI
-      );
-      ctx.stroke();
-      ctx.restore();
     }
     keplersEquation(E_rad) {
       return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);
