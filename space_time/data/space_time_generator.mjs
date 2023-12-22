@@ -1,102 +1,124 @@
+"use strict";
 import * as fs from "fs";
-class Celestial {
-    constructor(name, dayLength_h, yearLength_h, initialYearProgress = 0, initialWeekDay = 0) {
-        this.name = name;
-        this.dayLength_ms = Math.floor(dayLength_h * 3600) * 1000;
-        this.yearLength_ms = Math.floor(yearLength_h * 3600) * 1000;
-        this.yearLength_hd = 0;
-        // ------------------ Days and weeks -----------------------------
-        // Factor for calculating length of human day
-        let offsetFrom24h = 1;
-        // Check if day length is +-offsetFrom24h from 24 hours
-        if (Math.abs(24 * 3600 * 1000 - this.dayLength_ms) > offsetFrom24h * 3600 * 1000) {
-            // If it's not, use the solar day as a week and calculate a human day
-            this.calculateWeek(offsetFrom24h, 1);
-        }
-        else {
-            // Use a default 7 day week if we don't need a special one
-            this.hDayLength_ms = this.dayLength_ms;
-            this.weekLength_d = 7;
-            this.weekLength_hd = this.weekLength_d;
-        }
-        // Calculate year length including rounding to integer days
-        this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms);
-        this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
-        // ------------------ Months -----------------------------
-        // Months are as close as 4 weeks per month as reasonable
-        let idealWeeksPerMonth = 4;
-        let idealDaysPerMonth = idealWeeksPerMonth * this.weekLength_hd;
-        let idealMonthCount = Math.round(this.yearLength_hd / idealDaysPerMonth);
-        // Number of months must be a multiple of 4 (so seasons are easier)
-        this.monthCount = Math.floor(idealMonthCount / 4) * 4;
-        this.nominalMonthLength_hd = Math.floor(this.yearLength_hd / this.monthCount);
-        this.nominalMonthLength_ms = this.nominalMonthLength_hd * this.hDayLength_ms;
-        // ------------------ Leap Years -----------------------------
-        let yearRemainder_hd = [];
-        this.leapYearFreq_hd = [];
-        this.leapYearBlocks_ms = [];
-        yearRemainder_hd.push((this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms);
-        this.leapYearFreq_hd.push(Math.ceil(1 / yearRemainder_hd.at(-1)));
-        yearRemainder_hd.push((this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - 1 / this.leapYearFreq_hd.at(-1));
-        this.leapYearFreq_hd.push(Math.ceil(1 / yearRemainder_hd.at(-1)));
-        this.monthRemainder_hd = this.hYearLength_ms / this.hDayLength_ms - (this.nominalMonthLength_ms / this.hDayLength_ms) * this.monthCount;
-        let excessYearRemainder = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - 1 / this.leapYearFreq_hd[0] - 1 / this.leapYearFreq_hd[1];
-        // Length of time between leap years in ms
-        this.leapYearBlocks_ms.push(this.leapYearFreq_hd[0] * this.hYearLength_ms + this.hDayLength_ms);
-        this.leapYearBlocks_ms.push(Math.floor(this.leapYearFreq_hd[1] / this.leapYearFreq_hd[0]) * this.leapYearBlocks_ms.at(-1) +
-            (this.leapYearFreq_hd[1] % this.leapYearFreq_hd[0]) * this.hYearLength_ms +
-            this.hDayLength_ms);
-        // Fudge factors
-        this.initialWeekDay = initialWeekDay;
-        this.initialYearProgress = initialYearProgress;
-    }
-    calculateWeek(offsetFrom24h_h, solarDaysPerWeek) {
-        let minWeekLength = 4;
-        let lowerLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 - offsetFrom24h_h) * 3600 * 1000);
-        let upperLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 + offsetFrom24h_h) * 3600 * 1000);
-        if (Math.floor(lowerLimit) > upperLimit && Math.floor(lowerLimit) > minWeekLength) {
-            // Valid week length (also longer than the minimum length)
-            this.weekLength_d = solarDaysPerWeek;
-            this.weekLength_hd = Math.floor(lowerLimit);
-            this.hDayLength_ms = Math.floor((this.dayLength_ms * solarDaysPerWeek) / (this.weekLength_hd * 1000)) * 1000;
-        }
-        else {
-            if (solarDaysPerWeek < 100) {
-                this.calculateWeek(offsetFrom24h_h, solarDaysPerWeek + 1);
-            }
-            else {
-                console.log("Week length not found for " + this.name);
-                this.hDayLength_ms = 0;
-                this.weekLength_d = 0;
-                this.weekLength_hd = 0;
-            }
-        }
-    }
-    setPhysicalParameters(GM_km3_S2, radius_km) {
-        this.GM_km3_s2 = GM_km3_S2;
-        this.radius_km = radius_km;
-        this.surface_gravity_ms = (GM_km3_S2 / radius_km ** 2) * 1000;
-    }
-    setJ2000OrbitalElements(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg) {
-        this.semiMajorAxis_0_km = a_km;
-        this.eccentricity_0 = e;
-        this.inclination_0_deg = i_deg;
-        this.longitudOfAscendingNode_0_deg = longitudeOfAscendingNode_deg;
-        this.argumentOfPeriapsis_0_deg = argumentOfPeriapsis_deg;
-        this.trueAnomaly_0_deg = 0;
-        this.semiMajorAxis_km_Cy = 0;
-        this.eccentricity_Cy = 0;
-        this.inclination_sec_Cy = 0;
-        this.longitudOfAscendingNode_sec_Cy = 0;
-        this.argumentOfPeriapsis_sec_Cy = 0;
-        this.trueAnomaly_sec_Cy = 0;
-    }
-    setTrueAnomaly(trueAnomaly_deg, trueAnomaly_sec_Cy = 0) {
-        this.trueAnomaly_0_deg = trueAnomaly_deg;
-        this.trueAnomaly_sec_Cy = trueAnomaly_sec_Cy;
-    }
+var Celestial = /** @class */ (function () {
+	function Celestial(name, dayLength_h, yearLength_h, initialYearProgress, initialWeekDay) {
+		if (initialYearProgress === void 0) {
+			initialYearProgress = 0;
+		}
+		if (initialWeekDay === void 0) {
+			initialWeekDay = 0;
+		}
+		this.name = name;
+		this.dayLength_ms = Math.floor(dayLength_h * 3600) * 1000;
+		this.yearLength_ms = Math.floor(yearLength_h * 3600) * 1000;
+		this.yearLength_hd = 0;
+		// ------------------ Days and weeks -----------------------------
+		// Factor for calculating length of human day
+		var offsetFrom24h = 1;
+		// Check if day length is +-offsetFrom24h from 24 hours
+		if (Math.abs(24 * 3600 * 1000 - this.dayLength_ms) > offsetFrom24h * 3600 * 1000) {
+			// If it's not, use the solar day as a week and calculate a human day
+			this.calculateWeek(offsetFrom24h, 1);
+		} else {
+			// Use a default 7 day week if we don't need a special one
+			this.hDayLength_ms = this.dayLength_ms;
+			this.weekLength_d = 7;
+			this.weekLength_hd = this.weekLength_d;
+		}
+		// Calculate year length including rounding to integer days
+		this.yearLength_hd = Math.floor(this.yearLength_ms / this.hDayLength_ms);
+		this.hYearLength_ms = this.yearLength_hd * this.hDayLength_ms;
+		// ------------------ Months -----------------------------
+		// Months are as close as 4 weeks per month as reasonable
+		var idealWeeksPerMonth = 4;
+		var idealDaysPerMonth = idealWeeksPerMonth * this.weekLength_hd;
+		var idealMonthCount = Math.round(this.yearLength_hd / idealDaysPerMonth);
+		// Number of months must be a multiple of 4 (so seasons are easier)
+		this.monthCount = Math.floor(idealMonthCount / 4) * 4;
+		this.nominalMonthLength_hd = Math.floor(this.yearLength_hd / this.monthCount);
+		this.nominalMonthLength_ms = this.nominalMonthLength_hd * this.hDayLength_ms;
+		// ------------------ Leap Years -----------------------------
+		var yearRemainder_hd = [];
+		this.leapYearFreq_hd = [];
+		this.leapYearBlocks_ms = [];
+		yearRemainder_hd.push((this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms);
+		this.leapYearFreq_hd.push(Math.ceil(1 / yearRemainder_hd.at(-1)));
+		yearRemainder_hd.push((this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - 1 / this.leapYearFreq_hd.at(-1));
+		this.leapYearFreq_hd.push(Math.ceil(1 / yearRemainder_hd.at(-1)));
+		this.monthRemainder_hd = this.hYearLength_ms / this.hDayLength_ms - (this.nominalMonthLength_ms / this.hDayLength_ms) * this.monthCount;
+		var excessYearRemainder = (this.yearLength_ms % this.hYearLength_ms) / this.hDayLength_ms - 1 / this.leapYearFreq_hd[0] - 1 / this.leapYearFreq_hd[1];
+		// Length of time between leap years in ms
+		this.leapYearBlocks_ms.push(this.leapYearFreq_hd[0] * this.hYearLength_ms + this.hDayLength_ms);
+		this.leapYearBlocks_ms.push(
+			Math.floor(this.leapYearFreq_hd[1] / this.leapYearFreq_hd[0]) * this.leapYearBlocks_ms.at(-1) +
+				(this.leapYearFreq_hd[1] % this.leapYearFreq_hd[0]) * this.hYearLength_ms +
+				this.hDayLength_ms
+		);
+		// Fudge factors
+		this.initialWeekDay = initialWeekDay;
+		this.initialYearProgress = initialYearProgress;
+	}
+	Celestial.prototype.calculateWeek = function (offsetFrom24h_h, solarDaysPerWeek) {
+		var minWeekLength = 4;
+		var lowerLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 - offsetFrom24h_h) * 3600 * 1000);
+		var upperLimit = (this.dayLength_ms * solarDaysPerWeek) / ((24 + offsetFrom24h_h) * 3600 * 1000);
+		if (Math.floor(lowerLimit) > upperLimit && Math.floor(lowerLimit) > minWeekLength) {
+			// Valid week length (also longer than the minimum length)
+			this.weekLength_d = solarDaysPerWeek;
+			this.weekLength_hd = Math.floor(lowerLimit);
+			this.hDayLength_ms = Math.floor((this.dayLength_ms * solarDaysPerWeek) / (this.weekLength_hd * 1000)) * 1000;
+		} else {
+			if (solarDaysPerWeek < 100) {
+				this.calculateWeek(offsetFrom24h_h, solarDaysPerWeek + 1);
+			} else {
+				console.log("Week length not found for " + this.name);
+				this.hDayLength_ms = 0;
+				this.weekLength_d = 0;
+				this.weekLength_hd = 0;
+			}
+		}
+	};
+	Celestial.prototype.setPhysicalParameters = function (GM_km3_S2, radius_km) {
+		this.GM_km3_s2 = GM_km3_S2;
+		this.radius_km = radius_km;
+		this.surface_gravity_ms = (GM_km3_S2 / Math.pow(radius_km, 2)) * 1000;
+		if (this.semiMajorAxis_0_km != undefined) this.period_ms = 2 * Math.PI * Math.pow(Math.pow(this.semiMajorAxis_0_km, 3) / this.GM_km3_s2, 0.5) * 1000;
+	};
+	Celestial.prototype.setJ2000OrbitalElements = function (a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg) {
+		this.semiMajorAxis_0_km = a_km;
+		this.eccentricity_0 = e;
+		this.inclination_0_deg = i_deg;
+		this.longitudOfAscendingNode_0_deg = longitudeOfAscendingNode_deg;
+		this.argumentOfPeriapsis_0_deg = argumentOfPeriapsis_deg;
+		this.trueAnomaly_0_deg = 0;
+		this.semiMajorAxis_km_Cy = 0;
+		this.eccentricity_Cy = 0;
+		this.inclination_sec_Cy = 0;
+		this.longitudOfAscendingNode_sec_Cy = 0;
+		this.argumentOfPeriapsis_sec_Cy = 0;
+		this.trueAnomaly_sec_Cy = 0;
+		if (this.GM_km3_s2 != undefined) this.period_ms = 2 * Math.PI * Math.pow(Math.pow(this.semiMajorAxis_0_km, 3) / this.GM_km3_s2, 0.5) * 1000;
+	};
+	Celestial.prototype.setTrueAnomaly = function (trueAnomaly_deg, trueAnomaly_sec_Cy) {
+		if (trueAnomaly_sec_Cy === void 0) {
+			trueAnomaly_sec_Cy = 0;
+		}
+		this.trueAnomaly_0_deg = trueAnomaly_deg;
+		this.trueAnomaly_sec_Cy = trueAnomaly_sec_Cy;
+		var eccentricAnomaly_deg = Math.acos(
+			(this.eccentricity_0 + Math.cos(degToRad(this.meanAnomaly_0_deg))) / (1 + this.eccentricity_0 * Math.cos(this.meanAnomaly_0_deg))
+		);
+		this.meanAnomaly_0_deg = eccentricAnomaly_deg - this.eccentricity_0 * Math.cos(degToRad(eccentricAnomaly_deg));
+	};
+	return Celestial;
+})();
+function degToRad(degrees) {
+	return degrees * (Math.PI / 180);
 }
-let bodies = {};
+function radToDeg(degrees) {
+	return degrees * (180 / Math.PI);
+}
+var bodies = {};
 // Celestial Bodies (name, dayLength, yearLength, initialYearProgress, initialWeekDay)
 bodies["Earth"] = new Celestial("Earth", 24, 365.256363004 * 24, 0, 6);
 bodies["Mars"] = new Celestial("Mars", 24.65979, 668.5991 * 24.623, 0, 0);
@@ -116,10 +138,12 @@ bodies["Earth"].setTrueAnomaly(3.581260865474801e2);
 bodies["Mars"].setPhysicalParameters(42828.375214, 3396.19);
 bodies["Mars"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
 bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
-let jsonString = "export const space_time = ";
+bodies["Ceres"].setPhysicalParameters(62.6325, 469.7);
+bodies["Ceres"].setJ2000OrbitalElements(4.138616544134015e8, 7.837505504042046e-2, 1.058336067354914e1, 8.049436497118826e1, 7.392278732202695e1);
+bodies["Ceres"].setTrueAnomaly(7.121193766358798);
+var jsonString = "export const space_time = ";
 jsonString += JSON.stringify(bodies);
-fs.writeFile("celestial_data.js", jsonString, (err) => {
-    if (err)
-        throw err;
-    console.log("Data written to file");
+fs.writeFile("celestial_data.js", jsonString, function (err) {
+	if (err) throw err;
+	console.log("Data written to file");
 });

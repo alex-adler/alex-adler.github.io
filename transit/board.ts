@@ -110,14 +110,14 @@ class Letter {
 		this._falling.appendChild(this._fallingText);
 
 		this._index = 0;
-		this._interval = null;
-		this._stopAt = null;
+		this._interval = 0;
+		this._stopAt = 0;
 	}
 	getElement() {
 		return this._element;
 	}
 	spin(clear: boolean) {
-		if (clear !== false) this._stopAt = null;
+		if (clear !== false) this._stopAt = 0;
 
 		var me = this;
 		this._interval = window.setInterval(function () {

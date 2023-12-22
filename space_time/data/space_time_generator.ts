@@ -204,9 +204,9 @@ bodies["Mars"].setPhysicalParameters(42828.375214, 3396.19);
 bodies["Mars"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
 bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
 
-bodies["Ceres"].setPhysicalParameters(42828.375214, 3396.19);
-bodies["Ceres"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
-bodies["Ceres"].setTrueAnomaly(2.302024685501411e1);
+bodies["Ceres"].setPhysicalParameters(62.6325, 469.7);
+bodies["Ceres"].setJ2000OrbitalElements(4.138616544134015e8, 7.837505504042046e-2, 1.058336067354914e1, 8.049436497118826e1, 7.392278732202695e1);
+bodies["Ceres"].setTrueAnomaly(7.121193766358798);
 
 let jsonString = "export const space_time = ";
 jsonString += JSON.stringify(bodies);

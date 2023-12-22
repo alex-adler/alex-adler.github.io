@@ -71,7 +71,7 @@ export class InfiniteCanvas {
 	isDragging = false;
 	dragStart = { x: 0, y: 0 };
 	cameraOffset = { x: 0, y: 0 };
-	initialPinchDistance: number = null;
+	initialPinchDistance: number = 0;
 	lastZoom: number = 1;
 	lastDrawnZoom: number = 1;
 
@@ -81,8 +81,14 @@ export class InfiniteCanvas {
 	#drawFunctions: ((context: CanvasRenderingContext2D, displayUnit: number) => void)[] = [];
 	#needsUpdating: Array<() => boolean> = [];
 
-	constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-		view.context = context;
+	constructor(canvas: HTMLCanvasElement) {
+		let temp_context = canvas.getContext("2d");
+		if (!temp_context) {
+			console.log("Failed to get context");
+			return;
+		}
+		view.context = temp_context;
+		this.context = temp_context;
 
 		this.canvas = canvas;
 		this.#setupEvents(canvas);
@@ -92,8 +98,6 @@ export class InfiniteCanvas {
 
 		this.cameraOffset.x = this.canvas.width / 2;
 		this.cameraOffset.y = this.canvas.height / 2;
-
-		this.context = context;
 
 		view.pan({ x: this.canvas.width / 2, y: this.canvas.height / 2 });
 

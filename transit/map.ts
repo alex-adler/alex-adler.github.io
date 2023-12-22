@@ -126,11 +126,11 @@ function newtonRaphson(f: (x: number) => number, x0: number, options: any): numb
 	let fp = null;
 
 	// Interpret variadic forms:
-	if (typeof fp !== "function") {
-		options = x0;
-		x0 = fp;
-		fp = null;
-	}
+	// if (typeof fp !== "function") {
+	// 	options = x0;
+	// 	x0 = fp;
+	// 	fp = null;
+	// }
 
 	options = options || {};
 	tol = options.tolerance === undefined ? 1e-7 : options.tolerance;

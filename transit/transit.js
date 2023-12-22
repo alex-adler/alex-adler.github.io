@@ -32,7 +32,9 @@
       inclination_sec_Cy: 0,
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
-      trueAnomaly_sec_Cy: 0
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 18219702661829465e-3,
+      meanAnomaly_0_deg: null
     },
     Mars: {
       name: "Mars",
@@ -65,7 +67,9 @@
       inclination_sec_Cy: 0,
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
-      trueAnomaly_sec_Cy: 0
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 10448214047350531e-2,
+      meanAnomaly_0_deg: null
     },
     Ceres: {
       name: "Ceres",
@@ -83,7 +87,24 @@
       leapYearBlocks_ms: [872526982e3, 4798940868e3],
       monthRemainder_hd: 32,
       initialWeekDay: 0,
-      initialYearProgress: 0
+      initialYearProgress: 0,
+      GM_km3_s2: 62.6325,
+      radius_km: 469.7,
+      surface_gravity_ms: 0.2838955771940551,
+      semiMajorAxis_0_km: 4138616544134015e-7,
+      eccentricity_0: 0.07837505504042046,
+      inclination_0_deg: 10.58336067354914,
+      longitudOfAscendingNode_0_deg: 80.49436497118826,
+      argumentOfPeriapsis_0_deg: 73.92278732202695,
+      trueAnomaly_0_deg: 7.121193766358798,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 6684405364675394,
+      meanAnomaly_0_deg: null
     },
     Europa: {
       name: "Europa",
@@ -280,11 +301,6 @@
   function newtonRaphson(f, x0, options) {
     var x1, y, yp, tol, maxIter, iter, yph, ymh, yp2h, ym2h, h, hr, verbose, eps;
     let fp = null;
-    if (typeof fp !== "function") {
-      options = x0;
-      x0 = fp;
-      fp = null;
-    }
     options = options || {};
     tol = options.tolerance === void 0 ? 1e-7 : options.tolerance;
     eps = options.epsilon === void 0 ? 2220446049250313e-31 : options.epsilon;
@@ -434,15 +450,15 @@
       this._fallingText.style.transitionDuration = this.DROP_TIME * 0.5 + "ms";
       this._falling.appendChild(this._fallingText);
       this._index = 0;
-      this._interval = null;
-      this._stopAt = null;
+      this._interval = 0;
+      this._stopAt = 0;
     }
     getElement() {
       return this._element;
     }
     spin(clear) {
       if (clear !== false)
-        this._stopAt = null;
+        this._stopAt = 0;
       var me = this;
       this._interval = window.setInterval(function() {
         me._tick();
@@ -521,7 +537,7 @@
     return API;
   })();
   var InfiniteCanvas = class {
-    constructor(canvas, context) {
+    constructor(canvas) {
       this.#pixelRatio = window.devicePixelRatio;
       this.cameraZoom = 1;
       this.MAX_ZOOM = 5;
@@ -530,21 +546,26 @@
       this.isDragging = false;
       this.dragStart = { x: 0, y: 0 };
       this.cameraOffset = { x: 0, y: 0 };
-      this.initialPinchDistance = null;
+      this.initialPinchDistance = 0;
       this.lastZoom = 1;
       this.lastDrawnZoom = 1;
       this.#pointerPos = { x: 0, y: 0 };
       this.mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
       this.#drawFunctions = [];
       this.#needsUpdating = [];
-      view.context = context;
+      let temp_context = canvas.getContext("2d");
+      if (!temp_context) {
+        console.log("Failed to get context");
+        return;
+      }
+      view.context = temp_context;
+      this.context = temp_context;
       this.canvas = canvas;
       this.#setupEvents(canvas);
       this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
       this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
       this.cameraOffset.x = this.canvas.width / 2;
       this.cameraOffset.y = this.canvas.height / 2;
-      this.context = context;
       view.pan({ x: this.canvas.width / 2, y: this.canvas.height / 2 });
       this.#draw();
     }
@@ -719,9 +740,7 @@
     }
   }
   function generateCanvas(canvas, orbits) {
-    if (!canvas.getContext)
-      return;
-    const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"));
+    const infiniteCanvas = new InfiniteCanvas(canvas);
     infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
     orbits.forEach((o) => {
