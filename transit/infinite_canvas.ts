@@ -78,18 +78,10 @@ export class InfiniteCanvas {
 	#pointerPos = { x: 0, y: 0 };
 	mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
 
-	#drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void;
-	#needsUpdating: () => boolean;
+	#drawFunctions: ((context: CanvasRenderingContext2D, displayUnit: number) => void)[] = [];
+	#needsUpdating: Array<() => boolean> = [];
 
-	constructor(
-		canvas: HTMLCanvasElement,
-		context: CanvasRenderingContext2D,
-		drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void,
-		needsUpdating: () => boolean
-	) {
-		this.#drawFunction = drawFunction;
-		this.#needsUpdating = needsUpdating;
-
+	constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
 		view.context = context;
 
 		this.canvas = canvas;
@@ -107,8 +99,14 @@ export class InfiniteCanvas {
 
 		this.#draw();
 	}
+	addDrawFunction(drawFunction: (context: CanvasRenderingContext2D, displayUnit: number) => void, needsUpdating: () => boolean) {
+		this.#drawFunctions.push(drawFunction);
+		this.#needsUpdating.push(needsUpdating);
+	}
 	#draw(): void {
-		if (view.isDirty() || this.#needsUpdating()) {
+		// Check if the viewport needs updating or if any of the elements need to be redrawn
+		// if (view.isDirty()) {
+		if (view.isDirty() || this.#needsUpdating.length || this.#needsUpdating.some((e) => e())) {
 			this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
 			this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
 			this.context.setTransform(1, 0, 0, 1, 0, 0);
@@ -116,8 +114,9 @@ export class InfiniteCanvas {
 
 			view.apply(); // set the 2D context transform to the view
 
-			// Call the user defined function that draws the canvas
-			this.#drawFunction(this.context, this.canvas.width / 2);
+			// Call all of the user defined functions that draw shapes
+			let that = this;
+			if (this.#drawFunctions.length) this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2));
 		}
 		// TODO: Get mouse position
 		// this.context.beginPath();

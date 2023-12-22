@@ -39,14 +39,12 @@ export class Orbit {
 
 		this.scale = scale;
 	}
-	draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+	draw(ctx: CanvasRenderingContext2D, canvasUnit: number) {
 		if (this.semiMajorAxis_km == undefined) return;
 		ctx.beginPath();
 		ctx.ellipse(
-			0.5 * canvas.width +
-				Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-			0.5 * canvas.height +
-				Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
+			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
+			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
 			this.semiMajorAxis_km * this.scale,
 			this.semiMinorAxis_km * this.scale,
 			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),

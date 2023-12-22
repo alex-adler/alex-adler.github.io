@@ -64,15 +64,17 @@ function generate() {
 }
 
 function drawCircle(context: CanvasRenderingContext2D, displayUnit: number): void {
-	context.fillStyle = "#eecc77";
-	context.fillRect(0, 0, displayUnit, displayUnit);
-	context.fillStyle = "#77ccee";
-	context.fillRect(0, 0, -displayUnit, -displayUnit);
-
 	context.beginPath();
 	context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
 	context.strokeStyle = "white";
 	context.stroke();
+}
+
+function drawSquares(context: CanvasRenderingContext2D, displayUnit: number): void {
+	context.fillStyle = "#eecc77";
+	context.fillRect(0, 0, displayUnit, displayUnit);
+	context.fillStyle = "#77ccee";
+	context.fillRect(0, 0, -displayUnit, -displayUnit);
 }
 
 let initialDraw = false;
@@ -87,7 +89,9 @@ function checkIfCanvasNeedsUpdating(): boolean {
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	if (!canvas.getContext) return;
 
-	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle, checkIfCanvasNeedsUpdating);
+	const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"));
+	infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
+	infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
 	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
 	// let ctx = canvas.getContext("2d");

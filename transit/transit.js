@@ -227,13 +227,13 @@
       this.GM_km3_s2 = GM_km3_s2;
       this.scale = scale;
     }
-    draw(canvas, ctx) {
+    draw(ctx, canvasUnit) {
       if (this.semiMajorAxis_km == void 0)
         return;
       ctx.beginPath();
       ctx.ellipse(
-        0.5 * canvas.width + Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
-        0.5 * canvas.height + Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
+        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
+        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * this.scale,
         this.semiMajorAxis_km * this.scale,
         this.semiMinorAxis_km * this.scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -520,7 +520,7 @@
     return API;
   })();
   var InfiniteCanvas = class {
-    constructor(canvas, context, drawFunction, needsUpdating) {
+    constructor(canvas, context) {
       this.#pixelRatio = window.devicePixelRatio;
       this.cameraZoom = 1;
       this.MAX_ZOOM = 5;
@@ -534,8 +534,8 @@
       this.lastDrawnZoom = 1;
       this.#pointerPos = { x: 0, y: 0 };
       this.mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
-      this.#drawFunction = drawFunction;
-      this.#needsUpdating = needsUpdating;
+      this.#drawFunctions = [];
+      this.#needsUpdating = [];
       view.context = context;
       this.canvas = canvas;
       this.#setupEvents(canvas);
@@ -549,16 +549,22 @@
     }
     #pixelRatio;
     #pointerPos;
-    #drawFunction;
+    #drawFunctions;
     #needsUpdating;
+    addDrawFunction(drawFunction, needsUpdating) {
+      this.#drawFunctions.push(drawFunction);
+      this.#needsUpdating.push(needsUpdating);
+    }
     #draw() {
-      if (view.isDirty() || this.#needsUpdating()) {
+      if (view.isDirty() || this.#needsUpdating.length || this.#needsUpdating.some((e) => e())) {
         this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
         this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
         this.context.setTransform(1, 0, 0, 1, 0, 0);
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         view.apply();
-        this.#drawFunction(this.context, this.canvas.width / 2);
+        let that = this;
+        if (this.#drawFunctions.length)
+          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2));
       }
       requestAnimationFrame(this.#draw.bind(this));
     }
@@ -699,14 +705,16 @@
     window.setTimeout(spinArrival, 1e4, arrivalBoard);
   }
   function drawCircle(context, displayUnit) {
-    context.fillStyle = "#eecc77";
-    context.fillRect(0, 0, displayUnit, displayUnit);
-    context.fillStyle = "#77ccee";
-    context.fillRect(0, 0, -displayUnit, -displayUnit);
     context.beginPath();
     context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
     context.strokeStyle = "white";
     context.stroke();
+  }
+  function drawSquares(context, displayUnit) {
+    context.fillStyle = "#eecc77";
+    context.fillRect(0, 0, displayUnit, displayUnit);
+    context.fillStyle = "#77ccee";
+    context.fillRect(0, 0, -displayUnit, -displayUnit);
   }
   var initialDraw = false;
   function checkIfCanvasNeedsUpdating() {
@@ -720,7 +728,9 @@
   function generateCanvas(canvas, orbits) {
     if (!canvas.getContext)
       return;
-    const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle, checkIfCanvasNeedsUpdating);
+    const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"));
+    infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
+    infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
   }
   var services = ["Spin", "1/3g", " 1g "];
