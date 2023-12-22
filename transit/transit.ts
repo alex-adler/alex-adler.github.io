@@ -13,8 +13,8 @@ function generate() {
 	var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
 	var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
 
-	// for (let i = 0; i < 11; i++) departureBoard.setValue(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
-	// for (let i = 0; i < 11; i++) arrivalBoard.setValue(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
+	for (let i = 0; i < 11; i++) departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
+	for (let i = 0; i < 11; i++) arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
 
 	let orbits: Orbit[] = [];
 
@@ -59,8 +59,8 @@ function generate() {
 	// 	}
 	// }
 
-	// window.setTimeout(spinDeparture, 20000, departureBoard);
-	// window.setTimeout(spinArrival, 30000, arrivalBoard);
+	window.setTimeout(spinDeparture, 5000, departureBoard);
+	window.setTimeout(spinArrival, 10000, arrivalBoard);
 }
 
 function drawCircle(context: CanvasRenderingContext2D, displayUnit: number): void {
@@ -157,7 +157,7 @@ function spinDeparture(board: DepartureBoard) {
 		board.setValue(row, stringOut);
 	}
 
-	window.setTimeout(spinDeparture, 20000, board);
+	window.setTimeout(spinDeparture, 10000, board);
 }
 
 function spinArrival(board: DepartureBoard) {
@@ -199,7 +199,7 @@ function spinArrival(board: DepartureBoard) {
 		for (let i = 0; i < 2; i++) stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
 		stringOut += " ";
 
-		const remarks = ["", "Docking", "Delayed", "Cancelled", "Docked"];
+		const remarks = ["", "Docking", "Delayed", "Docked"];
 		stringOut += remarks[Math.floor(Math.random() * remarks.length)];
 
 		board.setValue(row, stringOut);
@@ -208,7 +208,7 @@ function spinArrival(board: DepartureBoard) {
 	// board.setValue(0, "14:58 Ganymede  Spin WA0002 08");
 	// board.setValue(1, "10:03 Luna      1g   LA7290 00 Delayed");
 
-	window.setTimeout(spinArrival, 20000, board);
+	window.setTimeout(spinArrival, 10000, board);
 }
 
 // function buildDepartureBoard() {

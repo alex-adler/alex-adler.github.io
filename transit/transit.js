@@ -366,6 +366,14 @@
         })(row, i);
       }
     }
+    setValueNoSpin(row, value_in) {
+      console.log(value_in);
+      let me = this;
+      let value = value_in.toUpperCase();
+      for (let i = 0, l = value.length; i < l; i++) {
+        me._letters[row][i].setValueNoSpin(value[i]);
+      }
+    }
   };
   var Letter = class {
     constructor() {
@@ -445,6 +453,11 @@
         this._stopAt = 0;
       if (!this._interval && this._index != this._stopAt)
         this.spin(false);
+    }
+    setValueNoSpin(value) {
+      this._topText.innerHTML = value;
+      this._fallingText.innerHTML = value;
+      this._bottomText.innerHTML = value;
     }
   };
 
@@ -653,6 +666,10 @@
     let canvas = document.getElementById("orbital-canvas");
     var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
     var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
+    for (let i = 0; i < 11; i++)
+      departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
+    for (let i = 0; i < 11; i++)
+      arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
     let orbits = [];
     for (const key in space_time) {
       let opt = document.createElement("option");
@@ -678,6 +695,8 @@
       orbits.at(-1).updatePosition(Date.now() - 9466848e5);
     }
     generateCanvas(canvas, orbits);
+    window.setTimeout(spinDeparture, 5e3, departureBoard);
+    window.setTimeout(spinArrival, 1e4, arrivalBoard);
   }
   function drawCircle(context, displayUnit) {
     context.fillStyle = "#eecc77";
@@ -703,6 +722,83 @@
       return;
     const infiniteCanvas = new InfiniteCanvas(canvas, canvas.getContext("2d"), drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
+  }
+  var services = ["Spin", "1/3g", " 1g "];
+  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var hexCharacters = "0123456789ABCDEF";
+  function spinDeparture(board) {
+    const changingOdds = 0.3;
+    for (let row = 0; row < board._letters.length; row++) {
+      if (Math.random() > changingOdds)
+        continue;
+      let stringOut;
+      let hour = Math.floor(Math.random() * 24);
+      let minute = Math.floor(Math.random() * 60);
+      stringOut = hour > 9 ? String(hour) : "0" + hour;
+      stringOut += ":";
+      stringOut += minute > 9 ? String(minute) : "0" + minute;
+      stringOut += " ";
+      let randomBody = function(object) {
+        var keys = Object.keys(object);
+        return object[keys[Math.floor(keys.length * Math.random())]];
+      };
+      let randomBodyName = randomBody(space_time).name;
+      stringOut += randomBodyName;
+      for (let i = randomBodyName.length; i < 10; i++) {
+        stringOut += " ";
+      }
+      stringOut += services[Math.floor(Math.random() * services.length)];
+      stringOut += " ";
+      for (let i = 0; i < 2; i++)
+        stringOut += characters[Math.floor(Math.random() * characters.length)];
+      for (let i = 0; i < 4; i++)
+        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+      stringOut += " ";
+      for (let i = 0; i < 2; i++)
+        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+      stringOut += " ";
+      const remarks = ["", "Boarding", "Final Call", "Delayed", "Cancelled", "Departing"];
+      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
+      board.setValue(row, stringOut);
+    }
+    window.setTimeout(spinDeparture, 1e4, board);
+  }
+  function spinArrival(board) {
+    const changingOdds = 0.3;
+    for (let row = 0; row < board._letters.length; row++) {
+      if (Math.random() > changingOdds)
+        continue;
+      let stringOut;
+      let hour = Math.floor(Math.random() * 24);
+      let minute = Math.floor(Math.random() * 60);
+      stringOut = hour > 9 ? String(hour) : "0" + hour;
+      stringOut += ":";
+      stringOut += minute > 9 ? String(minute) : "0" + minute;
+      stringOut += " ";
+      let randomBody = function(object) {
+        var keys = Object.keys(object);
+        return object[keys[Math.floor(keys.length * Math.random())]];
+      };
+      let randomBodyName = randomBody(space_time).name;
+      stringOut += randomBodyName;
+      for (let i = randomBodyName.length; i < 10; i++) {
+        stringOut += " ";
+      }
+      stringOut += services[Math.floor(Math.random() * services.length)];
+      stringOut += " ";
+      for (let i = 0; i < 2; i++)
+        stringOut += characters[Math.floor(Math.random() * characters.length)];
+      for (let i = 0; i < 4; i++)
+        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+      stringOut += " ";
+      for (let i = 0; i < 2; i++)
+        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
+      stringOut += " ";
+      const remarks = ["", "Docking", "Delayed", "Docked"];
+      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
+      board.setValue(row, stringOut);
+    }
+    window.setTimeout(spinArrival, 1e4, board);
   }
   window.onload = function() {
     generate();

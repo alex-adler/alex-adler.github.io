@@ -48,6 +48,15 @@ export class DepartureBoard {
 			})(row, i);
 		}
 	}
+	setValueNoSpin(row: number, value_in: String) {
+		console.log(value_in);
+		let me = this;
+		let value = value_in.toUpperCase();
+
+		for (let i = 0, l = value.length; i < l; i++) {
+			me._letters[row][i].setValueNoSpin(value[i]);
+		}
+	}
 }
 
 class Letter {
@@ -120,6 +129,11 @@ class Letter {
 
 		if (this._stopAt < 0) this._stopAt = 0;
 		if (!this._interval && this._index != this._stopAt) this.spin(false);
+	}
+	setValueNoSpin(value: string) {
+		this._topText.innerHTML = value;
+		this._fallingText.innerHTML = value;
+		this._bottomText.innerHTML = value;
 	}
 	_tick = function () {
 		var me = this,
