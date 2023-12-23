@@ -391,29 +391,28 @@
       var width = 0.5;
       ctx.lineWidth = width;
       var brightHalf = ctx.createLinearGradient(
-        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
         largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
         largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
       );
       brightHalf.addColorStop(0, "white");
       brightHalf.addColorStop(1, "DimGray");
       var darkHalf = ctx.createLinearGradient(
-        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
         largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
         largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
       );
       darkHalf.addColorStop(0, "#202020");
       darkHalf.addColorStop(1, "DimGray");
       ctx.save();
       ctx.beginPath();
-      ctx.strokeStyle = brightHalf;
-      ctx.fillStyle = brightHalf;
       ctx.rotate(degToRad(this.meanAnomaly_deg));
       ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
+      ctx.strokeStyle = darkHalf;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -428,12 +427,11 @@
       ctx.restore();
       ctx.save();
       ctx.beginPath();
-      ctx.fillStyle = darkHalf;
       ctx.rotate(degToRad(this.meanAnomaly_deg));
       ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
-      ctx.strokeStyle = darkHalf;
+      ctx.strokeStyle = brightHalf;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,

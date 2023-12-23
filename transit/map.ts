@@ -42,18 +42,18 @@ export class Orbit {
 		ctx.lineWidth = width;
 
 		var brightHalf = ctx.createLinearGradient(
-			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
 			largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
 			largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
 		);
 		brightHalf.addColorStop(0, "white");
 		brightHalf.addColorStop(1, "DimGray");
 
 		var darkHalf = ctx.createLinearGradient(
-			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
 			largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
 			largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
 		);
 		darkHalf.addColorStop(0, "#202020");
@@ -63,16 +63,13 @@ export class Orbit {
 		// First we make a clipping region for the left half
 		ctx.save();
 		ctx.beginPath();
-		ctx.strokeStyle = brightHalf;
-		ctx.fillStyle = brightHalf;
 		ctx.rotate(degToRad(this.meanAnomaly_deg));
 		ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
 		reset();
 		ctx.clip();
-		// ctx.stroke();
-		// ctx.fill();
 
 		// Then we draw the left half
+		ctx.strokeStyle = darkHalf;
 		ctx.beginPath();
 		ctx.ellipse(
 			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -88,19 +85,15 @@ export class Orbit {
 		ctx.restore(); // restore clipping region to default
 
 		// Then we make a clipping region for the right half
-
 		ctx.save();
 		ctx.beginPath();
-		ctx.fillStyle = darkHalf;
 		ctx.rotate(degToRad(this.meanAnomaly_deg));
 		ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
 		reset();
-		// ctx.stroke();
 		ctx.clip();
-		// ctx.fill();
 
 		// Then we draw the right half
-		ctx.strokeStyle = darkHalf;
+		ctx.strokeStyle = brightHalf;
 		ctx.beginPath();
 		ctx.ellipse(
 			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -112,20 +105,6 @@ export class Orbit {
 			2 * Math.PI
 		);
 		ctx.stroke();
-
-		// ctx.beginPath();
-		// ctx.rect(-largeSide, -largeSide, largeSide * 2, largeSide * 2);
-		// ctx.ellipse(
-		// 	Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-		// 	Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-		// 	this.semiMajorAxis_km * canvasUnit * scale,
-		// 	this.semiMinorAxis_km * canvasUnit * scale,
-		// 	degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
-		// 	0 * Math.PI,
-		// 	1 * Math.PI
-		// );
-		// ctx.strokeStyle = "white";
-		// ctx.stroke();
 
 		ctx.restore(); // restore clipping region to default
 	}
