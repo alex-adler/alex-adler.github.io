@@ -384,10 +384,36 @@
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
     }
-    draw(ctx, canvasUnit) {
+    draw(ctx, canvasUnit, reset) {
       if (this.semiMajorAxis_km == void 0)
         return;
-      ctx.lineWidth = 0.5;
+      let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
+      var width = 0.5;
+      ctx.lineWidth = width;
+      var brightHalf = ctx.createLinearGradient(
+        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+      );
+      brightHalf.addColorStop(0, "white");
+      brightHalf.addColorStop(1, "DimGray");
+      var darkHalf = ctx.createLinearGradient(
+        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+      );
+      darkHalf.addColorStop(0, "#202020");
+      darkHalf.addColorStop(1, "DimGray");
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = brightHalf;
+      ctx.fillStyle = brightHalf;
+      ctx.rotate(degToRad(this.meanAnomaly_deg));
+      ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+      reset();
+      ctx.clip();
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -398,14 +424,34 @@
         0 * Math.PI,
         2 * Math.PI
       );
-      ctx.strokeStyle = "white";
       ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = darkHalf;
+      ctx.rotate(degToRad(this.meanAnomaly_deg));
+      ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+      reset();
+      ctx.clip();
+      ctx.strokeStyle = darkHalf;
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        this.semiMajorAxis_km * canvasUnit * scale,
+        this.semiMinorAxis_km * canvasUnit * scale,
+        degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+        0 * Math.PI,
+        2 * Math.PI
+      );
+      ctx.stroke();
+      ctx.restore();
     }
     keplersEquation(E_rad) {
       return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);
     }
     updatePosition(t_ms) {
-      this.meanAnomaly_deg = this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5;
+      this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
       let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
       let trueAnomaly_rad = 2 * Math.atan2(
         (1 + this.eccentricity) ** 0.5 * Math.sin(eccentricAnomaly_rad / 2),
@@ -712,7 +758,7 @@
       this.#needsUpdating.push(needsUpdating);
     }
     #draw() {
-      if (view.isDirty() || this.#needsUpdating.length || this.#needsUpdating.some((e) => e())) {
+      if (view.isDirty() || this.#needsUpdating.length && this.#needsUpdating.some((e) => e())) {
         this.canvas.width = this.canvas.clientWidth * this.#pixelRatio;
         this.canvas.height = this.canvas.clientHeight * this.#pixelRatio;
         this.context.setTransform(1, 0, 0, 1, 0, 0);
@@ -720,7 +766,7 @@
         view.apply();
         let that = this;
         if (this.#drawFunctions.length)
-          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2));
+          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply));
       }
       requestAnimationFrame(this.#draw.bind(this));
     }
