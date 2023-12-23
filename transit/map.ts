@@ -37,7 +37,7 @@ export class Orbit {
 	}
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number) {
 		if (this.semiMajorAxis_km == undefined) return;
-		ctx.lineWidth = 0.1;
+		ctx.lineWidth = 0.5;
 		ctx.beginPath();
 		ctx.ellipse(
 			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,

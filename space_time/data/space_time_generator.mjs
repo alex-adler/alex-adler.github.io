@@ -2,13 +2,24 @@
 import * as fs from "fs";
 var Celestial = /** @class */ (function () {
 	function Celestial(name, dayLength_h, yearLength_h, initialYearProgress, initialWeekDay) {
+		if (dayLength_h === void 0) {
+			dayLength_h = 0;
+		}
+		if (yearLength_h === void 0) {
+			yearLength_h = 0;
+		}
 		if (initialYearProgress === void 0) {
 			initialYearProgress = 0;
 		}
 		if (initialWeekDay === void 0) {
 			initialWeekDay = 0;
 		}
+		this.generatedTimeZone = true;
 		this.name = name;
+		if (dayLength_h === 0 && yearLength_h === 0) {
+			this.generatedTimeZone = false;
+			return;
+		}
 		this.dayLength_ms = Math.floor(dayLength_h * 3600) * 1000;
 		this.yearLength_ms = Math.floor(yearLength_h * 3600) * 1000;
 		this.yearLength_hd = 0;
@@ -120,18 +131,30 @@ function radToDeg(degrees) {
 }
 var bodies = {};
 // Celestial Bodies (name, dayLength, yearLength, initialYearProgress, initialWeekDay)
+bodies["Mercury"] = new Celestial("Mercury");
+bodies["Venus"] = new Celestial("Venus");
+// bodies["Venus"] = new Celestial("Venus", 116.75 * 24, 5832.6, 0, 0, 0);
 bodies["Earth"] = new Celestial("Earth", 24, 365.256363004 * 24, 0, 6);
 bodies["Mars"] = new Celestial("Mars", 24.65979, 668.5991 * 24.623, 0, 0);
-// var Venus = new Celestial("Venus", 116.75 * 24, 5832.6, 0, 0, 0);
 bodies["Ceres"] = new Celestial("Ceres", 9.07417, 1683.14570801 * 24, 0, 0);
+bodies["Jupiter"] = new Celestial("Jupiter");
 bodies["Europa"] = new Celestial("Europa", 3.551181 * 24, 4332.59 * 24, 0, 0);
 bodies["Ganymede"] = new Celestial("Ganymede", 7.15455296 * 24, 4332.59 * 24, 0, 0);
 bodies["Callisto"] = new Celestial("Callisto", 16.6890184 * 24, 4332.59 * 24, 0, 0);
+bodies["Saturn"] = new Celestial("Saturn");
 bodies["Titan"] = new Celestial("Titan", 15.945 * 24, 10759.22 * 24, 0, 0);
 bodies["Enceladus"] = new Celestial("Enceladus", 1.370218 * 24, 10759.22 * 24, 0, 0);
+bodies["Uranus"] = new Celestial("Uranus");
 bodies["Titania"] = new Celestial("Titania", 8.706234 * 24, 30688.5 * 24, 0, 0);
+bodies["Neptune"] = new Celestial("Neptune");
 bodies["Triton"] = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0);
 // Data from https://ssd.jpl.nasa.gov/horizons/app.html#/
+bodies["Mercury"].setPhysicalParameters(22031.86855, 2440);
+bodies["Mercury"].setJ2000OrbitalElements(5.790907025241733e7, 2.056302515978038e-1, 7.005014362233553, 4.833053877672862e1, 2.912427943500334e1);
+bodies["Mercury"].setTrueAnomaly(1.751155302923815e2);
+bodies["Venus"].setPhysicalParameters(324858.592, 6051.893);
+bodies["Venus"].setJ2000OrbitalElements(1.082081565316098e8, 6.755697268576816e-3, 3.394589632757466, 7.66783751109416e1, 5.518541504725159e1);
+bodies["Venus"].setTrueAnomaly(4.990452231912491e1);
 bodies["Earth"].setPhysicalParameters(398600.435436, 6378.137);
 bodies["Earth"].setJ2000OrbitalElements(1.496534962738141e8, 1.704239718110438e-2, 2.668809336274974e-4, 1.639748712430063e2, 2.977671795415902e2);
 bodies["Earth"].setTrueAnomaly(3.581260865474801e2);
@@ -141,6 +164,18 @@ bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
 bodies["Ceres"].setPhysicalParameters(62.6325, 469.7);
 bodies["Ceres"].setJ2000OrbitalElements(4.138616544134015e8, 7.837505504042046e-2, 1.058336067354914e1, 8.049436497118826e1, 7.392278732202695e1);
 bodies["Ceres"].setTrueAnomaly(7.121193766358798);
+bodies["Jupiter"].setPhysicalParameters(126686531.9, 71492);
+bodies["Jupiter"].setJ2000OrbitalElements(7.786731611090481e8, 4.892305962953223e-2, 1.304655711046047, 1.004888615724618e2, 2.751197059498091e2);
+bodies["Jupiter"].setTrueAnomaly(2.063463654069944e1);
+bodies["Saturn"].setPhysicalParameters(37931206.234, 60268);
+bodies["Saturn"].setJ2000OrbitalElements(1.433364815997285e9, 5.559928887285597e-2, 2.48436877980734, 1.136930130794106e2, 3.359006492558044e2);
+bodies["Saturn"].setTrueAnomaly(3.160917716241848e2);
+bodies["Uranus"].setPhysicalParameters(5793951.256, 25559);
+bodies["Uranus"].setJ2000OrbitalElements(2.876758957338404e9, 4.439336258840319e-2, 7.723604869115734e-1, 7.396006633963485e1, 9.661122696481169e1);
+bodies["Uranus"].setTrueAnomaly(1.458440420932308e2);
+bodies["Neptune"].setPhysicalParameters(6835099.97, 24766);
+bodies["Neptune"].setJ2000OrbitalElements(4.503002396427352e9, 1.127490587339749e-2, 1.764331194766304, 1.318103417756993e2, 2.66115451343762e2);
+bodies["Neptune"].setTrueAnomaly(2.659963939182547e2);
 var jsonString = "export const space_time = ";
 jsonString += JSON.stringify(bodies);
 fs.writeFile("celestial_data.js", jsonString, function (err) {

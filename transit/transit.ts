@@ -88,7 +88,7 @@ function checkIfCanvasNeedsUpdating(): boolean {
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	const infiniteCanvas = new InfiniteCanvas(canvas);
 	// infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
-	infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
+	// infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
 	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
 	// let ctx = canvas.getContext("2d");

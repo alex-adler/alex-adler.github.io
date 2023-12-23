@@ -1,7 +1,50 @@
 (() => {
   // space_time/data/celestial_data.js
   var space_time = {
+    Mercury: {
+      generatedTimeZone: false,
+      name: "Mercury",
+      GM_km3_s2: 22031.86855,
+      radius_km: 2440,
+      surface_gravity_ms: 3.7005960343321687,
+      semiMajorAxis_0_km: 5790907025241733e-8,
+      eccentricity_0: 0.2056302515978038,
+      inclination_0_deg: 7.005014362233553,
+      longitudOfAscendingNode_0_deg: 48.33053877672862,
+      argumentOfPeriapsis_0_deg: 29.12427943500334,
+      trueAnomaly_0_deg: 175.1155302923815,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 1865409099234155e-2,
+      meanAnomaly_0_deg: null
+    },
+    Venus: {
+      generatedTimeZone: false,
+      name: "Venus",
+      GM_km3_s2: 324858.592,
+      radius_km: 6051.893,
+      surface_gravity_ms: 8.869760144761234,
+      semiMajorAxis_0_km: 1082081565316098e-7,
+      eccentricity_0: 0.006755697268576816,
+      inclination_0_deg: 3.394589632757466,
+      longitudOfAscendingNode_0_deg: 76.6783751109416,
+      argumentOfPeriapsis_0_deg: 55.18541504725159,
+      trueAnomaly_0_deg: 49.90452231912491,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 12408597200354518e-3,
+      meanAnomaly_0_deg: null
+    },
     Earth: {
+      generatedTimeZone: true,
       name: "Earth",
       dayLength_ms: 864e5,
       yearLength_ms: 31558149e3,
@@ -37,6 +80,7 @@
       meanAnomaly_0_deg: null
     },
     Mars: {
+      generatedTimeZone: true,
       name: "Mars",
       dayLength_ms: 88775e3,
       yearLength_ms: 59266496e3,
@@ -72,6 +116,7 @@
       meanAnomaly_0_deg: null
     },
     Ceres: {
+      generatedTimeZone: true,
       name: "Ceres",
       dayLength_ms: 32667e3,
       yearLength_ms: 145423789e3,
@@ -106,7 +151,29 @@
       period_ms: 6684405364675394,
       meanAnomaly_0_deg: null
     },
+    Jupiter: {
+      generatedTimeZone: false,
+      name: "Jupiter",
+      GM_km3_s2: 1266865319e-1,
+      radius_km: 71492,
+      surface_gravity_ms: 24.786519847888645,
+      semiMajorAxis_0_km: 7786731611090481e-7,
+      eccentricity_0: 0.04892305962953223,
+      inclination_0_deg: 1.304655711046047,
+      longitudOfAscendingNode_0_deg: 100.4888615724618,
+      argumentOfPeriapsis_0_deg: 275.1197059498091,
+      trueAnomaly_0_deg: 20.63463654069944,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 12129627211583168e-3,
+      meanAnomaly_0_deg: null
+    },
     Europa: {
+      generatedTimeZone: true,
       name: "Europa",
       dayLength_ms: 306822e3,
       yearLength_ms: 374335776e3,
@@ -125,6 +192,7 @@
       initialYearProgress: 0
     },
     Ganymede: {
+      generatedTimeZone: true,
       name: "Ganymede",
       dayLength_ms: 618153e3,
       yearLength_ms: 374335776e3,
@@ -143,6 +211,7 @@
       initialYearProgress: 0
     },
     Callisto: {
+      generatedTimeZone: true,
       name: "Callisto",
       dayLength_ms: 1441931e3,
       yearLength_ms: 374335776e3,
@@ -160,7 +229,29 @@
       initialWeekDay: 0,
       initialYearProgress: 0
     },
+    Saturn: {
+      generatedTimeZone: false,
+      name: "Saturn",
+      GM_km3_s2: 37931206234e-3,
+      radius_km: 60268,
+      surface_gravity_ms: 10.442947496734448,
+      semiMajorAxis_0_km: 1433364815997285e-6,
+      eccentricity_0: 0.05559928887285597,
+      inclination_0_deg: 2.48436877980734,
+      longitudOfAscendingNode_0_deg: 113.6930130794106,
+      argumentOfPeriapsis_0_deg: 335.9006492558044,
+      trueAnomaly_0_deg: 316.0917716241848,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 5536262212547909e-2,
+      meanAnomaly_0_deg: null
+    },
     Titan: {
+      generatedTimeZone: true,
       name: "Titan",
       dayLength_ms: 1377648e3,
       yearLength_ms: 929596607e3,
@@ -179,6 +270,7 @@
       initialYearProgress: 0
     },
     Enceladus: {
+      generatedTimeZone: true,
       name: "Enceladus",
       dayLength_ms: 118386e3,
       yearLength_ms: 929596607e3,
@@ -196,7 +288,29 @@
       initialWeekDay: 0,
       initialYearProgress: 0
     },
+    Uranus: {
+      generatedTimeZone: false,
+      name: "Uranus",
+      GM_km3_s2: 5793951256e-3,
+      radius_km: 25559,
+      surface_gravity_ms: 8.8692545868098,
+      semiMajorAxis_0_km: 2876758957338404e-6,
+      eccentricity_0: 0.04439336258840319,
+      inclination_0_deg: 0.7723604869115734,
+      longitudOfAscendingNode_0_deg: 73.96006633963485,
+      argumentOfPeriapsis_0_deg: 96.61122696481169,
+      trueAnomaly_0_deg: 145.8440420932308,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 40276123214276875e-2,
+      meanAnomaly_0_deg: null
+    },
     Titania: {
+      generatedTimeZone: true,
       name: "Titania",
       dayLength_ms: 752218e3,
       yearLength_ms: 26514864e5,
@@ -214,7 +328,29 @@
       initialWeekDay: 0,
       initialYearProgress: 0
     },
+    Neptune: {
+      generatedTimeZone: false,
+      name: "Neptune",
+      GM_km3_s2: 683509997e-2,
+      radius_km: 24766,
+      surface_gravity_ms: 11.14379550029934,
+      semiMajorAxis_0_km: 4503002396427352e-6,
+      eccentricity_0: 0.01127490587339749,
+      inclination_0_deg: 1.764331194766304,
+      longitudOfAscendingNode_0_deg: 131.8103417756993,
+      argumentOfPeriapsis_0_deg: 266.115451343762,
+      trueAnomaly_0_deg: 265.9963939182547,
+      semiMajorAxis_km_Cy: 0,
+      eccentricity_Cy: 0,
+      inclination_sec_Cy: 0,
+      longitudOfAscendingNode_sec_Cy: 0,
+      argumentOfPeriapsis_sec_Cy: 0,
+      trueAnomaly_sec_Cy: 0,
+      period_ms: 726207450158298,
+      meanAnomaly_0_deg: null
+    },
     Triton: {
+      generatedTimeZone: true,
       name: "Triton",
       dayLength_ms: 50776e4,
       yearLength_ms: 51997248e5,
@@ -251,7 +387,7 @@
     draw(ctx, canvasUnit) {
       if (this.semiMajorAxis_km == void 0)
         return;
-      ctx.lineWidth = 0.1;
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
@@ -549,7 +685,6 @@
       this.initialPinchDistance = 0;
       this.lastZoom = 1;
       this.lastDrawnZoom = 1;
-      this.#pointerPos = { x: 0, y: 0 };
       this.mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
       this.#drawFunctions = [];
       this.#needsUpdating = [];
@@ -570,7 +705,6 @@
       this.#draw();
     }
     #pixelRatio;
-    #pointerPos;
     #drawFunctions;
     #needsUpdating;
     addDrawFunction(drawFunction, needsUpdating) {
@@ -724,24 +858,8 @@
     window.setTimeout(spinDeparture, 5e3, departureBoard);
     window.setTimeout(spinArrival, 1e4, arrivalBoard);
   }
-  function drawCircle(context, displayUnit) {
-    context.beginPath();
-    context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
-    context.strokeStyle = "white";
-    context.stroke();
-  }
-  var initialDraw = false;
-  function checkIfCanvasNeedsUpdating() {
-    if (initialDraw)
-      return false;
-    else {
-      initialDraw = true;
-      return true;
-    }
-  }
   function generateCanvas(canvas, orbits) {
     const infiniteCanvas = new InfiniteCanvas(canvas);
-    infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
     orbits.forEach((o) => {
       infiniteCanvas.addDrawFunction(o.draw.bind(o), () => true);

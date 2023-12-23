@@ -75,7 +75,6 @@ export class InfiniteCanvas {
 	lastZoom: number = 1;
 	lastDrawnZoom: number = 1;
 
-	#pointerPos = { x: 0, y: 0 };
 	mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
 
 	#drawFunctions: ((context: CanvasRenderingContext2D, displayUnit: number) => void)[] = [];
