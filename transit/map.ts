@@ -156,24 +156,24 @@ export class Orbit {
 		positionVector_inertialFrame[2] =
 			positionVector_perifocalFrame[0] * (Math.sin(argumentOfPeriapsis_rad) * Math.sin(inclination_rad)) -
 			positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad));
-		console.log(
-			"Perifocal: " +
-				positionVector_perifocalFrame[0] / AU_km +
-				" AU | " +
-				positionVector_perifocalFrame[1] / AU_km +
-				" AU | " +
-				positionVector_perifocalFrame[2] +
-				" km"
-		);
-		console.log(
-			"Inertial: " +
-				positionVector_inertialFrame[0] / AU_km +
-				" AU | " +
-				positionVector_inertialFrame[1] / AU_km +
-				" AU | " +
-				positionVector_inertialFrame[2] +
-				" km"
-		);
+		// console.log(
+		// 	"Perifocal: " +
+		// 		positionVector_perifocalFrame[0] / AU_km +
+		// 		" AU | " +
+		// 		positionVector_perifocalFrame[1] / AU_km +
+		// 		" AU | " +
+		// 		positionVector_perifocalFrame[2] +
+		// 		" km"
+		// );
+		// console.log(
+		// 	"Inertial: " +
+		// 		positionVector_inertialFrame[0] / AU_km +
+		// 		" AU | " +
+		// 		positionVector_inertialFrame[1] / AU_km +
+		// 		" AU | " +
+		// 		positionVector_inertialFrame[2] +
+		// 		" km"
+		// );
 	}
 }
 // https://github.com/scijs/newton-raphson-method

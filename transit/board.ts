@@ -49,7 +49,6 @@ export class DepartureBoard {
 		}
 	}
 	setValueNoSpin(row: number, value_in: String) {
-		console.log(value_in);
 		let me = this;
 		let value = value_in.toUpperCase();
 

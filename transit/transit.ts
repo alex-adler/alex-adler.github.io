@@ -38,8 +38,8 @@ function generate() {
 		);
 
 		console.log(body.name);
-		console.log(orbits.at(-1));
-		orbits.at(-1).updatePosition(0);
+		// console.log(orbits.at(-1));
+		// orbits.at(-1).updatePosition(0);
 		orbits.at(-1).updatePosition(Date.now() - 946684800000);
 	}
 
@@ -104,8 +104,7 @@ function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	// ctx.fill(this);
 
 	orbits.forEach((o) => {
-		infiniteCanvas.addDrawFunction(o.draw.bind(o), () => true);
-		// o.draw(canvas, ctx);
+		infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
 	});
 }
 

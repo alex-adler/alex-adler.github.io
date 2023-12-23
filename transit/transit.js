@@ -470,12 +470,6 @@
       positionVector_inertialFrame[0] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad) - positionVector_perifocalFrame[1] * (Math.sin(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) + Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad)));
       positionVector_inertialFrame[1] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) + Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad) + positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.sin(longitudOfAscendingNode_rad)));
       positionVector_inertialFrame[2] = positionVector_perifocalFrame[0] * (Math.sin(argumentOfPeriapsis_rad) * Math.sin(inclination_rad)) - positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad));
-      console.log(
-        "Perifocal: " + positionVector_perifocalFrame[0] / AU_km + " AU | " + positionVector_perifocalFrame[1] / AU_km + " AU | " + positionVector_perifocalFrame[2] + " km"
-      );
-      console.log(
-        "Inertial: " + positionVector_inertialFrame[0] / AU_km + " AU | " + positionVector_inertialFrame[1] / AU_km + " AU | " + positionVector_inertialFrame[2] + " km"
-      );
     }
   };
   function newtonRaphson(f, x0, options) {
@@ -564,7 +558,6 @@
       }
     }
     setValueNoSpin(row, value_in) {
-      console.log(value_in);
       let me = this;
       let value = value_in.toUpperCase();
       for (let i = 0, l = value.length; i < l; i++) {
@@ -894,19 +887,26 @@
         )
       );
       console.log(body.name);
-      console.log(orbits.at(-1));
-      orbits.at(-1).updatePosition(0);
       orbits.at(-1).updatePosition(Date.now() - 9466848e5);
     }
     generateCanvas(canvas, orbits);
     window.setTimeout(spinDeparture, 5e3, departureBoard);
     window.setTimeout(spinArrival, 1e4, arrivalBoard);
   }
+  var initialDraw = false;
+  function checkIfCanvasNeedsUpdating() {
+    if (initialDraw)
+      return false;
+    else {
+      initialDraw = true;
+      return true;
+    }
+  }
   function generateCanvas(canvas, orbits) {
     const infiniteCanvas = new InfiniteCanvas(canvas);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
     orbits.forEach((o) => {
-      infiniteCanvas.addDrawFunction(o.draw.bind(o), () => true);
+      infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
     });
   }
   var services = ["Spin", "1/3g", " 1g "];
