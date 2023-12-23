@@ -77,7 +77,7 @@ export class InfiniteCanvas {
 
 	mouse = { x: 0, y: 0, oldX: 0, oldY: 0, button: false };
 
-	#drawFunctions: ((context: CanvasRenderingContext2D, displayUnit: number, reset: () => void) => void)[] = [];
+	#drawFunctions: ((context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, scale: number) => void)[] = [];
 	#needsUpdating: Array<() => boolean> = [];
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -102,7 +102,10 @@ export class InfiniteCanvas {
 
 		this.#draw();
 	}
-	addDrawFunction(drawFunction: (context: CanvasRenderingContext2D, displayUnit: number, reset: () => void) => void, needsUpdating: () => boolean) {
+	addDrawFunction(
+		drawFunction: (context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, scale: number) => void,
+		needsUpdating: () => boolean
+	) {
 		this.#drawFunctions.push(drawFunction);
 		this.#needsUpdating.push(needsUpdating);
 	}
@@ -118,7 +121,7 @@ export class InfiniteCanvas {
 
 			// Call all of the user defined functions that draw shapes
 			let that = this;
-			if (this.#drawFunctions.length) this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply));
+			if (this.#drawFunctions.length) this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply, view.scale));
 		}
 		// TODO: Get mouse position
 		// this.context.beginPath();

@@ -384,11 +384,11 @@
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
     }
-    draw(ctx, canvasUnit, reset) {
+    draw(ctx, canvasUnit, reset, currentScale) {
       if (this.semiMajorAxis_km == void 0)
         return;
       let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
-      var width = 0.5;
+      var width = 1 / currentScale;
       ctx.lineWidth = width;
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
@@ -757,7 +757,7 @@
         view.apply();
         let that = this;
         if (this.#drawFunctions.length)
-          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply));
+          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply, view.scale));
       }
       requestAnimationFrame(this.#draw.bind(this));
     }

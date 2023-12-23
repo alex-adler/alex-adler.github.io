@@ -35,10 +35,10 @@ export class Orbit {
 
 		this.GM_km3_s2 = GM_km3_s2;
 	}
-	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void) {
+	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
 		let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
-		var width = 0.5;
+		var width = 1 / currentScale;
 		ctx.lineWidth = width;
 
 		var brightHalf = ctx.createLinearGradient(
