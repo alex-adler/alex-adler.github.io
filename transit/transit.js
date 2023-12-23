@@ -374,7 +374,7 @@
   var AU_km = 1496e5;
   var scale = 1 / (5 * AU_km);
   var Orbit = class {
-    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2) {
+    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, radius_km) {
       this.semiMajorAxis_km = a_km;
       this.eccentricity = e;
       this.inclination_deg = i_deg;
@@ -383,12 +383,13 @@
       this.meanAnomaly_0_deg = meanAnomaly_deg;
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
+      this.radius_km = radius_km;
     }
     draw(ctx, canvasUnit, reset, currentScale) {
       if (this.semiMajorAxis_km == void 0)
         return;
       let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
-      var width = 1 / currentScale;
+      var width = 0.5 / currentScale;
       ctx.lineWidth = width;
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
@@ -858,6 +859,7 @@
   };
 
   // transit/transit.ts
+  var AU_km2 = 1496e5;
   function generate() {
     let table = document.getElementById("output-table");
     let dropDown = document.getElementById("location-drop-down");
@@ -883,7 +885,8 @@
           body.longitudOfAscendingNode_0_deg,
           body.argumentOfPeriapsis_0_deg,
           body.trueAnomaly_0_deg,
-          body.GM_km3_s2
+          body.GM_km3_s2,
+          body.radius_km
         )
       );
       console.log(body.name);
@@ -892,6 +895,15 @@
     generateCanvas(canvas, orbits);
     window.setTimeout(spinDeparture, 5e3, departureBoard);
     window.setTimeout(spinArrival, 1e4, arrivalBoard);
+  }
+  function drawSun(context, displayUnit, reset, currentScale) {
+    const radius_km = 696e3;
+    let scale2 = 1 / (5 * AU_km2);
+    let radius_px = radius_km * displayUnit * scale2;
+    context.beginPath();
+    context.arc(0, 0, radius_px, 0, 2 * Math.PI);
+    context.fillStyle = "white";
+    context.fill();
   }
   var initialDraw = false;
   function checkIfCanvasNeedsUpdating() {
@@ -904,6 +916,7 @@
   }
   function generateCanvas(canvas, orbits) {
     const infiniteCanvas = new InfiniteCanvas(canvas);
+    infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
     document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
     orbits.forEach((o) => {
       infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);

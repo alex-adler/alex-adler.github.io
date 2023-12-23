@@ -33,7 +33,8 @@ function generate() {
 				body.longitudOfAscendingNode_0_deg,
 				body.argumentOfPeriapsis_0_deg,
 				body.trueAnomaly_0_deg,
-				body.GM_km3_s2
+				body.GM_km3_s2,
+				body.radius_km
 			)
 		);
 
@@ -62,11 +63,14 @@ function generate() {
 	window.setTimeout(spinArrival, 10000, arrivalBoard);
 }
 
-function drawCircle(context: CanvasRenderingContext2D, displayUnit: number): void {
+function drawSun(context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, currentScale: number): void {
+	const radius_km = 696e3;
+	let scale = 1 / (5 * AU_km);
+	let radius_px = radius_km * displayUnit * scale;
 	context.beginPath();
-	context.ellipse(0, 0, displayUnit, displayUnit, 0, 0, 2 * Math.PI);
-	context.strokeStyle = "white";
-	context.stroke();
+	context.arc(0, 0, radius_px, 0, 2 * Math.PI);
+	context.fillStyle = "white";
+	context.fill();
 }
 
 function drawSquares(context: CanvasRenderingContext2D, displayUnit: number): void {
@@ -88,7 +92,7 @@ function checkIfCanvasNeedsUpdating(): boolean {
 function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
 	const infiniteCanvas = new InfiniteCanvas(canvas);
 	// infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
-	// infiniteCanvas.addDrawFunction(drawCircle, checkIfCanvasNeedsUpdating);
+	infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
 	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
 	// let ctx = canvas.getContext("2d");

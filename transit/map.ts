@@ -15,6 +15,8 @@ export class Orbit {
 
 	meanAnomaly_deg: number;
 	trueAnomaly_deg: number;
+
+	radius_km: number;
 	constructor(
 		a_km: number,
 		e: number,
@@ -22,7 +24,8 @@ export class Orbit {
 		longitudeOfAscendingNode_deg: number,
 		argumentOfPeriapsis_deg: number,
 		meanAnomaly_deg: number,
-		GM_km3_s2: number
+		GM_km3_s2: number,
+		radius_km: number
 	) {
 		this.semiMajorAxis_km = a_km;
 		this.eccentricity = e;
@@ -34,11 +37,16 @@ export class Orbit {
 		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
 
 		this.GM_km3_s2 = GM_km3_s2;
+		this.radius_km = radius_km;
 	}
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
+
+		// ctx.arc()
+
+		// Draw orbit circle with a gradient to illustrate current position and direction
 		let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
-		var width = 1 / currentScale;
+		var width = 0.5 / currentScale;
 		ctx.lineWidth = width;
 
 		var brightHalf = ctx.createLinearGradient(
