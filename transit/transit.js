@@ -372,9 +372,10 @@
 
   // transit/map.ts
   var AU_km = 1496e5;
-  var scale = 1 / (5 * AU_km);
+  var scalePerKm = 1 / (5 * AU_km);
   var Orbit = class {
     constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, radius_km) {
+      this.positionVector_inertialFrame = [0, 0, 0];
       this.semiMajorAxis_km = a_km;
       this.eccentricity = e;
       this.inclination_deg = i_deg;
@@ -388,22 +389,28 @@
     draw(ctx, canvasUnit, reset, currentScale) {
       if (this.semiMajorAxis_km == void 0)
         return;
-      let largeSide = this.semiMajorAxis_km * canvasUnit * scale;
+      let scale = canvasUnit * scalePerKm;
+      ctx.beginPath();
+      ctx.fillStyle = "coral";
+      ctx.arc(this.positionVector_inertialFrame[0] * scale, this.positionVector_inertialFrame[1] * scale, 5 / currentScale, 0, 2 * Math.PI);
+      ctx.fill();
+      console.log("x: " + this.positionVector_inertialFrame[0] * scale + ", y: " + this.positionVector_inertialFrame[1] * scale);
+      let largeSide = this.semiMajorAxis_km * scale;
       var width = 0.5 / currentScale;
       ctx.lineWidth = width;
       var brightHalf = ctx.createLinearGradient(
-        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
         -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+        largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
       );
       brightHalf.addColorStop(0, "white");
       brightHalf.addColorStop(1, "DimGray");
       var darkHalf = ctx.createLinearGradient(
-        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
         -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+        largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
       );
       darkHalf.addColorStop(0, "#202020");
       darkHalf.addColorStop(1, "DimGray");
@@ -413,13 +420,13 @@
       ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
-      ctx.strokeStyle = darkHalf;
+      ctx.strokeStyle = brightHalf;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
         Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        this.semiMajorAxis_km * canvasUnit * scale,
-        this.semiMinorAxis_km * canvasUnit * scale,
+        this.semiMajorAxis_km * scale,
+        this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
         0 * Math.PI,
         2 * Math.PI
@@ -432,13 +439,13 @@
       ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
-      ctx.strokeStyle = brightHalf;
+      ctx.strokeStyle = darkHalf;
       ctx.beginPath();
       ctx.ellipse(
         Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
         Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        this.semiMajorAxis_km * canvasUnit * scale,
-        this.semiMinorAxis_km * canvasUnit * scale,
+        this.semiMajorAxis_km * scale,
+        this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
         0 * Math.PI,
         2 * Math.PI
@@ -467,10 +474,15 @@
       let argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
       let inclination_rad = degToRad(this.inclination_deg);
       let longitudOfAscendingNode_rad = degToRad(this.longitudOfAscendingNode_deg);
-      let positionVector_inertialFrame = new Array(3);
-      positionVector_inertialFrame[0] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad) - positionVector_perifocalFrame[1] * (Math.sin(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) + Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad)));
-      positionVector_inertialFrame[1] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) + Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad) + positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.sin(longitudOfAscendingNode_rad)));
-      positionVector_inertialFrame[2] = positionVector_perifocalFrame[0] * (Math.sin(argumentOfPeriapsis_rad) * Math.sin(inclination_rad)) - positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad));
+      this.positionVector_inertialFrame[0] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad)) - positionVector_perifocalFrame[1] * (Math.sin(argumentOfPeriapsis_rad) * Math.cos(longitudOfAscendingNode_rad) + Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.sin(longitudOfAscendingNode_rad));
+      this.positionVector_inertialFrame[1] = positionVector_perifocalFrame[0] * (Math.cos(argumentOfPeriapsis_rad) * Math.sin(longitudOfAscendingNode_rad) + Math.sin(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.cos(longitudOfAscendingNode_rad)) + positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.cos(inclination_rad) * Math.cos(longitudOfAscendingNode_rad) - Math.sin(argumentOfPeriapsis_rad) * Math.sin(longitudOfAscendingNode_rad));
+      this.positionVector_inertialFrame[2] = positionVector_perifocalFrame[0] * (Math.sin(argumentOfPeriapsis_rad) * Math.sin(inclination_rad)) - positionVector_perifocalFrame[1] * (Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad));
+      console.log(
+        "Perifocal: " + positionVector_perifocalFrame[0] / AU_km + " AU | " + positionVector_perifocalFrame[1] / AU_km + " AU | " + positionVector_perifocalFrame[2] + " km"
+      );
+      console.log(
+        "Inertial: " + this.positionVector_inertialFrame[0] / AU_km + " AU | " + this.positionVector_inertialFrame[1] / AU_km + " AU | " + this.positionVector_inertialFrame[2] + " km"
+      );
     }
   };
   function newtonRaphson(f, x0, options) {
@@ -656,7 +668,7 @@
   var view = /* @__PURE__ */ (() => {
     const matrix = [1, 0, 0, 1, 0, 0];
     var m = matrix;
-    var scale2 = 1;
+    var scale = 1;
     var ctx;
     const pos = { x: 0, y: 0 };
     var dirty = true;
@@ -672,7 +684,7 @@
         ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
       },
       get scale() {
-        return scale2;
+        return scale;
       },
       get position() {
         return pos;
@@ -685,7 +697,7 @@
       },
       update() {
         dirty = false;
-        m[3] = m[0] = scale2;
+        m[3] = m[0] = scale;
         m[2] = m[1] = 0;
         m[4] = pos.x;
         m[5] = pos.y;
@@ -702,7 +714,7 @@
         if (dirty) {
           this.update();
         }
-        scale2 *= amount;
+        scale *= amount;
         pos.x = at.x - (at.x - pos.x) * amount;
         pos.y = at.y - (at.y - pos.y) * amount;
         dirty = true;
@@ -898,8 +910,8 @@
   }
   function drawSun(context, displayUnit, reset, currentScale) {
     const radius_km = 696e3;
-    let scale2 = 1 / (5 * AU_km2);
-    let radius_px = radius_km * displayUnit * scale2;
+    let scale = 1 / (5 * AU_km2);
+    let radius_px = radius_km * displayUnit * scale;
     context.beginPath();
     context.arc(0, 0, radius_px, 0, 2 * Math.PI);
     context.fillStyle = "white";
