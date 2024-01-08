@@ -389,42 +389,46 @@
     draw(ctx, canvasUnit, reset, currentScale) {
       if (this.semiMajorAxis_km == void 0)
         return;
+      console.log("true: " + this.eccentricAnomaly_deg + ", mean: " + this.meanAnomaly_deg);
       let scale = canvasUnit * scalePerKm;
+      let ellipseCenter = {
+        x: Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        y: Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale
+      };
       ctx.beginPath();
       ctx.fillStyle = "coral";
       ctx.arc(this.positionVector_inertialFrame[0] * scale, this.positionVector_inertialFrame[1] * scale, 5 / currentScale, 0, 2 * Math.PI);
       ctx.fill();
-      console.log("x: " + this.positionVector_inertialFrame[0] * scale + ", y: " + this.positionVector_inertialFrame[1] * scale);
-      let largeSide = this.semiMajorAxis_km * scale;
+      let largeSide = this.semiMajorAxis_km * scale * 1.1;
       var width = 0.5 / currentScale;
       ctx.lineWidth = width;
       var brightHalf = ctx.createLinearGradient(
-        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+        -largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+        largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg))
       );
       brightHalf.addColorStop(0, "white");
       brightHalf.addColorStop(1, "DimGray");
       var darkHalf = ctx.createLinearGradient(
-        -largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
-        largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-        -largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+        -largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+        largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg)),
+        largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+        -largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg))
       );
       darkHalf.addColorStop(0, "#202020");
       darkHalf.addColorStop(1, "DimGray");
       ctx.save();
       ctx.beginPath();
-      ctx.rotate(degToRad(this.meanAnomaly_deg));
-      ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+      ctx.rotate(degToRad(this.eccentricAnomaly_deg));
+      ctx.rect(ellipseCenter.x - largeSide - width, ellipseCenter.y - largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
       ctx.strokeStyle = brightHalf;
       ctx.beginPath();
       ctx.ellipse(
-        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        ellipseCenter.x,
+        ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -435,15 +439,15 @@
       ctx.restore();
       ctx.save();
       ctx.beginPath();
-      ctx.rotate(degToRad(this.meanAnomaly_deg));
-      ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+      ctx.rotate(degToRad(this.eccentricAnomaly_deg));
+      ctx.rect(ellipseCenter.x - width, ellipseCenter.y - largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
       reset();
       ctx.clip();
       ctx.strokeStyle = darkHalf;
       ctx.beginPath();
       ctx.ellipse(
-        Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        ellipseCenter.x,
+        ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -459,6 +463,7 @@
     updatePosition(t_ms) {
       this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
       let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
+      this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
       let trueAnomaly_rad = 2 * Math.atan2(
         (1 + this.eccentricity) ** 0.5 * Math.sin(eccentricAnomaly_rad / 2),
         (1 - this.eccentricity) ** 0.5 * Math.cos(eccentricAnomaly_rad / 2)
@@ -529,140 +534,6 @@
   function radToDeg(radians) {
     return radians * (180 / Math.PI);
   }
-
-  // transit/board.ts
-  var LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,':()&!?+-/";
-  var DepartureBoard = class {
-    constructor(element, rowCount = 1, letterCount = 25) {
-      this._element = element;
-      this._letters = [];
-      element.className += " departure-board";
-      for (var r = 0; r < rowCount; r++) {
-        this._letters.push([]);
-        let rowElement = document.createElement("div");
-        rowElement.className = "row";
-        element.appendChild(rowElement);
-        for (var l = 0; l < letterCount; l++) {
-          let letter = new Letter();
-          this._letters[r].push(letter);
-          rowElement.appendChild(letter.getElement());
-        }
-      }
-    }
-    spin() {
-      var me = this;
-      for (var i = 0, l = this._letters.length; i < l; i++) {
-        (function(i2) {
-          window.setTimeout(function() {
-            me._letters[i2].forEach(this.spin());
-          }, 20 * i2 + Math.random() * 400);
-        })(i);
-      }
-    }
-    setValue(row, value_in) {
-      let me = this;
-      let value = value_in.toUpperCase();
-      for (let i = 0, l = this._letters[row].length; i < l; i++) {
-        (function(row2, i2) {
-          window.setTimeout(function() {
-            me._letters[row2][i2].setValue(value[i2]);
-          }, 25 * i2 + Math.random() * 400);
-        })(row, i);
-      }
-    }
-    setValueNoSpin(row, value_in) {
-      let me = this;
-      let value = value_in.toUpperCase();
-      for (let i = 0, l = value.length; i < l; i++) {
-        me._letters[row][i].setValueNoSpin(value[i]);
-      }
-    }
-  };
-  var Letter = class {
-    constructor() {
-      this._tick = function() {
-        var me = this, oldValue = LETTERS.charAt(this._index), fallingStyle = this._falling.style, fallingTextStyle = this._fallingText.style;
-        this._index = (this._index + 1) % LETTERS.length;
-        let newValue = LETTERS.charAt(this._index);
-        this._fallingText.innerHTML = oldValue;
-        fallingStyle.display = "block";
-        this._topText.innerHTML = newValue;
-        window.setTimeout(function() {
-          fallingTextStyle.WebkitTransitionTimingFunction = fallingTextStyle.MozTransitionTimingFunction = fallingTextStyle.OTransitionTimingFunction = fallingTextStyle.transitionTimingFunction = "ease-in";
-          fallingTextStyle.WebkitTransform = fallingTextStyle.MozTransform = fallingTextStyle.OTransform = fallingTextStyle.transform = "scaleY(0)";
-        }, 1);
-        window.setTimeout(function() {
-          me._fallingText.innerHTML = newValue;
-          fallingStyle.top = "-.03em";
-          fallingStyle.bottom = "auto";
-          fallingTextStyle.top = "-.65em";
-          fallingTextStyle.WebkitTransitionTimingFunction = fallingTextStyle.MozTransitionTimingFunction = fallingTextStyle.OTransitionTimingFunction = fallingTextStyle.transitionTimingFunction = "ease-out";
-          fallingTextStyle.WebkitTransform = fallingTextStyle.MozTransform = fallingTextStyle.OTransform = fallingTextStyle.transform = "scaleY(1)";
-        }, this.DROP_TIME / 2);
-        window.setTimeout(function() {
-          me._bottomText.innerHTML = newValue;
-          fallingStyle.display = "none";
-          fallingStyle.top = "auto";
-          fallingStyle.bottom = 0;
-          fallingTextStyle.top = 0;
-        }, this.DROP_TIME);
-        if (this._index === this._stopAt) {
-          clearInterval(this._interval);
-          delete this._interval;
-        }
-      };
-      this._element = document.createElement("span");
-      this._element.className = "letter";
-      this._bottom = document.createElement("span");
-      this._bottom.className = "flap bottom";
-      this._element.appendChild(this._bottom);
-      this._bottomText = document.createElement("span");
-      this._bottomText.className = "text";
-      this._bottom.appendChild(this._bottomText);
-      this._top = document.createElement("span");
-      this._top.className = "flap top";
-      this._element.appendChild(this._top);
-      this._topText = document.createElement("span");
-      this._topText.className = "text";
-      this._top.appendChild(this._topText);
-      this._fold = document.createElement("span");
-      this._fold.className = "fold";
-      this._element.appendChild(this._fold);
-      this._falling = document.createElement("span");
-      this._falling.className = "flap falling";
-      this._fold.appendChild(this._falling);
-      this._fallingText = document.createElement("span");
-      this._fallingText.className = "text";
-      this._fallingText.style.transitionDuration = this.DROP_TIME * 0.5 + "ms";
-      this._falling.appendChild(this._fallingText);
-      this._index = 0;
-      this._interval = 0;
-      this._stopAt = 0;
-    }
-    getElement() {
-      return this._element;
-    }
-    spin(clear) {
-      if (clear !== false)
-        this._stopAt = 0;
-      var me = this;
-      this._interval = window.setInterval(function() {
-        me._tick();
-      }, this.DROP_TIME * 1.1);
-    }
-    setValue(value) {
-      this._stopAt = LETTERS.indexOf(value);
-      if (this._stopAt < 0)
-        this._stopAt = 0;
-      if (!this._interval && this._index != this._stopAt)
-        this.spin(false);
-    }
-    setValueNoSpin(value) {
-      this._topText.innerHTML = value;
-      this._fallingText.innerHTML = value;
-      this._bottomText.innerHTML = value;
-    }
-  };
 
   // transit/infinite_canvas.ts
   var view = /* @__PURE__ */ (() => {
@@ -876,12 +747,6 @@
     let table = document.getElementById("output-table");
     let dropDown = document.getElementById("location-drop-down");
     let canvas = document.getElementById("orbital-canvas");
-    var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
-    var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
-    for (let i = 0; i < 11; i++)
-      departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
-    for (let i = 0; i < 11; i++)
-      arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
     let orbits = [];
     for (const key in space_time) {
       let opt = document.createElement("option");
@@ -902,11 +767,9 @@
         )
       );
       console.log(body.name);
-      orbits.at(-1).updatePosition(Date.now() - 9466848e5);
+      orbits.at(-1)?.updatePosition(0);
     }
     generateCanvas(canvas, orbits);
-    window.setTimeout(spinDeparture, 5e3, departureBoard);
-    window.setTimeout(spinArrival, 1e4, arrivalBoard);
   }
   function drawSun(context, displayUnit, reset, currentScale) {
     const radius_km = 696e3;
@@ -933,83 +796,6 @@
     orbits.forEach((o) => {
       infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
     });
-  }
-  var services = ["Spin", "1/3g", " 1g "];
-  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  var hexCharacters = "0123456789ABCDEF";
-  function spinDeparture(board) {
-    const changingOdds = 0.3;
-    for (let row = 0; row < board._letters.length; row++) {
-      if (Math.random() > changingOdds)
-        continue;
-      let stringOut;
-      let hour = Math.floor(Math.random() * 24);
-      let minute = Math.floor(Math.random() * 60);
-      stringOut = hour > 9 ? String(hour) : "0" + hour;
-      stringOut += ":";
-      stringOut += minute > 9 ? String(minute) : "0" + minute;
-      stringOut += " ";
-      let randomBody = function(object) {
-        var keys = Object.keys(object);
-        return object[keys[Math.floor(keys.length * Math.random())]];
-      };
-      let randomBodyName = randomBody(space_time).name;
-      stringOut += randomBodyName;
-      for (let i = randomBodyName.length; i < 10; i++) {
-        stringOut += " ";
-      }
-      stringOut += services[Math.floor(Math.random() * services.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += characters[Math.floor(Math.random() * characters.length)];
-      for (let i = 0; i < 4; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      const remarks = ["", "Boarding", "Final Call", "Delayed", "Cancelled", "Departing"];
-      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
-      board.setValue(row, stringOut);
-    }
-    window.setTimeout(spinDeparture, 1e4, board);
-  }
-  function spinArrival(board) {
-    const changingOdds = 0.3;
-    for (let row = 0; row < board._letters.length; row++) {
-      if (Math.random() > changingOdds)
-        continue;
-      let stringOut;
-      let hour = Math.floor(Math.random() * 24);
-      let minute = Math.floor(Math.random() * 60);
-      stringOut = hour > 9 ? String(hour) : "0" + hour;
-      stringOut += ":";
-      stringOut += minute > 9 ? String(minute) : "0" + minute;
-      stringOut += " ";
-      let randomBody = function(object) {
-        var keys = Object.keys(object);
-        return object[keys[Math.floor(keys.length * Math.random())]];
-      };
-      let randomBodyName = randomBody(space_time).name;
-      stringOut += randomBodyName;
-      for (let i = randomBodyName.length; i < 10; i++) {
-        stringOut += " ";
-      }
-      stringOut += services[Math.floor(Math.random() * services.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += characters[Math.floor(Math.random() * characters.length)];
-      for (let i = 0; i < 4; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      for (let i = 0; i < 2; i++)
-        stringOut += hexCharacters[Math.floor(Math.random() * hexCharacters.length)];
-      stringOut += " ";
-      const remarks = ["", "Docking", "Delayed", "Docked"];
-      stringOut += remarks[Math.floor(Math.random() * remarks.length)];
-      board.setValue(row, stringOut);
-    }
-    window.setTimeout(spinArrival, 1e4, board);
   }
   window.onload = function() {
     generate();

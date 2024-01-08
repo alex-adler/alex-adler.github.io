@@ -10,11 +10,11 @@ function generate() {
 	let dropDown = document.getElementById("location-drop-down") as HTMLSelectElement;
 	let canvas = document.getElementById("orbital-canvas") as HTMLCanvasElement;
 
-	var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
-	var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
+	// var departureBoard = new DepartureBoard(document.getElementById("departure"), 11, 41);
+	// var arrivalBoard = new DepartureBoard(document.getElementById("arrival"), 11, 41);
 
-	for (let i = 0; i < 11; i++) departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
-	for (let i = 0; i < 11; i++) arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
+	// for (let i = 0; i < 11; i++) departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
+	// for (let i = 0; i < 11; i++) arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
 
 	let orbits: Orbit[] = [];
 
@@ -40,8 +40,8 @@ function generate() {
 
 		console.log(body.name);
 		// console.log(orbits.at(-1));
-		// orbits.at(-1).updatePosition(0);
-		orbits.at(-1).updatePosition(Date.now() - 946684800000);
+		orbits.at(-1)?.updatePosition(0);
+		// orbits.at(-1)?.updatePosition(Date.now() - 946684800000);
 	}
 
 	generateCanvas(canvas, orbits);
@@ -59,8 +59,8 @@ function generate() {
 	// 	}
 	// }
 
-	window.setTimeout(spinDeparture, 5000, departureBoard);
-	window.setTimeout(spinArrival, 10000, arrivalBoard);
+	// window.setTimeout(spinDeparture, 5000, departureBoard);
+	// window.setTimeout(spinArrival, 10000, arrivalBoard);
 }
 
 function drawSun(context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, currentScale: number): void {

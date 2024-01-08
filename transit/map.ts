@@ -14,7 +14,7 @@ export class Orbit {
 	semiMinorAxis_km: number;
 
 	meanAnomaly_deg: number;
-	trueAnomaly_deg: number;
+	eccentricAnomaly_deg: number;
 
 	radius_km: number;
 
@@ -44,8 +44,14 @@ export class Orbit {
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
 
+		console.log("true: " + this.eccentricAnomaly_deg + ", mean: " + this.meanAnomaly_deg);
 		// The scale (in pixels per km) is the number of pixels displayed on the canvas divided by a number of kilometers
 		let scale = canvasUnit * scalePerKm;
+
+		let ellipseCenter = {
+			x: Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			y: Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+		};
 
 		ctx.beginPath();
 		ctx.fillStyle = "coral";
@@ -53,27 +59,28 @@ export class Orbit {
 		// ctx.arc(this.positionVector_inertialFrame[0] * scale, this.positionVector_inertialFrame[1] * scale, this.radius_km * scale, 0, 2 * Math.PI);
 		ctx.fill();
 
-		console.log("x: " + this.positionVector_inertialFrame[0] * scale + ", y: " + this.positionVector_inertialFrame[1] * scale);
+		// console.log("x: " + this.positionVector_inertialFrame[0] * scale + ", y: " + this.positionVector_inertialFrame[1] * scale);
+		// console.log("x: " + ellipseCenter.x + ", y: " + ellipseCenter.y);
 
 		// Draw orbit circle with a gradient to illustrate current position and direction
-		let largeSide = this.semiMajorAxis_km * scale;
+		let largeSide = this.semiMajorAxis_km * scale * 1.1; // Why is the fudge factor necessary?
 		var width = 0.5 / currentScale;
 		ctx.lineWidth = width;
 
 		var brightHalf = ctx.createLinearGradient(
-			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
-			largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+			-largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+			largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg)),
+			largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+			-largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg))
 		);
 		brightHalf.addColorStop(0, "white");
 		brightHalf.addColorStop(1, "DimGray");
 
 		var darkHalf = ctx.createLinearGradient(
-			-largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			largeSide * Math.cos(degToRad(this.meanAnomaly_deg)),
-			largeSide * Math.sin(degToRad(this.meanAnomaly_deg)),
-			-largeSide * Math.cos(degToRad(this.meanAnomaly_deg))
+			-largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+			largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg)),
+			largeSide * Math.sin(degToRad(this.eccentricAnomaly_deg)),
+			-largeSide * Math.cos(degToRad(this.eccentricAnomaly_deg))
 		);
 		darkHalf.addColorStop(0, "#202020");
 		// darkHalf.addColorStop(0, "#222222");
@@ -82,8 +89,8 @@ export class Orbit {
 		// First we make a clipping region for the left half
 		ctx.save();
 		ctx.beginPath();
-		ctx.rotate(degToRad(this.meanAnomaly_deg));
-		ctx.rect(-largeSide - width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+		ctx.rotate(degToRad(this.eccentricAnomaly_deg));
+		ctx.rect(ellipseCenter.x - largeSide - width, ellipseCenter.y - largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
 		reset();
 		ctx.clip();
 
@@ -91,8 +98,8 @@ export class Orbit {
 		ctx.strokeStyle = brightHalf;
 		ctx.beginPath();
 		ctx.ellipse(
-			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			ellipseCenter.x,
+			ellipseCenter.y,
 			this.semiMajorAxis_km * scale,
 			this.semiMinorAxis_km * scale,
 			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -106,8 +113,8 @@ export class Orbit {
 		// Then we make a clipping region for the right half
 		ctx.save();
 		ctx.beginPath();
-		ctx.rotate(degToRad(this.meanAnomaly_deg));
-		ctx.rect(-width, -largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
+		ctx.rotate(degToRad(this.eccentricAnomaly_deg));
+		ctx.rect(ellipseCenter.x - width, ellipseCenter.y - largeSide - width, largeSide + width * 2, (largeSide + width) * 2);
 		reset();
 		ctx.clip();
 
@@ -115,8 +122,8 @@ export class Orbit {
 		ctx.strokeStyle = darkHalf;
 		ctx.beginPath();
 		ctx.ellipse(
-			Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-			Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			ellipseCenter.x,
+			ellipseCenter.y,
 			this.semiMajorAxis_km * scale,
 			this.semiMinorAxis_km * scale,
 			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -133,6 +140,7 @@ export class Orbit {
 	updatePosition(t_ms: number) {
 		this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
 		let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
+		this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
 		let trueAnomaly_rad =
 			2 *
 			Math.atan2(

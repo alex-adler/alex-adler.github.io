@@ -19,7 +19,7 @@ p {
 
 .grid-container {
 	width: 100vw;
-	height: 60vh;
+	height: 80vh;
 	display: grid;
 	grid-template-columns: 30vw auto;
 	grid-template-rows: 50vh auto;
