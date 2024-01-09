@@ -38,11 +38,8 @@ export class Orbit {
 		if (e !== undefined) this.eccentricity = e;
 		if (!isNaN(i_deg)) this.inclination_deg = i_deg;
 		this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
-		// this.longitudOfAscendingNode_deg = 0;
 		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
-		// this.argumentOfPeriapsis_deg = 0;
 		// this.meanAnomaly_0_deg = meanAnomaly_deg;
-		this.meanAnomaly_0_deg = 0;
 
 		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
 
@@ -62,8 +59,6 @@ export class Orbit {
 		};
 
 		let ellipseCenterMagnitude = Math.sqrt(ellipseCenter.x ** 2 + ellipseCenter.y ** 2);
-		// console.log(ellipseCenter.x^2);
-		// console.log("Magnitude {ellipseCenterMagnitude} +this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg + this.eccentricity + this.semiMajorAxis_km");
 
 		ctx.beginPath();
 		ctx.fillStyle = "coral";
@@ -77,27 +72,39 @@ export class Orbit {
 		ctx.fill();
 
 		// Draw orbit circle with a gradient to illustrate current position and direction
-		// let largeSide = this.semiMajorAxis_km * scale; // Why is the fudge factor necessary?
-		let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale; // Why is the fudge factor necessary?
+		let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
 		var width = 0.5 / currentScale;
 		ctx.lineWidth = width;
 
-		let colourAngle_rad = degToRad(this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg);
+		let colourAngle_deg = this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
+		// let colourAngle_deg = 45;
+		let colourAngle_rad = degToRad(colourAngle_deg);
+		console.log(
+			this.trueAnomaly_deg +
+				" + " +
+				this.longitudOfAscendingNode_deg +
+				" + " +
+				this.argumentOfPeriapsis_deg +
+				" = " +
+				colourAngle_deg +
+				" -> " +
+				colourAngle_rad
+		);
 
 		var brightHalf = ctx.createLinearGradient(
 			largeSide * Math.cos(colourAngle_rad),
-			-largeSide * Math.sin(colourAngle_rad),
+			largeSide * Math.sin(colourAngle_rad),
 			-largeSide * Math.cos(colourAngle_rad),
-			largeSide * Math.sin(colourAngle_rad)
+			-largeSide * Math.sin(colourAngle_rad)
 		);
 		brightHalf.addColorStop(0, "white");
 		brightHalf.addColorStop(1, "DimGray");
 
 		var darkHalf = ctx.createLinearGradient(
 			largeSide * Math.cos(colourAngle_rad),
-			-largeSide * Math.sin(colourAngle_rad),
+			largeSide * Math.sin(colourAngle_rad),
 			-largeSide * Math.cos(colourAngle_rad),
-			largeSide * Math.sin(colourAngle_rad)
+			-largeSide * Math.sin(colourAngle_rad)
 		);
 		darkHalf.addColorStop(0, "#202020");
 		// darkHalf.addColorStop(0, "#222222");
@@ -105,10 +112,12 @@ export class Orbit {
 
 		// First we make a clipping region for the left half
 		ctx.save();
+		ctx.fillStyle = darkHalf;
 		ctx.beginPath();
 		ctx.rotate(colourAngle_rad);
 		ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
 		reset();
+		// ctx.fill();
 		ctx.clip();
 
 		// Then we draw the left half

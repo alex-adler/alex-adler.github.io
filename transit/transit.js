@@ -703,7 +703,6 @@
         this.inclination_deg = i_deg;
       this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
       this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
-      this.meanAnomaly_0_deg = 0;
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
       this.radius_km = radius_km;
@@ -730,24 +729,29 @@
       let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
       var width = 0.5 / currentScale;
       ctx.lineWidth = width;
-      let colourAngle_rad = degToRad(this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg);
+      let colourAngle_deg = this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
+      let colourAngle_rad = degToRad(colourAngle_deg);
+      console.log(
+        this.trueAnomaly_deg + " + " + this.longitudOfAscendingNode_deg + " + " + this.argumentOfPeriapsis_deg + " = " + colourAngle_deg + " -> " + colourAngle_rad
+      );
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
-        -largeSide * Math.sin(colourAngle_rad),
+        largeSide * Math.sin(colourAngle_rad),
         -largeSide * Math.cos(colourAngle_rad),
-        largeSide * Math.sin(colourAngle_rad)
+        -largeSide * Math.sin(colourAngle_rad)
       );
       brightHalf.addColorStop(0, "white");
       brightHalf.addColorStop(1, "DimGray");
       var darkHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
-        -largeSide * Math.sin(colourAngle_rad),
+        largeSide * Math.sin(colourAngle_rad),
         -largeSide * Math.cos(colourAngle_rad),
-        largeSide * Math.sin(colourAngle_rad)
+        -largeSide * Math.sin(colourAngle_rad)
       );
       darkHalf.addColorStop(0, "#202020");
       darkHalf.addColorStop(1, "DimGray");
       ctx.save();
+      ctx.fillStyle = darkHalf;
       ctx.beginPath();
       ctx.rotate(colourAngle_rad);
       ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
