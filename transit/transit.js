@@ -172,63 +172,63 @@
       period_ms: 12129627211583168e-3,
       meanAnomaly_0_deg: null
     },
-    Europa: {
-      generatedTimeZone: true,
-      name: "Europa",
-      dayLength_ms: 306822e3,
-      yearLength_ms: 374335776e3,
-      yearLength_hd: 4270,
-      weekLength_d: 2,
-      weekLength_hd: 7,
-      hDayLength_ms: 87663e3,
-      hYearLength_ms: 37432101e4,
-      monthCount: 152,
-      nominalMonthLength_hd: 28,
-      nominalMonthLength_ms: 2454564e3,
-      leapYearFreq_hd: [6, 564],
-      leapYearBlocks_ms: [2246013723e3, 211125377625e3],
-      monthRemainder_hd: 14,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
-    Ganymede: {
-      generatedTimeZone: true,
-      name: "Ganymede",
-      dayLength_ms: 618153e3,
-      yearLength_ms: 374335776e3,
-      yearLength_hd: 4239,
-      weekLength_d: 1,
-      weekLength_hd: 7,
-      hDayLength_ms: 88307e3,
-      hYearLength_ms: 374333373e3,
-      monthCount: 148,
-      nominalMonthLength_hd: 28,
-      nominalMonthLength_ms: 2472596e3,
-      leapYearFreq_hd: [37, 5410],
-      leapYearBlocks_ms: [13850423108e3, 2025156529059e3],
-      monthRemainder_hd: 95,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
-    Callisto: {
-      generatedTimeZone: true,
-      name: "Callisto",
-      dayLength_ms: 1441931e3,
-      yearLength_ms: 374335776e3,
-      yearLength_hd: 4413,
-      weekLength_d: 1,
-      weekLength_hd: 17,
-      hDayLength_ms: 84819e3,
-      hYearLength_ms: 374306247e3,
-      monthCount: 64,
-      nominalMonthLength_hd: 68,
-      nominalMonthLength_ms: 5767692e3,
-      leapYearFreq_hd: [3, 68],
-      leapYearBlocks_ms: [112300356e4, 25454775633e3],
-      monthRemainder_hd: 61,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
+    // Europa: {
+    // 	generatedTimeZone: true,
+    // 	name: "Europa",
+    // 	dayLength_ms: 306822000,
+    // 	yearLength_ms: 374335776000,
+    // 	yearLength_hd: 4270,
+    // 	weekLength_d: 2,
+    // 	weekLength_hd: 7,
+    // 	hDayLength_ms: 87663000,
+    // 	hYearLength_ms: 374321010000,
+    // 	monthCount: 152,
+    // 	nominalMonthLength_hd: 28,
+    // 	nominalMonthLength_ms: 2454564000,
+    // 	leapYearFreq_hd: [6, 564],
+    // 	leapYearBlocks_ms: [2246013723000, 211125377625000],
+    // 	monthRemainder_hd: 14,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
+    // Ganymede: {
+    // 	generatedTimeZone: true,
+    // 	name: "Ganymede",
+    // 	dayLength_ms: 618153000,
+    // 	yearLength_ms: 374335776000,
+    // 	yearLength_hd: 4239,
+    // 	weekLength_d: 1,
+    // 	weekLength_hd: 7,
+    // 	hDayLength_ms: 88307000,
+    // 	hYearLength_ms: 374333373000,
+    // 	monthCount: 148,
+    // 	nominalMonthLength_hd: 28,
+    // 	nominalMonthLength_ms: 2472596000,
+    // 	leapYearFreq_hd: [37, 5410],
+    // 	leapYearBlocks_ms: [13850423108000, 2025156529059000],
+    // 	monthRemainder_hd: 95,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
+    // Callisto: {
+    // 	generatedTimeZone: true,
+    // 	name: "Callisto",
+    // 	dayLength_ms: 1441931000,
+    // 	yearLength_ms: 374335776000,
+    // 	yearLength_hd: 4413,
+    // 	weekLength_d: 1,
+    // 	weekLength_hd: 17,
+    // 	hDayLength_ms: 84819000,
+    // 	hYearLength_ms: 374306247000,
+    // 	monthCount: 64,
+    // 	nominalMonthLength_hd: 68,
+    // 	nominalMonthLength_ms: 5767692000,
+    // 	leapYearFreq_hd: [3, 68],
+    // 	leapYearBlocks_ms: [1123003560000, 25454775633000],
+    // 	monthRemainder_hd: 61,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
     Saturn: {
       generatedTimeZone: false,
       name: "Saturn",
@@ -250,44 +250,44 @@
       period_ms: 5536262212547909e-2,
       meanAnomaly_0_deg: null
     },
-    Titan: {
-      generatedTimeZone: true,
-      name: "Titan",
-      dayLength_ms: 1377648e3,
-      yearLength_ms: 929596607e3,
-      yearLength_hd: 10796,
-      weekLength_d: 1,
-      weekLength_hd: 16,
-      hDayLength_ms: 86103e3,
-      hYearLength_ms: 929567988e3,
-      monthCount: 168,
-      nominalMonthLength_hd: 64,
-      nominalMonthLength_ms: 5510592e3,
-      leapYearFreq_hd: [4, 13],
-      leapYearBlocks_ms: [3718358055e3, 12084728256e3],
-      monthRemainder_hd: 44,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
-    Enceladus: {
-      generatedTimeZone: true,
-      name: "Enceladus",
-      dayLength_ms: 118386e3,
-      yearLength_ms: 929596607e3,
-      yearLength_hd: 10993,
-      weekLength_d: 5,
-      weekLength_hd: 7,
-      hDayLength_ms: 84561e3,
-      hYearLength_ms: 929579073e3,
-      monthCount: 392,
-      nominalMonthLength_hd: 28,
-      nominalMonthLength_ms: 2367708e3,
-      leapYearFreq_hd: [5, 136],
-      leapYearBlocks_ms: [4647979926e3, 126425121636e3],
-      monthRemainder_hd: 17,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
+    // Titan: {
+    // 	generatedTimeZone: true,
+    // 	name: "Titan",
+    // 	dayLength_ms: 1377648000,
+    // 	yearLength_ms: 929596607000,
+    // 	yearLength_hd: 10796,
+    // 	weekLength_d: 1,
+    // 	weekLength_hd: 16,
+    // 	hDayLength_ms: 86103000,
+    // 	hYearLength_ms: 929567988000,
+    // 	monthCount: 168,
+    // 	nominalMonthLength_hd: 64,
+    // 	nominalMonthLength_ms: 5510592000,
+    // 	leapYearFreq_hd: [4, 13],
+    // 	leapYearBlocks_ms: [3718358055000, 12084728256000],
+    // 	monthRemainder_hd: 44,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
+    // Enceladus: {
+    // 	generatedTimeZone: true,
+    // 	name: "Enceladus",
+    // 	dayLength_ms: 118386000,
+    // 	yearLength_ms: 929596607000,
+    // 	yearLength_hd: 10993,
+    // 	weekLength_d: 5,
+    // 	weekLength_hd: 7,
+    // 	hDayLength_ms: 84561000,
+    // 	hYearLength_ms: 929579073000,
+    // 	monthCount: 392,
+    // 	nominalMonthLength_hd: 28,
+    // 	nominalMonthLength_ms: 2367708000,
+    // 	leapYearFreq_hd: [5, 136],
+    // 	leapYearBlocks_ms: [4647979926000, 126425121636000],
+    // 	monthRemainder_hd: 17,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
     Uranus: {
       generatedTimeZone: false,
       name: "Uranus",
@@ -309,25 +309,25 @@
       period_ms: 40276123214276875e-2,
       meanAnomaly_0_deg: null
     },
-    Titania: {
-      generatedTimeZone: true,
-      name: "Titania",
-      dayLength_ms: 752218e3,
-      yearLength_ms: 26514864e5,
-      yearLength_hd: 31724,
-      weekLength_d: 1,
-      weekLength_hd: 9,
-      hDayLength_ms: 83579e3,
-      hYearLength_ms: 2651460196e3,
-      monthCount: 880,
-      nominalMonthLength_hd: 36,
-      nominalMonthLength_ms: 3008844e3,
-      leapYearFreq_hd: [4, 16],
-      leapYearBlocks_ms: [10605924363e3, 42423781031e3],
-      monthRemainder_hd: 44,
-      initialWeekDay: 0,
-      initialYearProgress: 0
-    },
+    // Titania: {
+    // 	generatedTimeZone: true,
+    // 	name: "Titania",
+    // 	dayLength_ms: 752218000,
+    // 	yearLength_ms: 2651486400000,
+    // 	yearLength_hd: 31724,
+    // 	weekLength_d: 1,
+    // 	weekLength_hd: 9,
+    // 	hDayLength_ms: 83579000,
+    // 	hYearLength_ms: 2651460196000,
+    // 	monthCount: 880,
+    // 	nominalMonthLength_hd: 36,
+    // 	nominalMonthLength_ms: 3008844000,
+    // 	leapYearFreq_hd: [4, 16],
+    // 	leapYearBlocks_ms: [10605924363000, 42423781031000],
+    // 	monthRemainder_hd: 44,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
     Neptune: {
       generatedTimeZone: false,
       name: "Neptune",
@@ -348,37 +348,359 @@
       trueAnomaly_sec_Cy: 0,
       period_ms: 726207450158298,
       meanAnomaly_0_deg: null
-    },
-    Triton: {
-      generatedTimeZone: true,
-      name: "Triton",
-      dayLength_ms: 50776e4,
-      yearLength_ms: 51997248e5,
-      yearLength_hd: 61443,
-      weekLength_d: 1,
-      weekLength_hd: 6,
-      hDayLength_ms: 84626e3,
-      hYearLength_ms: 5199675318e3,
-      monthCount: 2560,
-      nominalMonthLength_hd: 24,
-      nominalMonthLength_ms: 2031024e3,
-      leapYearFreq_hd: [2, 12],
-      leapYearBlocks_ms: [10399435262e3, 62396696198e3],
-      monthRemainder_hd: 3,
-      initialWeekDay: 0,
-      initialYearProgress: 0
+    }
+    // Triton: {
+    // 	generatedTimeZone: true,
+    // 	name: "Triton",
+    // 	dayLength_ms: 507760000,
+    // 	yearLength_ms: 5199724800000,
+    // 	yearLength_hd: 61443,
+    // 	weekLength_d: 1,
+    // 	weekLength_hd: 6,
+    // 	hDayLength_ms: 84626000,
+    // 	hYearLength_ms: 5199675318000,
+    // 	monthCount: 2560,
+    // 	nominalMonthLength_hd: 24,
+    // 	nominalMonthLength_ms: 2031024000,
+    // 	leapYearFreq_hd: [2, 12],
+    // 	leapYearBlocks_ms: [10399435262000, 62396696198000],
+    // 	monthRemainder_hd: 3,
+    // 	initialWeekDay: 0,
+    // 	initialYearProgress: 0,
+    // },
+  };
+
+  // node_modules/ts-matrix/dist/ts-matrix.mjs
+  var x = Object.defineProperty;
+  var d = (y, t, s) => t in y ? x(y, t, { enumerable: true, configurable: true, writable: true, value: s }) : y[t] = s;
+  var m = (y, t, s) => (d(y, typeof t != "symbol" ? t + "" : t, s), s);
+  var c = class _c {
+    constructor(t, s, e) {
+      m(this, "_rows");
+      m(this, "_columns");
+      m(this, "_values");
+      this._rows = Math.max(t, 1), this._columns = Math.max(s, 1), this._values = new Array(this._rows).fill([]).map(() => new Array(this._columns).fill(0)), e && (this.values = e);
+    }
+    get rows() {
+      return this._rows;
+    }
+    get columns() {
+      return this._columns;
+    }
+    get values() {
+      return this._values;
+    }
+    set values(t) {
+      const s = Math.min(t.length, this.rows), e = Math.min(t[0].length, this.columns);
+      for (let r = 0; r < s; r++)
+        for (let n = 0; n < e; n++)
+          this.values[r][n] = t[r][n];
+    }
+    at(t, s) {
+      return this.values[t][s];
+    }
+    reset() {
+      this.values = this.values.map((t) => t.map(() => 0));
+    }
+    addAColumn() {
+      return new _c(this.rows, this.columns + 1, this.values);
+    }
+    addARow() {
+      return new _c(this.rows + 1, this.columns, this.values);
+    }
+    equals(t) {
+      return this.rows === t.rows && this.columns === t.columns && this.values.reduce(
+        (s, e, r) => s && e.reduce(
+          (n, i, o) => n && t.at(r, o) === i,
+          s
+        ),
+        true
+      );
+    }
+    setAsIdentity() {
+      if (this.rows !== this.columns)
+        throw new Error("Dimension error! The matrix isn't squared!");
+      return this.values.forEach((t, s) => {
+        t.forEach((e, r) => {
+          this.values[s][r] = s === r ? 1 : 0;
+        });
+      }), this;
+    }
+    static identity(t) {
+      if (t < 1)
+        throw Error("Dimension error! Matrix dimension must be positive.");
+      return new _c(t, t).setAsIdentity();
+    }
+    multiply(t) {
+      if (this.columns !== t.rows)
+        throw new Error("Dimension error! The operand matrix must have the same number of rows as 'this' matrix columns!");
+      const s = new _c(this.rows, t.columns);
+      return s.values = s.values.map((e, r) => e.map((n, i) => this.values[r].reduce((o, h, a) => o + h * t.at(a, i), 0))), s;
+    }
+    indexOf(t) {
+      for (let s = 0; s < this.rows; s++)
+        for (let e = 0; e < this.columns; e++)
+          if (this.values[s][e] === t)
+            return [s, e];
+      return [-1, -1];
+    }
+    max() {
+      return this.values.reduce((t, s) => Math.max(t, ...s), -1 / 0);
+    }
+    min() {
+      return this.values.reduce((t, s) => Math.min(t, ...s), 1 / 0);
+    }
+    round() {
+      return new _c(this.rows, this.columns, this.values.map((t) => t.map((s) => Math.round(s))));
+    }
+    determinant() {
+      if (this.rows !== this.columns)
+        throw new Error("Dimension error! The matrix isn't squared!");
+      if (this.rows === this.columns && this.columns === 1)
+        return this.values[0][0];
+      let t = 0, s = 1;
+      if (this.rows === 2)
+        t = this.values[0][0] * this.values[1][1] - this.values[1][0] * this.values[0][1];
+      else
+        for (let e = 0; e < this.rows; e++) {
+          const r = this.getCofactor(0, e);
+          t += s * this.at(0, e) * r.determinant(), s = -s;
+        }
+      return t;
+    }
+    getCofactor(t, s) {
+      return new _c(this.rows - 1, this.columns - 1, this.values.filter((e, r) => r !== t).map((e) => e.filter((r, n) => n !== s)));
+    }
+    transpose() {
+      return new _c(this.columns, this.rows, new Array(this.columns).fill([]).map((t, s) => new Array(this.rows).fill(0).map((e, r) => this.at(r, s))));
+    }
+    inverse() {
+      if (this.rows !== this.columns)
+        throw new Error("Dimension error! The matrix isn't squared!");
+      const t = this.determinant();
+      if (t === 0)
+        throw new Error("Determinant is 0, can't compute inverse.");
+      const e = new _c(
+        this.rows,
+        this.columns,
+        this.values.map((r, n) => r.map((i, o) => Math.pow(-1, n + o) * this.getCofactor(n, o).determinant()))
+      ).transpose();
+      return new _c(
+        this.rows,
+        this.columns,
+        this.values.map((r, n) => r.map((i, o) => e.at(n, o) / t))
+      );
+    }
+    toString() {
+      return `[${this.values.map((t) => `[${t.join(", ")}]`).join(`,
+`)}]`;
     }
   };
+  var z = 1e-5;
+  var w = class {
+    constructor(t) {
+      m(this, "values", new Float32Array(4));
+      t !== void 0 && (this.xyzw = t);
+    }
+    get x() {
+      return this.values[0];
+    }
+    set x(t) {
+      this.values[0] = t;
+    }
+    get y() {
+      return this.values[1];
+    }
+    set y(t) {
+      this.values[1] = t;
+    }
+    get z() {
+      return this.values[2];
+    }
+    set z(t) {
+      this.values[2] = t;
+    }
+    get w() {
+      return this.values[3];
+    }
+    set w(t) {
+      this.values[3] = t;
+    }
+    get xy() {
+      return [
+        this.values[0],
+        this.values[1]
+      ];
+    }
+    set xy(t) {
+      this.values[0] = t[0], this.values[1] = t[1];
+    }
+    get xyz() {
+      return [
+        this.values[0],
+        this.values[1],
+        this.values[2]
+      ];
+    }
+    set xyz(t) {
+      this.values[0] = t[0], this.values[1] = t[1], this.values[2] = t[2];
+    }
+    get xyzw() {
+      return [
+        this.values[0],
+        this.values[1],
+        this.values[2],
+        this.values[3]
+      ];
+    }
+    set xyzw(t) {
+      this.values[0] = t[0], this.values[1] = t[1], this.values[2] = t[2], this.values[3] = t[3];
+    }
+    at(t) {
+      return this.values[t];
+    }
+    reset() {
+      for (let t = 0; t < 4; t++)
+        this.values[t] = 0;
+    }
+    copy(t) {
+      t || (t = new w());
+      for (let s = 0; s < 4; s++)
+        t.values[s] = this.values[s];
+      return t;
+    }
+    roll() {
+      const t = this.x, s = this.y, e = this.z, r = this.w;
+      return Math.atan2(2 * (t * s + r * e), r * r + t * t - s * s - e * e);
+    }
+    pitch() {
+      const t = this.x, s = this.y, e = this.z, r = this.w;
+      return Math.atan2(2 * (s * e + r * t), r * r - t * t - s * s + e * e);
+    }
+    yaw() {
+      return Math.asin(2 * (this.x * this.z - this.w * this.y));
+    }
+    equals(t, s = z) {
+      for (let e = 0; e < 4; e++)
+        if (Math.abs(this.values[e] - t.at(e)) > s)
+          return false;
+      return true;
+    }
+    setIdentity() {
+      return this.x = 0, this.y = 0, this.z = 0, this.w = 1, this;
+    }
+    calculateW() {
+      const t = this.x, s = this.y, e = this.z;
+      return this.w = -Math.sqrt(Math.abs(1 - t * t - s * s - e * e)), this;
+    }
+    inverse() {
+      const t = w.dot(this, this);
+      if (!t)
+        return this.xyzw = [0, 0, 0, 0], this;
+      const s = t ? 1 / t : 0;
+      return this.x *= -s, this.y *= -s, this.z *= -s, this.w *= s, this;
+    }
+    conjugate() {
+      return this.values[0] *= -1, this.values[1] *= -1, this.values[2] *= -1, this;
+    }
+    length() {
+      const t = this.x, s = this.y, e = this.z, r = this.w;
+      return Math.sqrt(t * t + s * s + e * e + r * r);
+    }
+    normalize(t) {
+      t || (t = this);
+      const s = this.x, e = this.y, r = this.z, n = this.w;
+      let i = Math.sqrt(s * s + e * e + r * r + n * n);
+      return i ? (i = 1 / i, t.x = s * i, t.y = e * i, t.z = r * i, t.w = n * i, t) : (t.x = 0, t.y = 0, t.z = 0, t.w = 0, t);
+    }
+    add(t) {
+      for (let s = 0; s < 4; s++)
+        this.values[s] += t.at(s);
+      return this;
+    }
+    multiply(t) {
+      const s = this.values[0], e = this.values[1], r = this.values[2], n = this.values[3], i = t.x, o = t.y, h = t.z, a = t.w;
+      return this.x = s * a + n * i + e * h - r * o, this.y = e * a + n * o + r * i - s * h, this.z = r * a + n * h + s * o - e * i, this.w = n * a - s * i - e * o - r * h, this;
+    }
+    static dot(t, s) {
+      return t.x * s.x + t.y * s.y + t.z * s.z + t.w * s.w;
+    }
+    static sum(t, s) {
+      const e = new w();
+      return e.x = t.x + s.x, e.y = t.y + s.y, e.z = t.z + s.z, e.w = t.w + s.w, e;
+    }
+    static product(t, s) {
+      const e = new w(), r = t.x, n = t.y, i = t.z, o = t.w, h = s.x, a = s.y, u = s.z, l = s.w;
+      return e.x = r * l + o * h + n * u - i * a, e.y = n * l + o * a + i * h - r * u, e.z = i * l + o * u + r * a - n * h, e.w = o * l - r * h - n * a - i * u, e;
+    }
+    static cross(t, s) {
+      const e = new w(), r = t.x, n = t.y, i = t.z, o = t.w, h = s.x, a = s.y, u = s.z, l = s.w;
+      return e.x = o * u + i * l + r * a - n * h, e.y = o * l - r * h - n * a - i * u, e.z = o * h + r * l + n * u - i * a, e.w = o * a + n * l + i * h - r * u, e;
+    }
+    static shortMix(t, s, e) {
+      const r = new w();
+      if (e <= 0)
+        return r.xyzw = t.xyzw, r;
+      if (e >= 1)
+        return r.xyzw = s.xyzw, r;
+      let n = w.dot(t, s);
+      const i = s.copy();
+      n < 0 && (i.inverse(), n = -n);
+      let o, h;
+      if (n > 0.9999)
+        o = 1 - e, h = 0 + e;
+      else {
+        const a = Math.sqrt(1 - n * n), u = Math.atan2(a, n), l = 1 / a;
+        o = Math.sin((1 - e) * u) * l, h = Math.sin((0 + e) * u) * l;
+      }
+      return r.x = o * t.x + h * i.x, r.y = o * t.y + h * i.y, r.z = o * t.z + h * i.z, r.w = o * t.w + h * i.w, r;
+    }
+    static mix(t, s, e) {
+      const r = new w(), n = t.x * s.x + t.y * s.y + t.z * s.z + t.w * s.w;
+      if (Math.abs(n) >= 1)
+        return r.xyzw = t.xyzw, r;
+      const i = Math.acos(n), o = Math.sqrt(1 - n * n);
+      if (Math.abs(o) < 1e-3)
+        return r.x = t.x * 0.5 + s.x * 0.5, r.y = t.y * 0.5 + s.y * 0.5, r.z = t.z * 0.5 + s.z * 0.5, r.w = t.w * 0.5 + s.w * 0.5, r;
+      const h = Math.sin((1 - e) * i) / o, a = Math.sin(e * i) / o;
+      return r.x = t.x * h + s.x * a, r.y = t.y * h + s.y * a, r.z = t.z * h + s.z * a, r.w = t.w * h + s.w * a, r;
+    }
+    static fromAxisAngle(t, s) {
+      if (t.rows !== 3)
+        throw new Error("The axis vector must be in 3D!");
+      const e = new w();
+      s *= 0.5;
+      const r = Math.sin(s);
+      return e.x = t.at(0) * r, e.y = t.at(1) * r, e.z = t.at(2) * r, e.w = Math.cos(s), e;
+    }
+  };
+  var f = w;
+  m(f, "identity", new w().setIdentity());
 
   // transit/map.ts
   var AU_km = 1496e5;
   var scalePerKm = 1 / (5 * AU_km);
   var Orbit = class {
     constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, radius_km) {
-      this.positionVector_perifocalFrame = [0, 0, 0];
+      this.semiMajorAxis_km = 0;
+      this.eccentricity = 0;
+      this.inclination_deg = 0;
+      this.longitudOfAscendingNode_deg = 0;
+      this.argumentOfPeriapsis_deg = 0;
+      this.meanAnomaly_0_deg = 0;
+      this.semiMinorAxis_km = 0;
+      this.meanAnomaly_deg = 0;
+      this.eccentricAnomaly_deg = 0;
+      this.trueAnomaly_rad = 0;
+      this.trueAnomaly_deg = 0;
+      this.radius_km = 0;
+      this.positionVector_perifocalFrame = new c(3, 1);
+      this.positionVector_inertialFrame = new c(3, 1);
       this.semiMajorAxis_km = a_km;
-      this.eccentricity = e;
-      this.inclination_deg = i_deg;
+      if (e !== void 0)
+        this.eccentricity = e;
+      if (!isNaN(i_deg))
+        this.inclination_deg = i_deg;
       this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
       this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
       this.meanAnomaly_0_deg = 0;
@@ -397,12 +719,18 @@
       let ellipseCenterMagnitude = Math.sqrt(ellipseCenter.x ** 2 + ellipseCenter.y ** 2);
       ctx.beginPath();
       ctx.fillStyle = "coral";
-      ctx.arc(this.positionVector_perifocalFrame[0] * scale, this.positionVector_perifocalFrame[1] * scale, 5 / currentScale, 0, 2 * Math.PI);
+      ctx.arc(
+        this.positionVector_inertialFrame.values[0][0] * scale,
+        this.positionVector_inertialFrame.values[1][0] * scale,
+        5 / currentScale,
+        0,
+        2 * Math.PI
+      );
       ctx.fill();
       let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
       var width = 0.5 / currentScale;
       ctx.lineWidth = width;
-      let colourAngle_rad = degToRad(this.trueAnomaly_deg);
+      let colourAngle_rad = degToRad(this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg);
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
         -largeSide * Math.sin(colourAngle_rad),
@@ -428,8 +756,8 @@
       ctx.strokeStyle = brightHalf;
       ctx.beginPath();
       ctx.ellipse(
-        ellipseCenter.x,
-        ellipseCenter.y,
+        -ellipseCenter.x,
+        -ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -447,8 +775,8 @@
       ctx.strokeStyle = darkHalf;
       ctx.beginPath();
       ctx.ellipse(
-        ellipseCenter.x,
-        ellipseCenter.y,
+        -ellipseCenter.x,
+        -ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
         degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
@@ -470,19 +798,33 @@
         (1 - this.eccentricity) ** 0.5 * Math.cos(eccentricAnomaly_rad / 2)
       );
       this.trueAnomaly_deg = degToRad(this.trueAnomaly_rad);
-      let distanceToCenter = this.semiMajorAxis_km * (1 - this.eccentricity * Math.cos(eccentricAnomaly_rad));
-      console.log(
-        "Mean anomaly: " + this.meanAnomaly_deg + " deg | Eccentric anomaly: " + radToDeg(eccentricAnomaly_rad) % 360 + " deg | Radius = " + distanceToCenter
-      );
-      this.positionVector_perifocalFrame[0] = distanceToCenter * Math.cos(this.trueAnomaly_rad);
-      this.positionVector_perifocalFrame[1] = distanceToCenter * Math.sin(this.trueAnomaly_rad);
-      this.positionVector_perifocalFrame[2] = 0;
+      let semiLatusRectum = this.semiMajorAxis_km * (1 - this.eccentricity ** 2);
+      let r = semiLatusRectum / (1 + this.eccentricity * Math.cos(this.trueAnomaly_rad));
+      this.positionVector_perifocalFrame.values = [[r * Math.cos(this.trueAnomaly_rad)], [r * Math.sin(this.trueAnomaly_rad)], [0]];
       let argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
       let inclination_rad = degToRad(this.inclination_deg);
-      let longitudOfAscendingNode_rad = degToRad(this.longitudOfAscendingNode_deg);
+      let longitudeOfAscendingNode_rad = degToRad(this.longitudOfAscendingNode_deg);
+      let Q = new c(3, 3, [
+        [
+          Math.cos(longitudeOfAscendingNode_rad) * Math.cos(argumentOfPeriapsis_rad) - Math.cos(inclination_rad) * Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+          -Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad) - Math.cos(inclination_rad) * Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+          Math.sin(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad)
+        ],
+        [
+          Math.cos(argumentOfPeriapsis_rad) * Math.sin(longitudeOfAscendingNode_rad) + Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
+          Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.cos(argumentOfPeriapsis_rad) - Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+          -Math.cos(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad)
+        ],
+        [
+          Math.sin(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
+          Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad),
+          Math.cos(inclination_rad)
+        ]
+      ]);
+      this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
     }
   };
-  function newtonRaphson(f, x0, options) {
+  function newtonRaphson(f2, x0, options) {
     var x1, y, yp, tol, maxIter, iter, yph, ymh, yp2h, ym2h, h, hr, verbose, eps;
     let fp = null;
     options = options || {};
@@ -494,11 +836,11 @@
     hr = 1 / h;
     iter = 0;
     while (iter++ < maxIter) {
-      y = f(x0);
-      yph = f(x0 + h);
-      ymh = f(x0 - h);
-      yp2h = f(x0 + 2 * h);
-      ym2h = f(x0 - 2 * h);
+      y = f2(x0);
+      yph = f2(x0 + h);
+      ymh = f2(x0 - h);
+      yp2h = f2(x0 + 2 * h);
+      ym2h = f2(x0 - 2 * h);
       yp = (ym2h - yp2h + 8 * (yph - ymh)) * hr / 12;
       if (Math.abs(yp) <= eps * Math.abs(y)) {
         if (verbose) {
@@ -530,7 +872,7 @@
   // transit/infinite_canvas.ts
   var view = /* @__PURE__ */ (() => {
     const matrix = [1, 0, 0, 1, 0, 0];
-    var m = matrix;
+    var m2 = matrix;
     var scale = 1;
     var ctx;
     const pos = { x: 0, y: 0 };
@@ -544,7 +886,7 @@
         if (dirty) {
           this.update();
         }
-        ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        ctx.setTransform(m2[0], m2[1], m2[2], m2[3], m2[4], m2[5]);
       },
       get scale() {
         return scale;
@@ -560,10 +902,10 @@
       },
       update() {
         dirty = false;
-        m[3] = m[0] = scale;
-        m[2] = m[1] = 0;
-        m[4] = pos.x;
-        m[5] = pos.y;
+        m2[3] = m2[0] = scale;
+        m2[2] = m2[1] = 0;
+        m2[4] = pos.x;
+        m2[5] = pos.y;
       },
       pan(amount) {
         if (dirty) {
@@ -633,7 +975,7 @@
         view.apply();
         let that = this;
         if (this.#drawFunctions.length)
-          this.#drawFunctions.map((f) => f(that.context, that.canvas.width / 2, view.apply, view.scale));
+          this.#drawFunctions.map((f2) => f2(that.context, that.canvas.width / 2, view.apply, view.scale));
       }
       requestAnimationFrame(this.#draw.bind(this));
     }
@@ -661,12 +1003,12 @@
       }
     }
     mouseWheelEvent(event) {
-      var x = event.offsetX;
+      var x2 = event.offsetX;
       var y = event.offsetY;
       if (event.deltaY < 0) {
-        view.scaleAt({ x, y }, 1.1);
+        view.scaleAt({ x: x2, y }, 1.1);
       } else {
-        view.scaleAt({ x, y }, 1 / 1.1);
+        view.scaleAt({ x: x2, y }, 1 / 1.1);
       }
       event.preventDefault();
     }
