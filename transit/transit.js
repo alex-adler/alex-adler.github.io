@@ -685,9 +685,13 @@
       this.semiMajorAxis_km = 0;
       this.eccentricity = 0;
       this.inclination_deg = 0;
-      this.longitudOfAscendingNode_deg = 0;
+      this.inclination_rad = 0;
+      this.longitudeOfAscendingNode_deg = 0;
+      this.longitudeOfAscendingNode_rad = 0;
       this.argumentOfPeriapsis_deg = 0;
+      this.argumentOfPeriapsis_rad = 0;
       this.meanAnomaly_0_deg = 0;
+      this.meanAnomaly_0_rad = 0;
       this.semiMinorAxis_km = 0;
       this.meanAnomaly_deg = 0;
       this.eccentricAnomaly_deg = 0;
@@ -701,8 +705,6 @@
         this.eccentricity = e;
       if (!isNaN(i_deg))
         this.inclination_deg = i_deg;
-      this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
-      this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
       this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
       this.GM_km3_s2 = GM_km3_s2;
       this.radius_km = radius_km;
@@ -712,27 +714,31 @@
         return;
       let scale = canvasUnit * scalePerKm;
       let ellipseCenter = {
-        x: Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-        y: Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale
+        x: Math.cos(degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+        y: Math.sin(degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale
       };
       let ellipseCenterMagnitude = Math.sqrt(ellipseCenter.x ** 2 + ellipseCenter.y ** 2);
-      ctx.beginPath();
-      ctx.fillStyle = "coral";
-      ctx.arc(
-        this.positionVector_inertialFrame.values[0][0] * scale,
-        this.positionVector_inertialFrame.values[1][0] * scale,
-        5 / currentScale,
-        0,
-        2 * Math.PI
-      );
-      ctx.fill();
+      for (let index = 0; index < 360; index++) {
+        this.meanAnomaly_deg = index;
+        this.updatePositionVector();
+        ctx.beginPath();
+        ctx.fillStyle = "bluegreen";
+        ctx.arc(
+          this.positionVector_inertialFrame.values[0][0] * scale,
+          this.positionVector_inertialFrame.values[1][0] * scale,
+          1 / currentScale,
+          0,
+          2 * Math.PI
+        );
+        ctx.fill();
+      }
       let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
       var width = 0.5 / currentScale;
       ctx.lineWidth = width;
-      let colourAngle_deg = this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
+      let colourAngle_deg = this.trueAnomaly_deg + this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
       let colourAngle_rad = degToRad(colourAngle_deg);
       console.log(
-        this.trueAnomaly_deg + " + " + this.longitudOfAscendingNode_deg + " + " + this.argumentOfPeriapsis_deg + " = " + colourAngle_deg + " -> " + colourAngle_rad
+        this.trueAnomaly_deg + " + " + this.longitudeOfAscendingNode_deg + " + " + this.argumentOfPeriapsis_deg + " = " + colourAngle_deg + " -> " + colourAngle_rad
       );
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
@@ -764,7 +770,7 @@
         -ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
-        degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+        degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
         0 * Math.PI,
         2 * Math.PI
       );
@@ -783,7 +789,7 @@
         -ellipseCenter.y,
         this.semiMajorAxis_km * scale,
         this.semiMinorAxis_km * scale,
-        degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+        degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
         0 * Math.PI,
         2 * Math.PI
       );
@@ -791,41 +797,44 @@
       ctx.restore();
     }
     keplersEquation(E_rad) {
-      return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);
+      return E_rad - this.eccentricity * Math.sin(E_rad) - degToRad(this.meanAnomaly_deg);
     }
-    updatePosition(t_ms) {
-      this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+    updatePositionVector() {
       let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
       this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
       this.trueAnomaly_rad = 2 * Math.atan2(
         (1 + this.eccentricity) ** 0.5 * Math.sin(eccentricAnomaly_rad / 2),
         (1 - this.eccentricity) ** 0.5 * Math.cos(eccentricAnomaly_rad / 2)
       );
-      this.trueAnomaly_deg = degToRad(this.trueAnomaly_rad);
+      this.trueAnomaly_deg = radToDeg(this.trueAnomaly_rad);
       let semiLatusRectum = this.semiMajorAxis_km * (1 - this.eccentricity ** 2);
       let r = semiLatusRectum / (1 + this.eccentricity * Math.cos(this.trueAnomaly_rad));
       this.positionVector_perifocalFrame.values = [[r * Math.cos(this.trueAnomaly_rad)], [r * Math.sin(this.trueAnomaly_rad)], [0]];
-      let argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
-      let inclination_rad = degToRad(this.inclination_deg);
-      let longitudeOfAscendingNode_rad = degToRad(this.longitudOfAscendingNode_deg);
       let Q = new c(3, 3, [
         [
-          Math.cos(longitudeOfAscendingNode_rad) * Math.cos(argumentOfPeriapsis_rad) - Math.cos(inclination_rad) * Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
-          -Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad) - Math.cos(inclination_rad) * Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
-          Math.sin(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad)
+          Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.argumentOfPeriapsis_rad) - Math.cos(this.inclination_rad) * Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
+          -Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad) - Math.cos(this.inclination_rad) * Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
+          Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.inclination_rad)
         ],
         [
-          Math.cos(argumentOfPeriapsis_rad) * Math.sin(longitudeOfAscendingNode_rad) + Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
-          Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.cos(argumentOfPeriapsis_rad) - Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
-          -Math.cos(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad)
+          Math.cos(this.argumentOfPeriapsis_rad) * Math.sin(this.longitudeOfAscendingNode_deg) + Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.inclination_rad) * Math.sin(this.argumentOfPeriapsis_rad),
+          Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.inclination_rad) * Math.cos(this.argumentOfPeriapsis_rad) - Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
+          -Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.inclination_rad)
         ],
         [
-          Math.sin(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
-          Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad),
-          Math.cos(inclination_rad)
+          Math.sin(this.inclination_rad) * Math.sin(this.argumentOfPeriapsis_rad),
+          Math.cos(this.argumentOfPeriapsis_rad) * Math.sin(this.inclination_rad),
+          Math.cos(this.inclination_rad)
         ]
       ]);
       this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
+    }
+    updatePosition(t_ms) {
+      this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
+      this.inclination_rad = degToRad(this.inclination_deg);
+      this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
+      this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+      this.updatePositionVector();
     }
   };
   function newtonRaphson(f2, x0, options) {

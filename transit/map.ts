@@ -9,9 +9,13 @@ export class Orbit {
 	semiMajorAxis_km: number = 0;
 	eccentricity: number = 0;
 	inclination_deg: number = 0;
-	longitudOfAscendingNode_deg: number = 0;
+	inclination_rad: number = 0;
+	longitudeOfAscendingNode_deg: number = 0;
+	longitudeOfAscendingNode_rad: number = 0;
 	argumentOfPeriapsis_deg: number = 0;
+	argumentOfPeriapsis_rad: number = 0;
 	meanAnomaly_0_deg: number = 0;
+	meanAnomaly_0_rad: number = 0;
 
 	semiMinorAxis_km: number = 0;
 
@@ -37,9 +41,10 @@ export class Orbit {
 		this.semiMajorAxis_km = a_km;
 		if (e !== undefined) this.eccentricity = e;
 		if (!isNaN(i_deg)) this.inclination_deg = i_deg;
-		this.longitudOfAscendingNode_deg = longitudeOfAscendingNode_deg;
-		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
+		// this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
+		// this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
 		// this.meanAnomaly_0_deg = meanAnomaly_deg;
+		// this.meanAnomaly_0_deg = 90;
 
 		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
 
@@ -54,35 +59,51 @@ export class Orbit {
 		let scale = canvasUnit * scalePerKm;
 
 		let ellipseCenter = {
-			x: Math.cos(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
-			y: Math.sin(degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			x: Math.cos(degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
+			y: Math.sin(degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg)) * this.eccentricity * this.semiMajorAxis_km * scale,
 		};
 
 		let ellipseCenterMagnitude = Math.sqrt(ellipseCenter.x ** 2 + ellipseCenter.y ** 2);
 
-		ctx.beginPath();
-		ctx.fillStyle = "coral";
-		ctx.arc(
-			this.positionVector_inertialFrame.values[0][0] * scale,
-			this.positionVector_inertialFrame.values[1][0] * scale,
-			5 / currentScale,
-			0,
-			2 * Math.PI
-		);
-		ctx.fill();
+		// Draw body
+		// ctx.beginPath();
+		// ctx.fillStyle = "coral";
+		// ctx.arc(
+		// 	this.positionVector_inertialFrame.values[0][0] * scale,
+		// 	this.positionVector_inertialFrame.values[1][0] * scale,
+		// 	5 / currentScale,
+		// 	0,
+		// 	2 * Math.PI
+		// );
+		// ctx.fill();
+
+		for (let index = 0; index < 360; index++) {
+			this.meanAnomaly_deg = index;
+			this.updatePositionVector();
+			ctx.beginPath();
+			ctx.fillStyle = "bluegreen";
+			ctx.arc(
+				this.positionVector_inertialFrame.values[0][0] * scale,
+				this.positionVector_inertialFrame.values[1][0] * scale,
+				1 / currentScale,
+				0,
+				2 * Math.PI
+			);
+			ctx.fill();
+		}
 
 		// Draw orbit circle with a gradient to illustrate current position and direction
 		let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
 		var width = 0.5 / currentScale;
 		ctx.lineWidth = width;
 
-		let colourAngle_deg = this.trueAnomaly_deg + this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
+		let colourAngle_deg = this.trueAnomaly_deg + this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
 		// let colourAngle_deg = 45;
 		let colourAngle_rad = degToRad(colourAngle_deg);
 		console.log(
 			this.trueAnomaly_deg +
 				" + " +
-				this.longitudOfAscendingNode_deg +
+				this.longitudeOfAscendingNode_deg +
 				" + " +
 				this.argumentOfPeriapsis_deg +
 				" = " +
@@ -128,7 +149,7 @@ export class Orbit {
 			-ellipseCenter.y,
 			this.semiMajorAxis_km * scale,
 			this.semiMinorAxis_km * scale,
-			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+			degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
 			0 * Math.PI,
 			2 * Math.PI
 		);
@@ -152,7 +173,7 @@ export class Orbit {
 			-ellipseCenter.y,
 			this.semiMajorAxis_km * scale,
 			this.semiMinorAxis_km * scale,
-			degToRad(this.longitudOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
+			degToRad(this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg),
 			0 * Math.PI,
 			2 * Math.PI
 		);
@@ -161,10 +182,9 @@ export class Orbit {
 		ctx.restore(); // restore clipping region to default
 	}
 	keplersEquation(E_rad: number): number {
-		return E_rad - this.eccentricity * Math.sin(E_rad) - radToDeg(this.meanAnomaly_deg);
+		return E_rad - this.eccentricity * Math.sin(E_rad) - degToRad(this.meanAnomaly_deg);
 	}
-	updatePosition(t_ms: number) {
-		this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+	updatePositionVector() {
 		let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
 		this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
 		this.trueAnomaly_rad =
@@ -173,72 +193,49 @@ export class Orbit {
 				(1 + this.eccentricity) ** 0.5 * Math.sin(eccentricAnomaly_rad / 2),
 				(1 - this.eccentricity) ** 0.5 * Math.cos(eccentricAnomaly_rad / 2)
 			);
-		this.trueAnomaly_deg = degToRad(this.trueAnomaly_rad);
+		this.trueAnomaly_deg = radToDeg(this.trueAnomaly_rad);
 		let semiLatusRectum = this.semiMajorAxis_km * (1 - this.eccentricity ** 2);
 		let r = semiLatusRectum / (1 + this.eccentricity * Math.cos(this.trueAnomaly_rad));
 
-		// let r_a = r * (1 - this.eccentricity * Math.cos(eccentricAnomaly_rad));
-		// let r_p = this.semiMajorAxis_km * (1 - this.eccentricity * Math.cos(eccentricAnomaly_rad));
-		// let r_p = this.semiMajorAxis_km * (1 - this.eccentricity * Math.cos(eccentricAnomaly_rad));
-		// console.log("Mean anomaly: " + this.meanAnomaly_deg + " deg | Eccentric anomaly: " + (radToDeg(eccentricAnomaly_rad) % 360) + " deg | Radius = " + r_a);
-		// let positionVector_perifocalFrame = new Array(3);
-		// this.positionVector_perifocalFrame.values = [[r * Math.cos(this.trueAnomaly_rad), r * Math.sin(this.trueAnomaly_rad), 0]];
 		this.positionVector_perifocalFrame.values = [[r * Math.cos(this.trueAnomaly_rad)], [r * Math.sin(this.trueAnomaly_rad)], [0]];
-		// this.positionVector_perifocalFrame[1] = r * Math.sin(this.trueAnomaly_rad);
-		// this.positionVector_perifocalFrame[2] = 0;
-
-		let argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
-		let inclination_rad = degToRad(this.inclination_deg);
-		let longitudeOfAscendingNode_rad = degToRad(this.longitudOfAscendingNode_deg);
 
 		let Q = new Matrix(3, 3, [
 			[
-				Math.cos(longitudeOfAscendingNode_rad) * Math.cos(argumentOfPeriapsis_rad) -
-					Math.cos(inclination_rad) * Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+				Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.argumentOfPeriapsis_rad) -
+					Math.cos(this.inclination_rad) * Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
 
-				-Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad) -
-					Math.cos(inclination_rad) * Math.cos(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+				-Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad) -
+					Math.cos(this.inclination_rad) * Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
 
-				Math.sin(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad),
+				Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.inclination_rad),
 			],
 			[
-				Math.cos(argumentOfPeriapsis_rad) * Math.sin(longitudeOfAscendingNode_rad) +
-					Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
+				Math.cos(this.argumentOfPeriapsis_rad) * Math.sin(this.longitudeOfAscendingNode_deg) +
+					Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.inclination_rad) * Math.sin(this.argumentOfPeriapsis_rad),
 
-				Math.cos(longitudeOfAscendingNode_rad) * Math.cos(inclination_rad) * Math.cos(argumentOfPeriapsis_rad) -
-					Math.sin(longitudeOfAscendingNode_rad) * Math.sin(argumentOfPeriapsis_rad),
+				Math.cos(this.longitudeOfAscendingNode_deg) * Math.cos(this.inclination_rad) * Math.cos(this.argumentOfPeriapsis_rad) -
+					Math.sin(this.longitudeOfAscendingNode_deg) * Math.sin(this.argumentOfPeriapsis_rad),
 
-				-Math.cos(longitudeOfAscendingNode_rad) * Math.sin(inclination_rad),
+				-Math.cos(this.longitudeOfAscendingNode_deg) * Math.sin(this.inclination_rad),
 			],
 			[
-				Math.sin(inclination_rad) * Math.sin(argumentOfPeriapsis_rad),
+				Math.sin(this.inclination_rad) * Math.sin(this.argumentOfPeriapsis_rad),
 
-				Math.cos(argumentOfPeriapsis_rad) * Math.sin(inclination_rad),
+				Math.cos(this.argumentOfPeriapsis_rad) * Math.sin(this.inclination_rad),
 
-				Math.cos(inclination_rad),
+				Math.cos(this.inclination_rad),
 			],
 		]);
-		// console.log(Q.values);
-
 		this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
-		// console.log(
-		// 	"Perifocal: " +
-		// 		this.positionVector_perifocalFrame[0] / AU_km +
-		// 		" AU | " +
-		// 		this.positionVector_perifocalFrame[1] / AU_km +
-		// 		" AU | " +
-		// 		this.positionVector_perifocalFrame[2] +
-		// 		" km"
-		// );
-		// console.log(
-		// 	"Inertial: " +
-		// 		this.positionVector_inertialFrame[0] / AU_km +
-		// 		" AU | " +
-		// 		this.positionVector_inertialFrame[1] / AU_km +
-		// 		" AU | " +
-		// 		this.positionVector_inertialFrame[2] +
-		// 		" km"
-		// );
+	}
+
+	updatePosition(t_ms: number) {
+		this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
+		this.inclination_rad = degToRad(this.inclination_deg);
+		this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
+
+		this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+		this.updatePositionVector();
 	}
 }
 // https://github.com/scijs/newton-raphson-method
