@@ -43,9 +43,7 @@ export class Orbit {
 		if (!isNaN(i_deg)) this.inclination_deg = i_deg;
 		this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
 		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
-		// this.argumentOfPeriapsis_deg = 10;
 		this.meanAnomaly_0_deg = meanAnomaly_deg;
-		// this.meanAnomaly_0_deg = 90;
 
 		this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
 
@@ -55,7 +53,6 @@ export class Orbit {
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
 
-		// console.log("true: " + this.eccentricAnomaly_deg + ", mean: " + this.meanAnomaly_deg);
 		// The scale (in pixels per km) is the number of pixels displayed on the canvas divided by a number of kilometers
 		let scale = canvasUnit * scalePerKm;
 
@@ -72,46 +69,39 @@ export class Orbit {
 		ctx.arc(
 			this.positionVector_inertialFrame.values[0][0] * scale,
 			this.positionVector_inertialFrame.values[1][0] * scale,
-			5 / currentScale,
+			this.radius_km * scale,
+			// 5 / currentScale,
 			0,
 			2 * Math.PI
 		);
 		ctx.fill();
 
-		for (let index = 0; index < 360; index++) {
-			this.meanAnomaly_deg = index;
-			this.updatePositionVector();
-			ctx.beginPath();
-			ctx.fillStyle = "teal";
-			ctx.arc(
-				this.positionVector_inertialFrame.values[0][0] * scale,
-				this.positionVector_inertialFrame.values[1][0] * scale,
-				1 / currentScale,
-				0,
-				2 * Math.PI
-			);
-			ctx.fill();
-		}
+		// for (let index = 0; index < 360; index++) {
+		// 	this.meanAnomaly_deg = index;
+		// 	this.updatePositionVector();
+		// 	ctx.beginPath();
+		// 	ctx.fillStyle = "teal";
+		// 	ctx.arc(
+		// 		this.positionVector_inertialFrame.values[0][0] * scale,
+		// 		this.positionVector_inertialFrame.values[1][0] * scale,
+		// 		1 / currentScale,
+		// 		0,
+		// 		2 * Math.PI
+		// 	);
+		// 	ctx.fill();
+		// }
 
 		// Draw orbit circle with a gradient to illustrate current position and direction
 		let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
 		var width = 0.5 / currentScale;
+		if (currentScale > 100) {
+			width /= (currentScale - 100) / 10;
+		}
+
 		ctx.lineWidth = width;
 
 		let colourAngle_deg = this.trueAnomaly_deg + this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
-		// let colourAngle_deg = 45;
 		let colourAngle_rad = degToRad(colourAngle_deg);
-		console.log(
-			this.trueAnomaly_deg +
-				" + " +
-				this.longitudeOfAscendingNode_deg +
-				" + " +
-				this.argumentOfPeriapsis_deg +
-				" = " +
-				colourAngle_deg +
-				" -> " +
-				colourAngle_rad
-		);
 
 		var brightHalf = ctx.createLinearGradient(
 			largeSide * Math.cos(colourAngle_rad),

@@ -726,33 +726,20 @@
       ctx.arc(
         this.positionVector_inertialFrame.values[0][0] * scale,
         this.positionVector_inertialFrame.values[1][0] * scale,
-        5 / currentScale,
+        this.radius_km * scale,
+        // 5 / currentScale,
         0,
         2 * Math.PI
       );
       ctx.fill();
-      for (let index = 0; index < 360; index++) {
-        this.meanAnomaly_deg = index;
-        this.updatePositionVector();
-        ctx.beginPath();
-        ctx.fillStyle = "teal";
-        ctx.arc(
-          this.positionVector_inertialFrame.values[0][0] * scale,
-          this.positionVector_inertialFrame.values[1][0] * scale,
-          1 / currentScale,
-          0,
-          2 * Math.PI
-        );
-        ctx.fill();
-      }
       let largeSide = ellipseCenterMagnitude + this.semiMajorAxis_km * scale;
       var width = 0.5 / currentScale;
+      if (currentScale > 100) {
+        width /= (currentScale - 100) / 10;
+      }
       ctx.lineWidth = width;
       let colourAngle_deg = this.trueAnomaly_deg + this.longitudeOfAscendingNode_deg + this.argumentOfPeriapsis_deg;
       let colourAngle_rad = degToRad(colourAngle_deg);
-      console.log(
-        this.trueAnomaly_deg + " + " + this.longitudeOfAscendingNode_deg + " + " + this.argumentOfPeriapsis_deg + " = " + colourAngle_deg + " -> " + colourAngle_rad
-      );
       var brightHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
         largeSide * Math.sin(colourAngle_rad),
