@@ -705,7 +705,7 @@
         this.eccentricity = e;
       if (!isNaN(i_deg))
         this.inclination_deg = i_deg;
-      this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
+      this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
       this.GM_km3_s2 = GM_km3_s2;
       this.radius_km = radius_km;
     }

@@ -46,7 +46,7 @@ export class Orbit {
 		// this.meanAnomaly_0_deg = meanAnomaly_deg;
 		// this.meanAnomaly_0_deg = 90;
 
-		this.semiMinorAxis_km = a_km * (1 - this.eccentricity);
+		this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
 
 		this.GM_km3_s2 = GM_km3_s2;
 		this.radius_km = radius_km;
