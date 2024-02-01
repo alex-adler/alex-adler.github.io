@@ -41,6 +41,7 @@ function generate() {
 		console.log(body.name);
 		// console.log(orbits.at(-1));
 		orbits.at(-1)?.updatePosition(0);
+		// orbits.at(-1)?.updatePosition(86400000);
 		// orbits.at(-1)?.updatePosition(Date.now() - 946684800000);
 	}
 

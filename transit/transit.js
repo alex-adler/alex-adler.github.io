@@ -746,24 +746,23 @@
         -largeSide * Math.cos(colourAngle_rad),
         -largeSide * Math.sin(colourAngle_rad)
       );
-      brightHalf.addColorStop(0, "white");
-      brightHalf.addColorStop(1, "DimGray");
       var darkHalf = ctx.createLinearGradient(
         largeSide * Math.cos(colourAngle_rad),
         largeSide * Math.sin(colourAngle_rad),
         -largeSide * Math.cos(colourAngle_rad),
         -largeSide * Math.sin(colourAngle_rad)
       );
-      darkHalf.addColorStop(0, "#202020");
+      brightHalf.addColorStop(0, "white");
+      brightHalf.addColorStop(1, "DimGray");
       darkHalf.addColorStop(1, "DimGray");
+      darkHalf.addColorStop(0, "#202020");
       ctx.save();
-      ctx.fillStyle = darkHalf;
       ctx.beginPath();
       ctx.rotate(colourAngle_rad);
       ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
       reset();
       ctx.clip();
-      ctx.strokeStyle = brightHalf;
+      ctx.strokeStyle = darkHalf;
       ctx.beginPath();
       ctx.ellipse(
         -ellipseCenter.x,
@@ -782,7 +781,7 @@
       ctx.rect(-largeSide - width, -width, (largeSide + width) * 2, largeSide + width * 2);
       reset();
       ctx.clip();
-      ctx.strokeStyle = darkHalf;
+      ctx.strokeStyle = brightHalf;
       ctx.beginPath();
       ctx.ellipse(
         -ellipseCenter.x,

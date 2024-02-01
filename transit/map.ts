@@ -109,31 +109,30 @@ export class Orbit {
 			-largeSide * Math.cos(colourAngle_rad),
 			-largeSide * Math.sin(colourAngle_rad)
 		);
-		brightHalf.addColorStop(0, "white");
-		brightHalf.addColorStop(1, "DimGray");
-
 		var darkHalf = ctx.createLinearGradient(
 			largeSide * Math.cos(colourAngle_rad),
 			largeSide * Math.sin(colourAngle_rad),
 			-largeSide * Math.cos(colourAngle_rad),
 			-largeSide * Math.sin(colourAngle_rad)
 		);
-		darkHalf.addColorStop(0, "#202020");
+
 		// darkHalf.addColorStop(0, "#222222");
+		brightHalf.addColorStop(0, "white");
+		brightHalf.addColorStop(1, "DimGray");
+
 		darkHalf.addColorStop(1, "DimGray");
+		darkHalf.addColorStop(0, "#202020");
 
 		// First we make a clipping region for the left half
 		ctx.save();
-		ctx.fillStyle = darkHalf;
 		ctx.beginPath();
 		ctx.rotate(colourAngle_rad);
 		ctx.rect(-largeSide - width, -largeSide - width, (largeSide + width) * 2, largeSide + width * 2);
 		reset();
-		// ctx.fill();
 		ctx.clip();
 
 		// Then we draw the left half
-		ctx.strokeStyle = brightHalf;
+		ctx.strokeStyle = darkHalf;
 		ctx.beginPath();
 		ctx.ellipse(
 			-ellipseCenter.x,
@@ -157,7 +156,7 @@ export class Orbit {
 		ctx.clip();
 
 		// Then we draw the right half
-		ctx.strokeStyle = darkHalf;
+		ctx.strokeStyle = brightHalf;
 		ctx.beginPath();
 		ctx.ellipse(
 			-ellipseCenter.x,
