@@ -24,6 +24,7 @@ declare type body_type = {
 	trueAnomaly_0_deg: number;
 
 	GM_km3_s2: number;
+	GM_km3_s2_primary: number;
 	radius_km: number;
 
 	period_ms: number;

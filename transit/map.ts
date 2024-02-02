@@ -4,7 +4,8 @@ const AU_km = 1.496e8;
 const scalePerKm = 1 / (5 * AU_km);
 
 export class Orbit {
-	GM_km3_s2: number;
+	GM_km3_s2: number = 0;
+	GM_km3_s2_primary: number = 0;
 
 	semiMajorAxis_km: number = 0;
 	eccentricity: number = 0;
@@ -20,6 +21,7 @@ export class Orbit {
 	semiMinorAxis_km: number = 0;
 
 	meanAnomaly_deg: number = 0;
+	meanAnomaly_rad: number = 0;
 	eccentricAnomaly_deg: number = 0;
 	trueAnomaly_rad: number = 0;
 	trueAnomaly_deg: number = 0;
@@ -36,6 +38,7 @@ export class Orbit {
 		argumentOfPeriapsis_deg: number,
 		meanAnomaly_deg: number,
 		GM_km3_s2: number,
+		GM_km3_s2_primary: number,
 		radius_km: number
 	) {
 		this.semiMajorAxis_km = a_km;
@@ -43,12 +46,17 @@ export class Orbit {
 		if (!isNaN(i_deg)) this.inclination_deg = i_deg;
 		this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
 		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
+
 		this.meanAnomaly_0_deg = meanAnomaly_deg;
+		this.meanAnomaly_0_rad = degToRad(this.meanAnomaly_0_deg);
 
 		this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
 
 		this.GM_km3_s2 = GM_km3_s2;
+		this.GM_km3_s2_primary = GM_km3_s2_primary;
 		this.radius_km = radius_km;
+
+		this.updatePosition(0);
 	}
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
@@ -224,7 +232,9 @@ export class Orbit {
 		this.inclination_rad = degToRad(this.inclination_deg);
 		this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
 
-		this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+		this.meanAnomaly_rad = (this.meanAnomaly_0_rad + (t_ms / 1000) * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5) % (2 * Math.PI);
+		this.meanAnomaly_deg = radToDeg(this.meanAnomaly_rad);
+
 		this.updatePositionVector();
 	}
 }

@@ -5,6 +5,7 @@
       generatedTimeZone: false,
       name: "Mercury",
       GM_km3_s2: 22031.86855,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 2440,
       surface_gravity_ms: 3.7005960343321687,
       semiMajorAxis_0_km: 5790907025241733e-8,
@@ -19,13 +20,14 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 1865409099234155e-2,
+      period_ms: 7600887337010863e-6,
       meanAnomaly_0_deg: null
     },
     Venus: {
       generatedTimeZone: false,
       name: "Venus",
       GM_km3_s2: 324858.592,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 6051.893,
       surface_gravity_ms: 8.869760144761234,
       semiMajorAxis_0_km: 1082081565316098e-7,
@@ -40,7 +42,7 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 12408597200354518e-3,
+      period_ms: 19414866312342583e-6,
       meanAnomaly_0_deg: null
     },
     Earth: {
@@ -62,6 +64,7 @@
       initialWeekDay: 6,
       initialYearProgress: 0,
       GM_km3_s2: 398600.435436,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 6378.137,
       surface_gravity_ms: 9.798285322749217,
       semiMajorAxis_0_km: 1496534962738141e-7,
@@ -76,7 +79,7 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 18219702661829465e-3,
+      period_ms: 31577279278169163e-6,
       meanAnomaly_0_deg: null
     },
     Mars: {
@@ -98,6 +101,7 @@
       initialWeekDay: 0,
       initialYearProgress: 0,
       GM_km3_s2: 42828.375214,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 3396.19,
       surface_gravity_ms: 3.7131940089349422,
       semiMajorAxis_0_km: 2279390120013493e-7,
@@ -112,7 +116,7 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 10448214047350531e-2,
+      period_ms: 5935706236500615e-5,
       meanAnomaly_0_deg: null
     },
     Ceres: {
@@ -134,6 +138,7 @@
       initialWeekDay: 0,
       initialYearProgress: 0,
       GM_km3_s2: 62.6325,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 469.7,
       surface_gravity_ms: 0.2838955771940551,
       semiMajorAxis_0_km: 4138616544134015e-7,
@@ -148,13 +153,14 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 6684405364675394,
+      period_ms: 14522025371986575e-5,
       meanAnomaly_0_deg: null
     },
     Jupiter: {
       generatedTimeZone: false,
       name: "Jupiter",
       GM_km3_s2: 1266865319e-1,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 71492,
       surface_gravity_ms: 24.786519847888645,
       semiMajorAxis_0_km: 7786731611090481e-7,
@@ -169,70 +175,71 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 12129627211583168e-3,
+      period_ms: 37478069809121204e-5,
       meanAnomaly_0_deg: null
     },
-    // Europa: {
-    // 	generatedTimeZone: true,
-    // 	name: "Europa",
-    // 	dayLength_ms: 306822000,
-    // 	yearLength_ms: 374335776000,
-    // 	yearLength_hd: 4270,
-    // 	weekLength_d: 2,
-    // 	weekLength_hd: 7,
-    // 	hDayLength_ms: 87663000,
-    // 	hYearLength_ms: 374321010000,
-    // 	monthCount: 152,
-    // 	nominalMonthLength_hd: 28,
-    // 	nominalMonthLength_ms: 2454564000,
-    // 	leapYearFreq_hd: [6, 564],
-    // 	leapYearBlocks_ms: [2246013723000, 211125377625000],
-    // 	monthRemainder_hd: 14,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
-    // Ganymede: {
-    // 	generatedTimeZone: true,
-    // 	name: "Ganymede",
-    // 	dayLength_ms: 618153000,
-    // 	yearLength_ms: 374335776000,
-    // 	yearLength_hd: 4239,
-    // 	weekLength_d: 1,
-    // 	weekLength_hd: 7,
-    // 	hDayLength_ms: 88307000,
-    // 	hYearLength_ms: 374333373000,
-    // 	monthCount: 148,
-    // 	nominalMonthLength_hd: 28,
-    // 	nominalMonthLength_ms: 2472596000,
-    // 	leapYearFreq_hd: [37, 5410],
-    // 	leapYearBlocks_ms: [13850423108000, 2025156529059000],
-    // 	monthRemainder_hd: 95,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
-    // Callisto: {
-    // 	generatedTimeZone: true,
-    // 	name: "Callisto",
-    // 	dayLength_ms: 1441931000,
-    // 	yearLength_ms: 374335776000,
-    // 	yearLength_hd: 4413,
-    // 	weekLength_d: 1,
-    // 	weekLength_hd: 17,
-    // 	hDayLength_ms: 84819000,
-    // 	hYearLength_ms: 374306247000,
-    // 	monthCount: 64,
-    // 	nominalMonthLength_hd: 68,
-    // 	nominalMonthLength_ms: 5767692000,
-    // 	leapYearFreq_hd: [3, 68],
-    // 	leapYearBlocks_ms: [1123003560000, 25454775633000],
-    // 	monthRemainder_hd: 61,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
+    Europa: {
+      generatedTimeZone: true,
+      name: "Europa",
+      dayLength_ms: 306822e3,
+      yearLength_ms: 374335776e3,
+      yearLength_hd: 4270,
+      weekLength_d: 2,
+      weekLength_hd: 7,
+      hDayLength_ms: 87663e3,
+      hYearLength_ms: 37432101e4,
+      monthCount: 152,
+      nominalMonthLength_hd: 28,
+      nominalMonthLength_ms: 2454564e3,
+      leapYearFreq_hd: [6, 564],
+      leapYearBlocks_ms: [2246013723e3, 211125377625e3],
+      monthRemainder_hd: 14,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
+    Ganymede: {
+      generatedTimeZone: true,
+      name: "Ganymede",
+      dayLength_ms: 618153e3,
+      yearLength_ms: 374335776e3,
+      yearLength_hd: 4239,
+      weekLength_d: 1,
+      weekLength_hd: 7,
+      hDayLength_ms: 88307e3,
+      hYearLength_ms: 374333373e3,
+      monthCount: 148,
+      nominalMonthLength_hd: 28,
+      nominalMonthLength_ms: 2472596e3,
+      leapYearFreq_hd: [37, 5410],
+      leapYearBlocks_ms: [13850423108e3, 2025156529059e3],
+      monthRemainder_hd: 95,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
+    Callisto: {
+      generatedTimeZone: true,
+      name: "Callisto",
+      dayLength_ms: 1441931e3,
+      yearLength_ms: 374335776e3,
+      yearLength_hd: 4413,
+      weekLength_d: 1,
+      weekLength_hd: 17,
+      hDayLength_ms: 84819e3,
+      hYearLength_ms: 374306247e3,
+      monthCount: 64,
+      nominalMonthLength_hd: 68,
+      nominalMonthLength_ms: 5767692e3,
+      leapYearFreq_hd: [3, 68],
+      leapYearBlocks_ms: [112300356e4, 25454775633e3],
+      monthRemainder_hd: 61,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
     Saturn: {
       generatedTimeZone: false,
       name: "Saturn",
       GM_km3_s2: 37931206234e-3,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 60268,
       surface_gravity_ms: 10.442947496734448,
       semiMajorAxis_0_km: 1433364815997285e-6,
@@ -247,51 +254,52 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 5536262212547909e-2,
+      period_ms: 9360079053995223e-4,
       meanAnomaly_0_deg: null
     },
-    // Titan: {
-    // 	generatedTimeZone: true,
-    // 	name: "Titan",
-    // 	dayLength_ms: 1377648000,
-    // 	yearLength_ms: 929596607000,
-    // 	yearLength_hd: 10796,
-    // 	weekLength_d: 1,
-    // 	weekLength_hd: 16,
-    // 	hDayLength_ms: 86103000,
-    // 	hYearLength_ms: 929567988000,
-    // 	monthCount: 168,
-    // 	nominalMonthLength_hd: 64,
-    // 	nominalMonthLength_ms: 5510592000,
-    // 	leapYearFreq_hd: [4, 13],
-    // 	leapYearBlocks_ms: [3718358055000, 12084728256000],
-    // 	monthRemainder_hd: 44,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
-    // Enceladus: {
-    // 	generatedTimeZone: true,
-    // 	name: "Enceladus",
-    // 	dayLength_ms: 118386000,
-    // 	yearLength_ms: 929596607000,
-    // 	yearLength_hd: 10993,
-    // 	weekLength_d: 5,
-    // 	weekLength_hd: 7,
-    // 	hDayLength_ms: 84561000,
-    // 	hYearLength_ms: 929579073000,
-    // 	monthCount: 392,
-    // 	nominalMonthLength_hd: 28,
-    // 	nominalMonthLength_ms: 2367708000,
-    // 	leapYearFreq_hd: [5, 136],
-    // 	leapYearBlocks_ms: [4647979926000, 126425121636000],
-    // 	monthRemainder_hd: 17,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
+    Titan: {
+      generatedTimeZone: true,
+      name: "Titan",
+      dayLength_ms: 1377648e3,
+      yearLength_ms: 929596607e3,
+      yearLength_hd: 10796,
+      weekLength_d: 1,
+      weekLength_hd: 16,
+      hDayLength_ms: 86103e3,
+      hYearLength_ms: 929567988e3,
+      monthCount: 168,
+      nominalMonthLength_hd: 64,
+      nominalMonthLength_ms: 5510592e3,
+      leapYearFreq_hd: [4, 13],
+      leapYearBlocks_ms: [3718358055e3, 12084728256e3],
+      monthRemainder_hd: 44,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
+    Enceladus: {
+      generatedTimeZone: true,
+      name: "Enceladus",
+      dayLength_ms: 118386e3,
+      yearLength_ms: 929596607e3,
+      yearLength_hd: 10993,
+      weekLength_d: 5,
+      weekLength_hd: 7,
+      hDayLength_ms: 84561e3,
+      hYearLength_ms: 929579073e3,
+      monthCount: 392,
+      nominalMonthLength_hd: 28,
+      nominalMonthLength_ms: 2367708e3,
+      leapYearFreq_hd: [5, 136],
+      leapYearBlocks_ms: [4647979926e3, 126425121636e3],
+      monthRemainder_hd: 17,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
     Uranus: {
       generatedTimeZone: false,
       name: "Uranus",
       GM_km3_s2: 5793951256e-3,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 25559,
       surface_gravity_ms: 8.8692545868098,
       semiMajorAxis_0_km: 2876758957338404e-6,
@@ -306,32 +314,33 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 40276123214276875e-2,
+      period_ms: 26613354438382827e-4,
       meanAnomaly_0_deg: null
     },
-    // Titania: {
-    // 	generatedTimeZone: true,
-    // 	name: "Titania",
-    // 	dayLength_ms: 752218000,
-    // 	yearLength_ms: 2651486400000,
-    // 	yearLength_hd: 31724,
-    // 	weekLength_d: 1,
-    // 	weekLength_hd: 9,
-    // 	hDayLength_ms: 83579000,
-    // 	hYearLength_ms: 2651460196000,
-    // 	monthCount: 880,
-    // 	nominalMonthLength_hd: 36,
-    // 	nominalMonthLength_ms: 3008844000,
-    // 	leapYearFreq_hd: [4, 16],
-    // 	leapYearBlocks_ms: [10605924363000, 42423781031000],
-    // 	monthRemainder_hd: 44,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
+    Titania: {
+      generatedTimeZone: true,
+      name: "Titania",
+      dayLength_ms: 752218e3,
+      yearLength_ms: 26514864e5,
+      yearLength_hd: 31724,
+      weekLength_d: 1,
+      weekLength_hd: 9,
+      hDayLength_ms: 83579e3,
+      hYearLength_ms: 2651460196e3,
+      monthCount: 880,
+      nominalMonthLength_hd: 36,
+      nominalMonthLength_ms: 3008844e3,
+      leapYearFreq_hd: [4, 16],
+      leapYearBlocks_ms: [10605924363e3, 42423781031e3],
+      monthRemainder_hd: 44,
+      initialWeekDay: 0,
+      initialYearProgress: 0
+    },
     Neptune: {
       generatedTimeZone: false,
       name: "Neptune",
       GM_km3_s2: 683509997e-2,
+      GM_km3_s2_primary: 1327e8,
       radius_km: 24766,
       surface_gravity_ms: 11.14379550029934,
       semiMajorAxis_0_km: 4503002396427352e-6,
@@ -346,28 +355,28 @@
       longitudOfAscendingNode_sec_Cy: 0,
       argumentOfPeriapsis_sec_Cy: 0,
       trueAnomaly_sec_Cy: 0,
-      period_ms: 726207450158298,
+      period_ms: 5211919197601552e-3,
       meanAnomaly_0_deg: null
+    },
+    Triton: {
+      generatedTimeZone: true,
+      name: "Triton",
+      dayLength_ms: 50776e4,
+      yearLength_ms: 51997248e5,
+      yearLength_hd: 61443,
+      weekLength_d: 1,
+      weekLength_hd: 6,
+      hDayLength_ms: 84626e3,
+      hYearLength_ms: 5199675318e3,
+      monthCount: 2560,
+      nominalMonthLength_hd: 24,
+      nominalMonthLength_ms: 2031024e3,
+      leapYearFreq_hd: [2, 12],
+      leapYearBlocks_ms: [10399435262e3, 62396696198e3],
+      monthRemainder_hd: 3,
+      initialWeekDay: 0,
+      initialYearProgress: 0
     }
-    // Triton: {
-    // 	generatedTimeZone: true,
-    // 	name: "Triton",
-    // 	dayLength_ms: 507760000,
-    // 	yearLength_ms: 5199724800000,
-    // 	yearLength_hd: 61443,
-    // 	weekLength_d: 1,
-    // 	weekLength_hd: 6,
-    // 	hDayLength_ms: 84626000,
-    // 	hYearLength_ms: 5199675318000,
-    // 	monthCount: 2560,
-    // 	nominalMonthLength_hd: 24,
-    // 	nominalMonthLength_ms: 2031024000,
-    // 	leapYearFreq_hd: [2, 12],
-    // 	leapYearBlocks_ms: [10399435262000, 62396696198000],
-    // 	monthRemainder_hd: 3,
-    // 	initialWeekDay: 0,
-    // 	initialYearProgress: 0,
-    // },
   };
 
   // node_modules/ts-matrix/dist/ts-matrix.mjs
@@ -681,7 +690,9 @@
   var AU_km = 1496e5;
   var scalePerKm = 1 / (5 * AU_km);
   var Orbit = class {
-    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, radius_km) {
+    constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, GM_km3_s2_primary, radius_km) {
+      this.GM_km3_s2 = 0;
+      this.GM_km3_s2_primary = 0;
       this.semiMajorAxis_km = 0;
       this.eccentricity = 0;
       this.inclination_deg = 0;
@@ -694,6 +705,7 @@
       this.meanAnomaly_0_rad = 0;
       this.semiMinorAxis_km = 0;
       this.meanAnomaly_deg = 0;
+      this.meanAnomaly_rad = 0;
       this.eccentricAnomaly_deg = 0;
       this.trueAnomaly_rad = 0;
       this.trueAnomaly_deg = 0;
@@ -708,9 +720,12 @@
       this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
       this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
       this.meanAnomaly_0_deg = meanAnomaly_deg;
+      this.meanAnomaly_0_rad = degToRad(this.meanAnomaly_0_deg);
       this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
       this.GM_km3_s2 = GM_km3_s2;
+      this.GM_km3_s2_primary = GM_km3_s2_primary;
       this.radius_km = radius_km;
+      this.updatePosition(0);
     }
     draw(ctx, canvasUnit, reset, currentScale) {
       if (this.semiMajorAxis_km == void 0)
@@ -832,7 +847,8 @@
       this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
       this.inclination_rad = degToRad(this.inclination_deg);
       this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
-      this.meanAnomaly_deg = (this.meanAnomaly_0_deg + t_ms * (this.GM_km3_s2 / this.semiMajorAxis_km ** 3) ** 0.5) % 360;
+      this.meanAnomaly_rad = (this.meanAnomaly_0_rad + t_ms / 1e3 * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5) % (2 * Math.PI);
+      this.meanAnomaly_deg = radToDeg(this.meanAnomaly_rad);
       this.updatePositionVector();
     }
   };
@@ -1093,29 +1109,37 @@
     let table = document.getElementById("output-table");
     let dropDown = document.getElementById("location-drop-down");
     let canvas = document.getElementById("orbital-canvas");
-    let orbits = [];
+    let orbits = {};
     for (const key in space_time) {
       let opt = document.createElement("option");
       let body = space_time[key];
       opt.value = key;
       opt.innerHTML = body.name;
       dropDown.appendChild(opt);
-      orbits.push(
-        new Orbit(
-          body.semiMajorAxis_0_km,
-          body.eccentricity_0,
-          body.inclination_0_deg,
-          body.longitudOfAscendingNode_0_deg,
-          body.argumentOfPeriapsis_0_deg,
-          body.trueAnomaly_0_deg,
-          body.GM_km3_s2,
-          body.radius_km
-        )
+      orbits[key] = new Orbit(
+        body.semiMajorAxis_0_km,
+        body.eccentricity_0,
+        body.inclination_0_deg,
+        body.longitudOfAscendingNode_0_deg,
+        body.argumentOfPeriapsis_0_deg,
+        body.trueAnomaly_0_deg,
+        body.GM_km3_s2,
+        body.GM_km3_s2_primary,
+        body.radius_km
       );
-      console.log(body.name);
-      orbits.at(-1)?.updatePosition(0);
+      orbits[key].updatePosition(Date.now() - 9466848e5);
     }
-    generateCanvas(canvas, orbits);
+    const infiniteCanvas = new InfiniteCanvas(canvas);
+    infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
+    document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
+    for (let i in orbits) {
+      let o = orbits[i];
+      infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
+    }
+    infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
+  }
+  function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
+    console.log(currentScale);
   }
   function drawSun(context, displayUnit, reset, currentScale) {
     const radius_km = 696e3;
@@ -1134,14 +1158,6 @@
       initialDraw = true;
       return true;
     }
-  }
-  function generateCanvas(canvas, orbits) {
-    const infiniteCanvas = new InfiniteCanvas(canvas);
-    infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
-    document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
-    orbits.forEach((o) => {
-      infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
-    });
   }
   window.onload = function() {
     generate();

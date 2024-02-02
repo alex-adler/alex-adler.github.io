@@ -16,7 +16,7 @@ function generate() {
 	// for (let i = 0; i < 11; i++) departureBoard.setValueNoSpin(i, "25:17 Earth     Spin AX1938 0" + i.toString(16));
 	// for (let i = 0; i < 11; i++) arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
 
-	let orbits: Orbit[] = [];
+	let orbits: { [name: string]: Orbit } = {};
 
 	for (const key in body_data.space_time) {
 		let opt = document.createElement("option");
@@ -25,27 +25,34 @@ function generate() {
 		opt.innerHTML = body.name;
 		dropDown.appendChild(opt);
 
-		orbits.push(
-			new Orbit(
-				body.semiMajorAxis_0_km,
-				body.eccentricity_0,
-				body.inclination_0_deg,
-				body.longitudOfAscendingNode_0_deg,
-				body.argumentOfPeriapsis_0_deg,
-				body.trueAnomaly_0_deg,
-				body.GM_km3_s2,
-				body.radius_km
-			)
+		orbits[key] = new Orbit(
+			body.semiMajorAxis_0_km,
+			body.eccentricity_0,
+			body.inclination_0_deg,
+			body.longitudOfAscendingNode_0_deg,
+			body.argumentOfPeriapsis_0_deg,
+			body.trueAnomaly_0_deg,
+			body.GM_km3_s2,
+			body.GM_km3_s2_primary,
+			body.radius_km
 		);
 
-		console.log(body.name);
-		// console.log(orbits.at(-1));
-		orbits.at(-1)?.updatePosition(0);
-		// orbits.at(-1)?.updatePosition(86400000);
-		// orbits.at(-1)?.updatePosition(Date.now() - 946684800000);
+		// console.log(body.name);
+		// orbits[key].updatePosition(3.156e10); // One Terran year
+		orbits[key].updatePosition(Date.now() - 946684800000); // ms since J2000
 	}
 
-	generateCanvas(canvas, orbits);
+	const infiniteCanvas = new InfiniteCanvas(canvas);
+	infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
+	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
+
+	for (let i in orbits) {
+		let o = orbits[i];
+		infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
+	}
+
+	infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
+
 	// for (const key in body_data.space_time) {
 	// 	if (Object.prototype.hasOwnProperty.call(bodies, key)) {
 	// 		const b = bodies[key];
@@ -62,6 +69,19 @@ function generate() {
 
 	// window.setTimeout(spinDeparture, 5000, departureBoard);
 	// window.setTimeout(spinArrival, 10000, arrivalBoard);
+}
+
+function impulseTransfer(
+	bodyStart: Orbit,
+	bodyEnd: Orbit,
+	deltaV_km_s: number,
+	ctx: CanvasRenderingContext2D,
+	canvasUnit: number,
+	reset: () => void,
+	currentScale: number
+): void {
+	// TODO: Implement a solution to Lambert's Problem
+	console.log(currentScale);
 }
 
 function drawSun(context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, currentScale: number): void {
@@ -88,29 +108,6 @@ function checkIfCanvasNeedsUpdating(): boolean {
 		initialDraw = true;
 		return true;
 	}
-}
-
-function generateCanvas(canvas: HTMLCanvasElement, orbits: Orbit[]) {
-	const infiniteCanvas = new InfiniteCanvas(canvas);
-	// infiniteCanvas.addDrawFunction(drawSquares, checkIfCanvasNeedsUpdating);
-	infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
-	document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
-
-	// let ctx = canvas.getContext("2d");
-
-	// // Deal with devices with a pixel ratio != 1
-	// const pixelRatio = window.devicePixelRatio;
-	// canvas.width = canvas.clientWidth * pixelRatio;
-	// canvas.height = canvas.clientHeight * pixelRatio;
-
-	// ctx.beginPath();
-	// ctx.fillStyle = "white";
-	// ctx.arc(canvas.width / 2, canvas.height / 2, 1, 0, 2 * Math.PI);
-	// ctx.fill(this);
-
-	orbits.forEach((o) => {
-		infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
-	});
 }
 
 // Each service must occupy 4 characters
