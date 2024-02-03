@@ -2,6 +2,7 @@ import * as body_data from "../space_time/data/celestial_data.js";
 import { Orbit } from "./map.ts";
 import { DepartureBoard } from "./board.ts";
 import { InfiniteCanvas } from "./infinite_canvas.ts";
+import init, { add } from "./transit_rs.js";
 
 const AU_km = 1.496e8;
 
@@ -81,7 +82,9 @@ function impulseTransfer(
 	currentScale: number
 ): void {
 	// TODO: Implement a solution to Lambert's Problem
-	console.log(currentScale);
+	init().then(() => {
+		console.log(add(4, 3));
+	});
 }
 
 function drawSun(context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, currentScale: number): void {

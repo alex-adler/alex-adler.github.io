@@ -46,5 +46,11 @@ tsc -w
 Transit is currently using ESLint to bundle files:
 
 ```bash
-./node_modules/.bin/esbuild transit/transit.ts --bundle --outdir=transit --watch
+./node_modules/.bin/esbuild transit/transit.ts --bundle --format=esm --outdir=transit --watch
+```
+
+Transit's rust code can be compiled into wasm by using the following command from inside the `transit` directory:
+
+```bash
+wasm-pack build --target web -d . --no-pack
 ```
