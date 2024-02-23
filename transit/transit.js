@@ -711,6 +711,8 @@ var Orbit = class {
     this.radius_km = 0;
     this.positionVector_perifocalFrame = new c(3, 1);
     this.positionVector_inertialFrame = new c(3, 1);
+    this.v_radial = 0;
+    this.v_perpendicular = 0;
     this.semiMajorAxis_km = a_km;
     if (e !== void 0)
       this.eccentricity = e;
@@ -841,6 +843,9 @@ var Orbit = class {
       ]
     ]);
     this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
+    let angular_momentum = (semiLatusRectum * this.GM_km3_s2_primary) ** 0.5;
+    this.v_radial = this.GM_km3_s2_primary / angular_momentum * this.eccentricity * Math.sin(this.trueAnomaly_rad);
+    this.v_perpendicular = angular_momentum / (this.positionVector_inertialFrame.values[0][0] ** 2 + this.positionVector_inertialFrame.values[0][1] ** 2 + this.positionVector_inertialFrame.values[0][2] ** 2) ** 0.5;
   }
   updatePosition(t_ms) {
     this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
@@ -1104,6 +1109,52 @@ var InfiniteCanvas = class {
 
 // transit/transit_rs.js
 var wasm;
+var heap = new Array(128).fill(void 0);
+heap.push(void 0, null, true, false);
+var heap_next = heap.length;
+function addHeapObject(obj) {
+  if (heap_next === heap.length)
+    heap.push(heap.length + 1);
+  const idx = heap_next;
+  heap_next = heap[idx];
+  heap[idx] = obj;
+  return idx;
+}
+var cachedTextDecoder = typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8", { ignoreBOM: true, fatal: true }) : { decode: () => {
+  throw Error("TextDecoder not available");
+} };
+if (typeof TextDecoder !== "undefined") {
+  cachedTextDecoder.decode();
+}
+var cachedUint8Memory0 = null;
+function getUint8Memory0() {
+  if (cachedUint8Memory0 === null || cachedUint8Memory0.byteLength === 0) {
+    cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+  }
+  return cachedUint8Memory0;
+}
+function getStringFromWasm0(ptr, len) {
+  ptr = ptr >>> 0;
+  return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+}
+function getObject(idx) {
+  return heap[idx];
+}
+function dropObject(idx) {
+  if (idx < 132)
+    return;
+  heap[idx] = heap_next;
+  heap_next = idx;
+}
+function takeObject(idx) {
+  const ret = getObject(idx);
+  dropObject(idx);
+  return ret;
+}
+function get_acc_orbit(a, r_x, r_y, r_z, v, t, dt) {
+  const ret = wasm.get_acc_orbit(a, r_x, r_y, r_z, v, t, dt);
+  return takeObject(ret);
+}
 function add(left, right) {
   const ret = wasm.add(left, right);
   return ret >>> 0;
@@ -1135,6 +1186,20 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
   const imports = {};
   imports.wbg = {};
+  imports.wbg.__wbindgen_number_new = function(arg0) {
+    const ret = arg0;
+    return addHeapObject(ret);
+  };
+  imports.wbg.__wbg_newwithlength_a20dc3b27e1cb1b2 = function(arg0) {
+    const ret = new Array(arg0 >>> 0);
+    return addHeapObject(ret);
+  };
+  imports.wbg.__wbg_set_79c308ecd9a1d091 = function(arg0, arg1, arg2) {
+    getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
+  };
+  imports.wbg.__wbindgen_throw = function(arg0, arg1) {
+    throw new Error(getStringFromWasm0(arg0, arg1));
+  };
   return imports;
 }
 function __wbg_init_memory(imports, maybe_memory) {
@@ -1142,6 +1207,7 @@ function __wbg_init_memory(imports, maybe_memory) {
 function __wbg_finalize_init(instance, module) {
   wasm = instance.exports;
   __wbg_init.__wbindgen_wasm_module = module;
+  cachedUint8Memory0 = null;
   return wasm;
 }
 async function __wbg_init(input) {
@@ -1194,10 +1260,35 @@ function generate() {
     infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
   }
   infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
+  infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
 }
 function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
     console.log(add(4, 3));
+  });
+}
+function accelerationTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
+  transit_rs_default().then(() => {
+    let end = get_acc_orbit(
+      10,
+      bodyStart.positionVector_inertialFrame.values[0][0],
+      bodyStart.positionVector_inertialFrame.values[1][0],
+      bodyStart.positionVector_inertialFrame.values[2][0],
+      bodyStart.v_radial,
+      100,
+      1
+    );
+    let scale = canvasUnit / (5 * 1496e5);
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 5 / currentScale;
+    ctx.beginPath();
+    ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
+    ctx.lineTo(end[0] * scale, end[1] * scale);
+    ctx.stroke();
+    console.log(
+      "Line width: " + 5 / currentScale + ", start: " + bodyStart.positionVector_inertialFrame.values[0][0] * scale + ", " + bodyStart.positionVector_inertialFrame.values[1][0] * scale
+    );
+    console.log("Start at " + bodyStart.positionVector_inertialFrame.values[1][0] + ", end at " + end);
   });
 }
 function drawSun(context, displayUnit, reset, currentScale) {

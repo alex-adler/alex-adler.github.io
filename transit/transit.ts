@@ -2,7 +2,7 @@ import * as body_data from "../space_time/data/celestial_data.js";
 import { Orbit } from "./map.ts";
 import { DepartureBoard } from "./board.ts";
 import { InfiniteCanvas } from "./infinite_canvas.ts";
-import init, { add } from "./transit_rs.js";
+import init, { get_acc_orbit, add } from "./transit_rs.js";
 
 const AU_km = 1.496e8;
 
@@ -53,6 +53,7 @@ function generate() {
 	}
 
 	infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
+	infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
 
 	// for (const key in body_data.space_time) {
 	// 	if (Object.prototype.hasOwnProperty.call(bodies, key)) {
@@ -84,6 +85,49 @@ function impulseTransfer(
 	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
 		console.log(add(4, 3));
+	});
+}
+
+function accelerationTransfer(
+	bodyStart: Orbit,
+	bodyEnd: Orbit,
+	deltaV_km_s: number,
+	ctx: CanvasRenderingContext2D,
+	canvasUnit: number,
+	reset: () => void,
+	currentScale: number
+): void {
+	// TODO: Implement a solution to Lambert's Problem
+	init().then(() => {
+		let end = get_acc_orbit(
+			10,
+			bodyStart.positionVector_inertialFrame.values[0][0],
+			bodyStart.positionVector_inertialFrame.values[1][0],
+			bodyStart.positionVector_inertialFrame.values[2][0],
+			bodyStart.v_radial,
+			100,
+			1
+		);
+
+		let scale = canvasUnit / (5 * 1.496e8);
+
+		ctx.strokeStyle = "red";
+		ctx.lineWidth = 5 / currentScale;
+		ctx.beginPath();
+		ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
+		ctx.lineTo(end[0] * scale, end[1] * scale);
+		ctx.stroke();
+
+		console.log(
+			"Line width: " +
+				5 / currentScale +
+				", start: " +
+				bodyStart.positionVector_inertialFrame.values[0][0] * scale +
+				", " +
+				bodyStart.positionVector_inertialFrame.values[1][0] * scale
+		);
+
+		console.log("Start at " + bodyStart.positionVector_inertialFrame.values[1][0] + ", end at " + end);
 	});
 }
 
