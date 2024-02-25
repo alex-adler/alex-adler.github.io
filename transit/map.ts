@@ -31,8 +31,10 @@ export class Orbit {
 	positionVector_perifocalFrame = new Matrix(3, 1);
 	positionVector_inertialFrame = new Matrix(3, 1);
 
-	v_radial = 0;
-	v_perpendicular = 0;
+	velocity = new Vector();
+
+	// v_radial = 0;
+	// v_perpendicular = 0;
 	constructor(
 		a_km: number,
 		e: number,
@@ -230,13 +232,14 @@ export class Orbit {
 		this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
 
 		let angular_momentum = (semiLatusRectum * this.GM_km3_s2_primary) ** 0.5;
-		this.v_radial = (this.GM_km3_s2_primary / angular_momentum) * this.eccentricity * Math.sin(this.trueAnomaly_rad);
-		this.v_perpendicular =
-			angular_momentum /
-			(this.positionVector_inertialFrame.values[0][0] ** 2 +
-				this.positionVector_inertialFrame.values[0][1] ** 2 +
-				this.positionVector_inertialFrame.values[0][2] ** 2) **
-				0.5;
+
+		let velocity_matrix = Q.multiply(new Matrix(3, 1, [[-Math.sin(this.trueAnomaly_rad)], [this.eccentricity + Math.cos(this.trueAnomaly_rad)], [0]]));
+		this.velocity = new Vector();
+		for (let i = 0; i < velocity_matrix.rows; i++) {
+			// this.velocity.values[i][0] *= this.GM_km3_s2_primary / angular_momentum;
+			this.velocity.addAValue();
+			this.velocity[i] = -(velocity_matrix.values[i][0] * this.GM_km3_s2_primary) / angular_momentum;
+		}
 	}
 
 	updatePosition(t_ms: number) {

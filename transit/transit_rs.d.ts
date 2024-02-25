@@ -1,16 +1,21 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {number} a
+* @param {number} a_x
+* @param {number} a_y
+* @param {number} a_z
 * @param {number} r_x
 * @param {number} r_y
 * @param {number} r_z
-* @param {number} v
-* @param {number} t
+* @param {number} v_x
+* @param {number} v_y
+* @param {number} v_z
 * @param {number} dt
+* @param {number} rk4_iterations
+* @param {number} macro_iterations
 * @returns {Array<any>}
 */
-export function get_acc_orbit(a: number, r_x: number, r_y: number, r_z: number, v: number, t: number, dt: number): Array<any>;
+export function get_acc_orbit(a_x: number, a_y: number, a_z: number, r_x: number, r_y: number, r_z: number, v_x: number, v_y: number, v_z: number, dt: number, rk4_iterations: number, macro_iterations: number): Array<any>;
 /**
 * @param {number} left
 * @param {number} right
@@ -22,7 +27,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly get_acc_orbit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+  readonly get_acc_orbit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => number;
   readonly add: (a: number, b: number) => number;
 }
 

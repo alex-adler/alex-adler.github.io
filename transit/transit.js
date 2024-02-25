@@ -504,6 +504,126 @@ var c = class _c {
 `)}]`;
   }
 };
+var v = class _v {
+  constructor(t) {
+    m(this, "_values");
+    this._values = new Array((t || [0]).length).fill(0), t && (this.values = t);
+  }
+  get rows() {
+    return this.values.length;
+  }
+  get values() {
+    return this._values;
+  }
+  set values(t) {
+    const s = Math.min(this.values.length, t.length);
+    for (let e = 0; e < s; e++)
+      this.values[e] = t[e];
+  }
+  angleFrom(t) {
+    if (this.rows !== t.rows)
+      throw new Error("To calculate the angle, vectors must have the same dimension!");
+    const e = this.dot(t) / (this.length() * t.length());
+    return Math.acos(e);
+  }
+  distanceFrom(t) {
+    if (this.rows !== t.rows)
+      throw new Error("To calculate the distance, vectors must have the same dimension!");
+    return this.subtract(t).length();
+  }
+  at(t) {
+    return this.values[t];
+  }
+  indexOf(t) {
+    return this.values.indexOf(t);
+  }
+  reset() {
+    this.values = this.values.fill(0);
+  }
+  addAValue() {
+    return this.values.push(0), new _v(this.values);
+  }
+  equals(t) {
+    return this.rows === t.rows && this.values.reduce((s, e, r) => s && t.at(r) === e, true);
+  }
+  negate() {
+    return new _v(this.values.map((t) => -t));
+  }
+  length() {
+    return Math.sqrt(this.squaredLength());
+  }
+  squaredLength() {
+    return this.dot(this);
+  }
+  add(t) {
+    if (this.rows !== t.rows)
+      throw new Error("Vectors don't have the same dimension!");
+    return this.operateOnAllValues((s, e) => s + t.at(e));
+  }
+  subtract(t) {
+    if (this.rows !== t.rows)
+      throw new Error("Vectors don't have the same dimension!");
+    return this.operateOnAllValues((s, e) => s - t.at(e));
+  }
+  multiply(t) {
+    if (this.rows !== t.rows)
+      throw new Error("Vectors don't have the same dimension!");
+    return this.operateOnAllValues((s, e) => s * t.at(e));
+  }
+  divide(t) {
+    if (this.rows !== t.rows)
+      throw new Error("Vectors don't have the same dimension!");
+    return this.operateOnAllValues((s, e) => t.at(e) === 0 ? s : s / t.at(e));
+  }
+  max() {
+    if (this.rows === 0)
+      throw new Error("Cannot get the maximum value of an empty vector!");
+    return Math.max(...this.values);
+  }
+  min() {
+    if (this.rows === 0)
+      throw new Error("Cannot get the minimum value of an empty vector!");
+    return Math.min(...this.values);
+  }
+  round() {
+    if (this.rows === 0)
+      throw new Error("Cannot round an empty vector!");
+    return this.operateOnAllValues((t) => Math.round(t));
+  }
+  scale(t) {
+    return this.operateOnAllValues((s) => s * t);
+  }
+  operateOnAllValues(t) {
+    return new _v(this.values.map(t));
+  }
+  normalize() {
+    const t = this.length();
+    return this.operateOnAllValues((s) => s / t);
+  }
+  dot(t) {
+    return this.values.reduce((s, e, r) => s + e * t.at(r), 0);
+  }
+  cross(t) {
+    if (this.rows < 3 || t.rows < 3)
+      throw new Error("Cross product is possible on 3D vectors only");
+    const s = new Array(3);
+    return s[0] = this.at(1) * t.at(2) - this.at(2) * t.at(1), s[1] = this.at(2) * t.at(0) - this.at(0) * t.at(2), s[2] = this.at(0) * t.at(1) - this.at(1) * t.at(0), new _v(s);
+  }
+  mix(t, s) {
+    return new _v(this.values.map((e, r) => e + s * (t.at(r) - e)));
+  }
+  static get360angle(t, s) {
+    if (t.rows !== 3 || s.rows !== 3)
+      throw new Error("Vectors must be in 3D!. You can add a 1 dimension if it is missing.");
+    return -Math.atan2(
+      s.cross(t).dot(new _v([0, 0, 1]).normalize()),
+      t.dot(s)
+    );
+  }
+  toString() {
+    return `[${this.values.join(", ")}]`;
+  }
+};
 var z = 1e-5;
 var w = class {
   constructor(t) {
@@ -689,6 +809,8 @@ m(f, "identity", new w().setIdentity());
 var AU_km = 1496e5;
 var scalePerKm = 1 / (5 * AU_km);
 var Orbit = class {
+  // v_radial = 0;
+  // v_perpendicular = 0;
   constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, GM_km3_s2_primary, radius_km) {
     this.GM_km3_s2 = 0;
     this.GM_km3_s2_primary = 0;
@@ -711,8 +833,7 @@ var Orbit = class {
     this.radius_km = 0;
     this.positionVector_perifocalFrame = new c(3, 1);
     this.positionVector_inertialFrame = new c(3, 1);
-    this.v_radial = 0;
-    this.v_perpendicular = 0;
+    this.velocity = new v();
     this.semiMajorAxis_km = a_km;
     if (e !== void 0)
       this.eccentricity = e;
@@ -844,8 +965,12 @@ var Orbit = class {
     ]);
     this.positionVector_inertialFrame = Q.multiply(this.positionVector_perifocalFrame);
     let angular_momentum = (semiLatusRectum * this.GM_km3_s2_primary) ** 0.5;
-    this.v_radial = this.GM_km3_s2_primary / angular_momentum * this.eccentricity * Math.sin(this.trueAnomaly_rad);
-    this.v_perpendicular = angular_momentum / (this.positionVector_inertialFrame.values[0][0] ** 2 + this.positionVector_inertialFrame.values[0][1] ** 2 + this.positionVector_inertialFrame.values[0][2] ** 2) ** 0.5;
+    let velocity_matrix = Q.multiply(new c(3, 1, [[-Math.sin(this.trueAnomaly_rad)], [this.eccentricity + Math.cos(this.trueAnomaly_rad)], [0]]));
+    this.velocity = new v();
+    for (let i = 0; i < velocity_matrix.rows; i++) {
+      this.velocity.addAValue();
+      this.velocity[i] = -(velocity_matrix.values[i][0] * this.GM_km3_s2_primary) / angular_momentum;
+    }
   }
   updatePosition(t_ms) {
     this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
@@ -1151,13 +1276,9 @@ function takeObject(idx) {
   dropObject(idx);
   return ret;
 }
-function get_acc_orbit(a, r_x, r_y, r_z, v, t, dt) {
-  const ret = wasm.get_acc_orbit(a, r_x, r_y, r_z, v, t, dt);
+function get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations) {
+  const ret = wasm.get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations);
   return takeObject(ret);
-}
-function add(left, right) {
-  const ret = wasm.add(left, right);
-  return ret >>> 0;
 }
 async function __wbg_load(module, imports) {
   if (typeof Response === "function" && module instanceof Response) {
@@ -1264,31 +1385,41 @@ function generate() {
 }
 function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
-    console.log(add(4, 3));
   });
 }
 function accelerationTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
     let end = get_acc_orbit(
-      10,
+      0,
+      0,
+      0,
       bodyStart.positionVector_inertialFrame.values[0][0],
       bodyStart.positionVector_inertialFrame.values[1][0],
       bodyStart.positionVector_inertialFrame.values[2][0],
-      bodyStart.v_radial,
-      100,
-      1
+      bodyStart.velocity[0],
+      bodyStart.velocity[1],
+      bodyStart.velocity[2],
+      // 50,
+      // 8.1,
+      // 0,
+      1e3,
+      500,
+      500
     );
     let scale = canvasUnit / (5 * 1496e5);
     ctx.strokeStyle = "red";
-    ctx.lineWidth = 5 / currentScale;
+    ctx.lineWidth = 1 / currentScale;
     ctx.beginPath();
     ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
-    ctx.lineTo(end[0] * scale, end[1] * scale);
+    for (let i = 0; i < 100; i++) {
+      ctx.lineTo(end[3 * i + 0] * scale, end[3 * i + 1] * scale);
+    }
     ctx.stroke();
+    console.log("Start: " + bodyStart.positionVector_inertialFrame.values[0][0] + ", " + bodyStart.positionVector_inertialFrame.values[1][0]);
+    console.log(bodyStart.velocity);
     console.log(
-      "Line width: " + 5 / currentScale + ", start: " + bodyStart.positionVector_inertialFrame.values[0][0] * scale + ", " + bodyStart.positionVector_inertialFrame.values[1][0] * scale
+      "Initial velocity of x:" + bodyStart.velocity[0] + " km/s, y:" + bodyStart.velocity[1] + " km/s, z:" + bodyStart.velocity[2] + " km/s, overall speed of " + (bodyStart.velocity[0] ** 2 + bodyStart.velocity[1] ** 2 + bodyStart.velocity[2] ** 2) ** 0.5 + " km/s	"
     );
-    console.log("Start at " + bodyStart.positionVector_inertialFrame.values[1][0] + ", end at " + end);
   });
 }
 function drawSun(context, displayUnit, reset, currentScale) {

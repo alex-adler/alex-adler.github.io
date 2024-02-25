@@ -71,7 +71,7 @@ impl ConstAccOrbit {
         let k5 = self.differentiate(s + k1 * (19372.0 / 6561.0) - k2 * ( 25360.0 / 2187.0) + k3 * (64448.0 / 6561.0) - k4 * (212.0 / 729.0)) * self.dt;
         let k6 = self.differentiate(s + k1 * (9017.0 / 3168.0) - k2 * ( 355.0 / 33.0) + k3 * (46732.0 / 5247.0) + k4 * (49.0 / 176.0) - k5 * (5103.0 / 18656.0)) * self.dt;
         //T k7=dT*differentiate(s+35.0/384*k1+500.0/1113*k3+125.0/192*k4-2187.0/6784*k5+11.0/84*k6);
-        return s + (k1 * (35.0 / 384.0) + k3 * (500.0 / 1113.0) + k4 * (125.0 / 192.0) - k5 * (2187.0 / 6784.0) + k6 * (11.0 / 84.0));
+        s + (k1 * (35.0 / 384.0) + k3 * (500.0 / 1113.0) + k4 * (125.0 / 192.0) - k5 * (2187.0 / 6784.0) + k6 * (11.0 / 84.0))
     }
 
     fn propagate(&self) -> State {
@@ -84,24 +84,39 @@ impl ConstAccOrbit {
 }
 
 #[wasm_bindgen]
-pub fn get_acc_orbit(a: f64, r_x: f64, r_y: f64, r_z: f64, v: f64, t: u32, dt: f64) -> Array {
-    let orbit = ConstAccOrbit {
-        a: Vector3::new(a, 0.0, 0.0),
-        μ: 1.32712440018e20,
-        x_0: State {
-            x: Vector3::new(r_x, r_y, r_z),
-            x_dot: Vector3::new(0.0, v, 0.0),
-        },
-        iterations: t / (dt as u32),
-        dt,
+pub fn get_acc_orbit(
+    a_x: f64,
+    a_y: f64,
+    a_z: f64,
+    r_x: f64,
+    r_y: f64,
+    r_z: f64,
+    v_x: f64,
+    v_y: f64,
+    v_z: f64,
+    dt: f64,
+    rk4_iterations: u32,
+    macro_iterations: u32,
+) -> Array {
+    let ret = Array::new_with_length(3 * macro_iterations);
+    let mut result = State {
+        x: Vector3::new(r_x, r_y, r_z),
+        x_dot: Vector3::new(v_x, v_y, v_z),
     };
+    for i in 0..macro_iterations {
+        let orbit = ConstAccOrbit {
+            a: Vector3::new(a_x, a_y, a_z),
+            μ: 1.32712440018e11,
+            x_0: result,
+            iterations: rk4_iterations,
+            dt,
+        };
+        result = orbit.propagate();
+        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
+        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
+        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
+    }
 
-    let result = orbit.propagate();
-
-    let ret = Array::new_with_length(3);
-    ret.set(0, JsValue::from_f64(result.x.x));
-    ret.set(1, JsValue::from_f64(result.x.y));
-    ret.set(2, JsValue::from_f64(result.x.z));
     ret
 }
 

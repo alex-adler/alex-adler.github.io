@@ -47,17 +47,22 @@ function takeObject(idx) {
     return ret;
 }
 /**
-* @param {number} a
+* @param {number} a_x
+* @param {number} a_y
+* @param {number} a_z
 * @param {number} r_x
 * @param {number} r_y
 * @param {number} r_z
-* @param {number} v
-* @param {number} t
+* @param {number} v_x
+* @param {number} v_y
+* @param {number} v_z
 * @param {number} dt
+* @param {number} rk4_iterations
+* @param {number} macro_iterations
 * @returns {Array<any>}
 */
-export function get_acc_orbit(a, r_x, r_y, r_z, v, t, dt) {
-    const ret = wasm.get_acc_orbit(a, r_x, r_y, r_z, v, t, dt);
+export function get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations) {
+    const ret = wasm.get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations);
     return takeObject(ret);
 }
 

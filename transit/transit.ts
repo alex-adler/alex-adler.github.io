@@ -84,7 +84,7 @@ function impulseTransfer(
 ): void {
 	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
-		console.log(add(4, 3));
+		// console.log(add(4, 3));
 	});
 }
 
@@ -100,34 +100,48 @@ function accelerationTransfer(
 	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
 		let end = get_acc_orbit(
-			10,
+			0,
+			0,
+			0,
 			bodyStart.positionVector_inertialFrame.values[0][0],
 			bodyStart.positionVector_inertialFrame.values[1][0],
 			bodyStart.positionVector_inertialFrame.values[2][0],
-			bodyStart.v_radial,
-			100,
-			1
+			bodyStart.velocity[0],
+			bodyStart.velocity[1],
+			bodyStart.velocity[2],
+			// 50,
+			// 8.1,
+			// 0,
+			1000,
+			500,
+			500
 		);
 
 		let scale = canvasUnit / (5 * 1.496e8);
 
 		ctx.strokeStyle = "red";
-		ctx.lineWidth = 5 / currentScale;
+		ctx.lineWidth = 1 / currentScale;
 		ctx.beginPath();
 		ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
-		ctx.lineTo(end[0] * scale, end[1] * scale);
+		for (let i = 0; i < 100; i++) {
+			ctx.lineTo(end[3 * i + 0] * scale, end[3 * i + 1] * scale);
+		}
 		ctx.stroke();
 
-		console.log(
-			"Line width: " +
-				5 / currentScale +
-				", start: " +
-				bodyStart.positionVector_inertialFrame.values[0][0] * scale +
-				", " +
-				bodyStart.positionVector_inertialFrame.values[1][0] * scale
-		);
+		console.log("Start: " + bodyStart.positionVector_inertialFrame.values[0][0] + ", " + bodyStart.positionVector_inertialFrame.values[1][0]);
 
-		console.log("Start at " + bodyStart.positionVector_inertialFrame.values[1][0] + ", end at " + end);
+		console.log(bodyStart.velocity);
+		console.log(
+			"Initial velocity of x:" +
+				bodyStart.velocity[0] +
+				" km/s, y:" +
+				bodyStart.velocity[1] +
+				" km/s, z:" +
+				bodyStart.velocity[2] +
+				" km/s, overall speed of " +
+				(bodyStart.velocity[0] ** 2 + bodyStart.velocity[1] ** 2 + bodyStart.velocity[2] ** 2) ** 0.5 +
+				" km/s	"
+		);
 	});
 }
 
