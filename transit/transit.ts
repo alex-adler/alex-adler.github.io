@@ -99,9 +99,13 @@ function accelerationTransfer(
 ): void {
 	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
+		let iterations = 40;
 		let end = get_acc_orbit(
-			0,
-			0,
+			// 1e-5,
+			-2e-5,
+			// 0,
+			5e-6,
+			// 0,
 			0,
 			bodyStart.positionVector_inertialFrame.values[0][0],
 			bodyStart.positionVector_inertialFrame.values[1][0],
@@ -109,12 +113,9 @@ function accelerationTransfer(
 			bodyStart.velocity[0],
 			bodyStart.velocity[1],
 			bodyStart.velocity[2],
-			// 50,
-			// 8.1,
-			// 0,
 			1000,
-			500,
-			500
+			60,
+			iterations
 		);
 
 		let scale = canvasUnit / (5 * 1.496e8);
@@ -123,7 +124,7 @@ function accelerationTransfer(
 		ctx.lineWidth = 1 / currentScale;
 		ctx.beginPath();
 		ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
-		for (let i = 0; i < 100; i++) {
+		for (let i = 0; i < iterations * 10; i++) {
 			ctx.lineTo(end[3 * i + 0] * scale, end[3 * i + 1] * scale);
 		}
 		ctx.stroke();

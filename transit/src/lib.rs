@@ -116,6 +116,32 @@ pub fn get_acc_orbit(
         ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
         ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
     }
+    for i in macro_iterations..macro_iterations * 2 {
+        let orbit = ConstAccOrbit {
+            a: Vector3::new(-a_x, -a_y, -a_z),
+            μ: 1.32712440018e11,
+            x_0: result,
+            iterations: rk4_iterations,
+            dt,
+        };
+        result = orbit.propagate();
+        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
+        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
+        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
+    }
+    for i in macro_iterations * 2..macro_iterations * 10 {
+        let orbit = ConstAccOrbit {
+            a: Vector3::new(0.0, 0.0, 0.0),
+            μ: 1.32712440018e11,
+            x_0: result,
+            iterations: rk4_iterations,
+            dt,
+        };
+        result = orbit.propagate();
+        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
+        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
+        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
+    }
 
     ret
 }
