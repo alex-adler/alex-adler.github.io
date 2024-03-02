@@ -1234,17 +1234,6 @@ var InfiniteCanvas = class {
 
 // transit/transit_rs.js
 var wasm;
-var heap = new Array(128).fill(void 0);
-heap.push(void 0, null, true, false);
-var heap_next = heap.length;
-function addHeapObject(obj) {
-  if (heap_next === heap.length)
-    heap.push(heap.length + 1);
-  const idx = heap_next;
-  heap_next = heap[idx];
-  heap[idx] = obj;
-  return idx;
-}
 var cachedTextDecoder = typeof TextDecoder !== "undefined" ? new TextDecoder("utf-8", { ignoreBOM: true, fatal: true }) : { decode: () => {
   throw Error("TextDecoder not available");
 } };
@@ -1262,6 +1251,17 @@ function getStringFromWasm0(ptr, len) {
   ptr = ptr >>> 0;
   return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
+var heap = new Array(128).fill(void 0);
+heap.push(void 0, null, true, false);
+var heap_next = heap.length;
+function addHeapObject(obj) {
+  if (heap_next === heap.length)
+    heap.push(heap.length + 1);
+  const idx = heap_next;
+  heap_next = heap[idx];
+  heap[idx] = obj;
+  return idx;
+}
 function getObject(idx) {
   return heap[idx];
 }
@@ -1276,8 +1276,38 @@ function takeObject(idx) {
   dropObject(idx);
   return ret;
 }
-function get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations) {
-  const ret = wasm.get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations);
+var cachedFloat64Memory0 = null;
+function getFloat64Memory0() {
+  if (cachedFloat64Memory0 === null || cachedFloat64Memory0.byteLength === 0) {
+    cachedFloat64Memory0 = new Float64Array(wasm.memory.buffer);
+  }
+  return cachedFloat64Memory0;
+}
+var WASM_VECTOR_LEN = 0;
+function passArrayF64ToWasm0(arg, malloc) {
+  const ptr = malloc(arg.length * 8, 8) >>> 0;
+  getFloat64Memory0().set(arg, ptr / 8);
+  WASM_VECTOR_LEN = arg.length;
+  return ptr;
+}
+function get_acc_orbit(acceleration, mercury_data, venus_data, earth_data, mars_data, jupiter_data, saturn_data, uranus_data, neptune_data, current_time_s, start_body_index, end_body_index, dt, rk4_iterations) {
+  const ptr0 = passArrayF64ToWasm0(mercury_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passArrayF64ToWasm0(venus_data, wasm.__wbindgen_malloc);
+  const len1 = WASM_VECTOR_LEN;
+  const ptr2 = passArrayF64ToWasm0(earth_data, wasm.__wbindgen_malloc);
+  const len2 = WASM_VECTOR_LEN;
+  const ptr3 = passArrayF64ToWasm0(mars_data, wasm.__wbindgen_malloc);
+  const len3 = WASM_VECTOR_LEN;
+  const ptr4 = passArrayF64ToWasm0(jupiter_data, wasm.__wbindgen_malloc);
+  const len4 = WASM_VECTOR_LEN;
+  const ptr5 = passArrayF64ToWasm0(saturn_data, wasm.__wbindgen_malloc);
+  const len5 = WASM_VECTOR_LEN;
+  const ptr6 = passArrayF64ToWasm0(uranus_data, wasm.__wbindgen_malloc);
+  const len6 = WASM_VECTOR_LEN;
+  const ptr7 = passArrayF64ToWasm0(neptune_data, wasm.__wbindgen_malloc);
+  const len7 = WASM_VECTOR_LEN;
+  const ret = wasm.get_acc_orbit(acceleration, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, current_time_s, start_body_index, end_body_index, dt, rk4_iterations);
   return takeObject(ret);
 }
 async function __wbg_load(module, imports) {
@@ -1307,16 +1337,27 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
   const imports = {};
   imports.wbg = {};
+  imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return addHeapObject(ret);
+  };
+  imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+    takeObject(arg0);
+  };
   imports.wbg.__wbindgen_number_new = function(arg0) {
     const ret = arg0;
     return addHeapObject(ret);
   };
-  imports.wbg.__wbg_newwithlength_a20dc3b27e1cb1b2 = function(arg0) {
-    const ret = new Array(arg0 >>> 0);
+  imports.wbg.__wbg_log_79d3c56888567995 = function(arg0) {
+    console.log(getObject(arg0));
+  };
+  imports.wbg.__wbg_new_75208e29bddfd88c = function() {
+    const ret = new Array();
     return addHeapObject(ret);
   };
-  imports.wbg.__wbg_set_79c308ecd9a1d091 = function(arg0, arg1, arg2) {
-    getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
+  imports.wbg.__wbg_push_0239ee92f127e807 = function(arg0, arg1) {
+    const ret = getObject(arg0).push(getObject(arg1));
+    return ret;
   };
   imports.wbg.__wbindgen_throw = function(arg0, arg1) {
     throw new Error(getStringFromWasm0(arg0, arg1));
@@ -1328,6 +1369,7 @@ function __wbg_init_memory(imports, maybe_memory) {
 function __wbg_finalize_init(instance, module) {
   wasm = instance.exports;
   __wbg_init.__wbindgen_wasm_module = module;
+  cachedFloat64Memory0 = null;
   cachedUint8Memory0 = null;
   return wasm;
 }
@@ -1354,6 +1396,7 @@ function generate() {
   let dropDown = document.getElementById("location-drop-down");
   let canvas = document.getElementById("orbital-canvas");
   let orbits = {};
+  let rust_array = [];
   for (const key in space_time) {
     let opt = document.createElement("option");
     let body = space_time[key];
@@ -1380,47 +1423,63 @@ function generate() {
     let o = orbits[i];
     infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
   }
-  infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
-  infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
+  let consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+  consideredBodies.forEach((b) => {
+    let elements = new Float64Array(7);
+    elements[0] = space_time[b].semiMajorAxis_0_km;
+    elements[1] = space_time[b].eccentricity_0;
+    elements[2] = space_time[b].inclination_0_deg * Math.PI / 180;
+    elements[3] = space_time[b].argumentOfPeriapsis_0_deg * Math.PI / 180;
+    elements[4] = space_time[b].longitudOfAscendingNode_0_deg * Math.PI / 180;
+    elements[5] = space_time[b].trueAnomaly_0_deg * Math.PI / 180;
+    elements[6] = space_time[b].GM_km3_s2;
+    rust_array.push(elements);
+  });
+  infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Mercury"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
+  infiniteCanvas.addDrawFunction(
+    accelerationTransfer.bind(this, rust_array, (Date.now() - 9466848e5) / 1e3, consideredBodies.indexOf("Earth"), consideredBodies.indexOf("Mars")),
+    checkIfCanvasNeedsUpdating
+  );
 }
 function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
+    let a = new Float64Array(10);
+    for (let index = 0; index < a.length; index++) {
+      a[index] = index;
+    }
   });
 }
-function accelerationTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
+function accelerationTransfer(orbitalData, currentTime, startBody, endBody, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
-    let iterations = 40;
-    let end = get_acc_orbit(
-      // 1e-5,
-      -2e-5,
-      // 0,
-      5e-6,
-      // 0,
-      0,
-      bodyStart.positionVector_inertialFrame.values[0][0],
-      bodyStart.positionVector_inertialFrame.values[1][0],
-      bodyStart.positionVector_inertialFrame.values[2][0],
-      bodyStart.velocity[0],
-      bodyStart.velocity[1],
-      bodyStart.velocity[2],
-      1e3,
-      60,
-      iterations
+    let a = 1e-3;
+    let dt = 10;
+    let iterations_small = 100;
+    let trajectory = get_acc_orbit(
+      a,
+      orbitalData[0],
+      orbitalData[1],
+      orbitalData[2],
+      orbitalData[3],
+      orbitalData[4],
+      orbitalData[5],
+      orbitalData[6],
+      orbitalData[7],
+      currentTime,
+      startBody,
+      endBody,
+      dt,
+      iterations_small
     );
     let scale = canvasUnit / (5 * 1496e5);
+    console.log(trajectory.length / 3 + " points");
     ctx.strokeStyle = "red";
     ctx.lineWidth = 1 / currentScale;
     ctx.beginPath();
-    ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
-    for (let i = 0; i < iterations * 10; i++) {
-      ctx.lineTo(end[3 * i + 0] * scale, end[3 * i + 1] * scale);
+    ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
+    for (let i = 1; i < trajectory.length / 3; i++) {
+      ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
     }
     ctx.stroke();
-    console.log("Start: " + bodyStart.positionVector_inertialFrame.values[0][0] + ", " + bodyStart.positionVector_inertialFrame.values[1][0]);
-    console.log(bodyStart.velocity);
-    console.log(
-      "Initial velocity of x:" + bodyStart.velocity[0] + " km/s, y:" + bodyStart.velocity[1] + " km/s, z:" + bodyStart.velocity[2] + " km/s, overall speed of " + (bodyStart.velocity[0] ** 2 + bodyStart.velocity[1] ** 2 + bodyStart.velocity[2] ** 2) ** 0.5 + " km/s	"
-    );
   });
 }
 function drawSun(context, displayUnit, reset, currentScale) {

@@ -1,10 +1,19 @@
 use js_sys::Array;
 use std::ops::{Add, Mul, Sub};
 
-use nalgebra::{SVector, Vector3};
 use wasm_bindgen::prelude::*;
-// type M = SMatrix<f64, 3, 3>;
-type V = SVector<f64, 3>;
+
+mod body;
+use body::{Body, V};
+
+extern crate web_sys;
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
 
 fn acceleration(a: V, μ: f64, r: V) -> V {
     a - μ * r / r.magnitude().powi(3)
@@ -70,7 +79,6 @@ impl ConstAccOrbit {
         let k4 = self.differentiate(s + k1 * (44.0 / 45.0) - k2 * ( 56.0 / 15.0) + k3 * (32.0 / 9.0)) * self.dt;
         let k5 = self.differentiate(s + k1 * (19372.0 / 6561.0) - k2 * ( 25360.0 / 2187.0) + k3 * (64448.0 / 6561.0) - k4 * (212.0 / 729.0)) * self.dt;
         let k6 = self.differentiate(s + k1 * (9017.0 / 3168.0) - k2 * ( 355.0 / 33.0) + k3 * (46732.0 / 5247.0) + k4 * (49.0 / 176.0) - k5 * (5103.0 / 18656.0)) * self.dt;
-        //T k7=dT*differentiate(s+35.0/384*k1+500.0/1113*k3+125.0/192*k4-2187.0/6784*k5+11.0/84*k6);
         s + (k1 * (35.0 / 384.0) + k3 * (500.0 / 1113.0) + k4 * (125.0 / 192.0) - k5 * (2187.0 / 6784.0) + k6 * (11.0 / 84.0))
     }
 
@@ -85,79 +93,155 @@ impl ConstAccOrbit {
 
 #[wasm_bindgen]
 pub fn get_acc_orbit(
-    a_x: f64,
-    a_y: f64,
-    a_z: f64,
-    r_x: f64,
-    r_y: f64,
-    r_z: f64,
-    v_x: f64,
-    v_y: f64,
-    v_z: f64,
-    dt: f64,
+    acceleration: f64,
+    mercury_data: &[f64],
+    venus_data: &[f64],
+    earth_data: &[f64],
+    mars_data: &[f64],
+    jupiter_data: &[f64],
+    saturn_data: &[f64],
+    uranus_data: &[f64],
+    neptune_data: &[f64],
+    current_time_s: u32,
+    start_body_index: usize,
+    end_body_index: usize,
+    dt: u32,
     rk4_iterations: u32,
-    macro_iterations: u32,
 ) -> Array {
-    let ret = Array::new_with_length(3 * macro_iterations);
+    let mut bodies: [Body; 8] = [Body::new(); 8];
+    bodies[0].populate(mercury_data);
+    bodies[1].populate(venus_data);
+    bodies[2].populate(earth_data);
+    bodies[3].populate(mars_data);
+    bodies[4].populate(jupiter_data);
+    bodies[5].populate(saturn_data);
+    bodies[6].populate(uranus_data);
+    bodies[7].populate(neptune_data);
+
+    // Update all of the planetary positions and velocities to the current time
+    bodies.iter_mut().for_each(|b| b.propagate(current_time_s));
+
+    let mut trajectory: Vec<f64> = Vec::new();
+    trajectory.reserve(1000);
     let mut result = State {
-        x: Vector3::new(r_x, r_y, r_z),
-        x_dot: Vector3::new(v_x, v_y, v_z),
+        x: bodies[start_body_index].x,
+        x_dot: bodies[start_body_index].v,
     };
-    for i in 0..macro_iterations {
+
+    let max_loops = 1000;
+    let mut final_step: u32 = 0;
+
+    // Acceleration phase
+    for i in 0..max_loops {
+        let a: V;
+        if (bodies[end_body_index].x - result.x).norm() == 0.0 {
+            a = V::zeros();
+        } else {
+            a = (bodies[end_body_index].x - result.x).normalize() * acceleration;
+        }
         let orbit = ConstAccOrbit {
-            a: Vector3::new(a_x, a_y, a_z),
+            // Acceleration direction is vector to the location of the end body
+            a,
             μ: 1.32712440018e11,
             x_0: result,
             iterations: rk4_iterations,
-            dt,
+            dt: dt as f64,
         };
         result = orbit.propagate();
-        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
-        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
-        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
-    }
-    for i in macro_iterations..macro_iterations * 2 {
-        let orbit = ConstAccOrbit {
-            a: Vector3::new(-a_x, -a_y, -a_z),
-            μ: 1.32712440018e11,
-            x_0: result,
-            iterations: rk4_iterations,
-            dt,
-        };
-        result = orbit.propagate();
-        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
-        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
-        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
-    }
-    for i in macro_iterations * 2..macro_iterations * 10 {
-        let orbit = ConstAccOrbit {
-            a: Vector3::new(0.0, 0.0, 0.0),
-            μ: 1.32712440018e11,
-            x_0: result,
-            iterations: rk4_iterations,
-            dt,
-        };
-        result = orbit.propagate();
-        ret.set(3 * i + 0, JsValue::from_f64(result.x.x));
-        ret.set(3 * i + 1, JsValue::from_f64(result.x.y));
-        ret.set(3 * i + 2, JsValue::from_f64(result.x.z));
+        trajectory.push(result.x.x);
+        trajectory.push(result.x.y);
+        trajectory.push(result.x.z);
+        bodies.iter_mut().for_each(|b| b.propagate(dt));
+        final_step = i;
+        // Check if we are halfway and should perform the flip
+        if (bodies[end_body_index].x - result.x).norm_squared()
+            < (bodies[start_body_index].x - result.x).norm_squared()
+        {
+            break;
+        }
     }
 
-    ret
+    if final_step == max_loops {
+        log!(
+            "Failed to find halfway point between bodies {} and {}",
+            start_body_index,
+            end_body_index
+        );
+    }
+
+    // Deceleration phase
+    for i in final_step..(final_step + max_loops) {
+        let a;
+        // Deal with if the velocities are very close (or identical) by assuming we match speeds
+        if (bodies[end_body_index].v - result.x_dot).norm() < 1.0 {
+            result.x_dot = bodies[end_body_index].v;
+            break;
+        }
+
+        a = (bodies[end_body_index].v - result.x_dot).normalize() * acceleration;
+
+        let orbit = ConstAccOrbit {
+            // Acceleration is the vector required to align velocity vectors
+            a,
+            μ: 1.32712440018e11,
+            x_0: result,
+            iterations: rk4_iterations,
+            dt: dt as f64,
+        };
+        result = orbit.propagate();
+        // bodies.iter_mut().for_each(|b| b.propagate(dt));
+        trajectory.push(result.x.x);
+        trajectory.push(result.x.y);
+        trajectory.push(result.x.z);
+        final_step = i;
+    }
+
+    if final_step == max_loops {
+        log!("Failed to match velocity with body {}", end_body_index);
+    }
+
+    let duration: u32 = final_step * dt * rk4_iterations;
+    log!(
+        "Transit took {:.2} days and cost {:.2} km/s ΔV",
+        duration as f64 / 86400.0,
+        acceleration * duration as f64
+    );
+
+    // Final orbit
+    // for _ in final_step..(final_step + max_loops) {
+    //     let orbit = ConstAccOrbit {
+    //         // Acceleration is 0 once we've matched speeds
+    //         a: V::zeros(),
+    //         μ: 1.32712440018e11,
+    //         x_0: result,
+    //         iterations: rk4_iterations,
+    //         dt: dt as f64,
+    //     };
+    //     result = orbit.propagate();
+    //     trajectory.push(result.x.x);
+    //     trajectory.push(result.x.y);
+    //     trajectory.push(result.x.z);
+    // }
+
+    trajectory.into_iter().map(JsValue::from_f64).collect()
 }
 
 #[wasm_bindgen]
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+pub fn add(a: &[f64]) -> f64 {
+    let mut sum = 0.0;
+    for i in 0..a.len() {
+        sum += a[i];
     }
+    sum
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn it_works() {
+//         let result = add(2, 2);
+//         assert_eq!(result, 4);
+//     }
+// }

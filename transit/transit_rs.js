@@ -1,20 +1,5 @@
 let wasm;
 
-const heap = new Array(128).fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-let heap_next = heap.length;
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
 const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
 
 if (typeof TextDecoder !== 'undefined') { cachedTextDecoder.decode(); };
@@ -33,6 +18,21 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
+const heap = new Array(128).fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+let heap_next = heap.length;
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+
 function getObject(idx) { return heap[idx]; }
 
 function dropObject(idx) {
@@ -46,34 +46,71 @@ function takeObject(idx) {
     dropObject(idx);
     return ret;
 }
+
+let cachedFloat64Memory0 = null;
+
+function getFloat64Memory0() {
+    if (cachedFloat64Memory0 === null || cachedFloat64Memory0.byteLength === 0) {
+        cachedFloat64Memory0 = new Float64Array(wasm.memory.buffer);
+    }
+    return cachedFloat64Memory0;
+}
+
+let WASM_VECTOR_LEN = 0;
+
+function passArrayF64ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 8, 8) >>> 0;
+    getFloat64Memory0().set(arg, ptr / 8);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
 /**
-* @param {number} a_x
-* @param {number} a_y
-* @param {number} a_z
-* @param {number} r_x
-* @param {number} r_y
-* @param {number} r_z
-* @param {number} v_x
-* @param {number} v_y
-* @param {number} v_z
+* @param {number} acceleration
+* @param {Float64Array} mercury_data
+* @param {Float64Array} venus_data
+* @param {Float64Array} earth_data
+* @param {Float64Array} mars_data
+* @param {Float64Array} jupiter_data
+* @param {Float64Array} saturn_data
+* @param {Float64Array} uranus_data
+* @param {Float64Array} neptune_data
+* @param {number} current_time_s
+* @param {number} start_body_index
+* @param {number} end_body_index
 * @param {number} dt
 * @param {number} rk4_iterations
-* @param {number} macro_iterations
 * @returns {Array<any>}
 */
-export function get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations) {
-    const ret = wasm.get_acc_orbit(a_x, a_y, a_z, r_x, r_y, r_z, v_x, v_y, v_z, dt, rk4_iterations, macro_iterations);
+export function get_acc_orbit(acceleration, mercury_data, venus_data, earth_data, mars_data, jupiter_data, saturn_data, uranus_data, neptune_data, current_time_s, start_body_index, end_body_index, dt, rk4_iterations) {
+    const ptr0 = passArrayF64ToWasm0(mercury_data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArrayF64ToWasm0(venus_data, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF64ToWasm0(earth_data, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArrayF64ToWasm0(mars_data, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArrayF64ToWasm0(jupiter_data, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArrayF64ToWasm0(saturn_data, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ptr6 = passArrayF64ToWasm0(uranus_data, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ptr7 = passArrayF64ToWasm0(neptune_data, wasm.__wbindgen_malloc);
+    const len7 = WASM_VECTOR_LEN;
+    const ret = wasm.get_acc_orbit(acceleration, ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, current_time_s, start_body_index, end_body_index, dt, rk4_iterations);
     return takeObject(ret);
 }
 
 /**
-* @param {number} left
-* @param {number} right
+* @param {Float64Array} a
 * @returns {number}
 */
-export function add(left, right) {
-    const ret = wasm.add(left, right);
-    return ret >>> 0;
+export function add(a) {
+    const ptr0 = passArrayF64ToWasm0(a, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.add(ptr0, len0);
+    return ret;
 }
 
 async function __wbg_load(module, imports) {
@@ -110,16 +147,27 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
+        const ret = getStringFromWasm0(arg0, arg1);
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
+    };
     imports.wbg.__wbindgen_number_new = function(arg0) {
         const ret = arg0;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_newwithlength_a20dc3b27e1cb1b2 = function(arg0) {
-        const ret = new Array(arg0 >>> 0);
+    imports.wbg.__wbg_log_79d3c56888567995 = function(arg0) {
+        console.log(getObject(arg0));
+    };
+    imports.wbg.__wbg_new_75208e29bddfd88c = function() {
+        const ret = new Array();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_set_79c308ecd9a1d091 = function(arg0, arg1, arg2) {
-        getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
+    imports.wbg.__wbg_push_0239ee92f127e807 = function(arg0, arg1) {
+        const ret = getObject(arg0).push(getObject(arg1));
+        return ret;
     };
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
@@ -135,6 +183,7 @@ function __wbg_init_memory(imports, maybe_memory) {
 function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     __wbg_init.__wbindgen_wasm_module = module;
+    cachedFloat64Memory0 = null;
     cachedUint8Memory0 = null;
 
 

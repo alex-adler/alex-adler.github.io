@@ -18,6 +18,7 @@ function generate() {
 	// for (let i = 0; i < 11; i++) arrivalBoard.setValueNoSpin(i, "02:40 Mars      1/3g PO1342 0" + i.toString(16));
 
 	let orbits: { [name: string]: Orbit } = {};
+	let rust_array: Float64Array[] = [];
 
 	for (const key in body_data.space_time) {
 		let opt = document.createElement("option");
@@ -41,6 +42,7 @@ function generate() {
 		// console.log(body.name);
 		// orbits[key].updatePosition(3.156e10); // One Terran year
 		orbits[key].updatePosition(Date.now() - 946684800000); // ms since J2000
+		// orbits[key].updatePosition(0); // ms since J2000
 	}
 
 	const infiniteCanvas = new InfiniteCanvas(canvas);
@@ -52,8 +54,25 @@ function generate() {
 		infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
 	}
 
-	infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
-	infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, orbits["Earth"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
+	let consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+
+	consideredBodies.forEach((b) => {
+		let elements = new Float64Array(7);
+		elements[0] = body_data.space_time[b].semiMajorAxis_0_km;
+		elements[1] = body_data.space_time[b].eccentricity_0;
+		elements[2] = (body_data.space_time[b].inclination_0_deg * Math.PI) / 180;
+		elements[3] = (body_data.space_time[b].argumentOfPeriapsis_0_deg * Math.PI) / 180;
+		elements[4] = (body_data.space_time[b].longitudOfAscendingNode_0_deg * Math.PI) / 180;
+		elements[5] = (body_data.space_time[b].trueAnomaly_0_deg * Math.PI) / 180;
+		elements[6] = body_data.space_time[b].GM_km3_s2;
+		rust_array.push(elements);
+	});
+
+	infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Mercury"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
+	infiniteCanvas.addDrawFunction(
+		accelerationTransfer.bind(this, rust_array, (Date.now() - 946684800000) / 1000, consideredBodies.indexOf("Earth"), consideredBodies.indexOf("Mars")),
+		checkIfCanvasNeedsUpdating
+	);
 
 	// for (const key in body_data.space_time) {
 	// 	if (Object.prototype.hasOwnProperty.call(bodies, key)) {
@@ -84,65 +103,55 @@ function impulseTransfer(
 ): void {
 	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
-		// console.log(add(4, 3));
+		let a = new Float64Array(10);
+		for (let index = 0; index < a.length; index++) {
+			a[index] = index;
+		}
+		// console.log(add(a));
 	});
 }
 
 function accelerationTransfer(
-	bodyStart: Orbit,
-	bodyEnd: Orbit,
-	deltaV_km_s: number,
+	orbitalData: Float64Array[],
+	currentTime: number,
+	startBody: number,
+	endBody: number,
 	ctx: CanvasRenderingContext2D,
 	canvasUnit: number,
 	reset: () => void,
 	currentScale: number
 ): void {
-	// TODO: Implement a solution to Lambert's Problem
 	init().then(() => {
-		let iterations = 40;
-		let end = get_acc_orbit(
-			// 1e-5,
-			-2e-5,
-			// 0,
-			5e-6,
-			// 0,
-			0,
-			bodyStart.positionVector_inertialFrame.values[0][0],
-			bodyStart.positionVector_inertialFrame.values[1][0],
-			bodyStart.positionVector_inertialFrame.values[2][0],
-			bodyStart.velocity[0],
-			bodyStart.velocity[1],
-			bodyStart.velocity[2],
-			1000,
-			60,
-			iterations
+		let a = 1e-3;
+		let dt = 10;
+		let iterations_small = 100;
+		let trajectory = get_acc_orbit(
+			a,
+			orbitalData[0],
+			orbitalData[1],
+			orbitalData[2],
+			orbitalData[3],
+			orbitalData[4],
+			orbitalData[5],
+			orbitalData[6],
+			orbitalData[7],
+			currentTime,
+			startBody,
+			endBody,
+			dt,
+			iterations_small
 		);
 
-		let scale = canvasUnit / (5 * 1.496e8);
-
+		let scale = canvasUnit / (5 * 1.496e8); // divided by 5 AU
+		console.log(trajectory.length / 3 + " points");
 		ctx.strokeStyle = "red";
 		ctx.lineWidth = 1 / currentScale;
 		ctx.beginPath();
-		ctx.moveTo(bodyStart.positionVector_inertialFrame.values[0][0] * scale, bodyStart.positionVector_inertialFrame.values[1][0] * scale);
-		for (let i = 0; i < iterations * 10; i++) {
-			ctx.lineTo(end[3 * i + 0] * scale, end[3 * i + 1] * scale);
+		ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
+		for (let i = 1; i < trajectory.length / 3; i++) {
+			ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
 		}
 		ctx.stroke();
-
-		console.log("Start: " + bodyStart.positionVector_inertialFrame.values[0][0] + ", " + bodyStart.positionVector_inertialFrame.values[1][0]);
-
-		console.log(bodyStart.velocity);
-		console.log(
-			"Initial velocity of x:" +
-				bodyStart.velocity[0] +
-				" km/s, y:" +
-				bodyStart.velocity[1] +
-				" km/s, z:" +
-				bodyStart.velocity[2] +
-				" km/s, overall speed of " +
-				(bodyStart.velocity[0] ** 2 + bodyStart.velocity[1] ** 2 + bodyStart.velocity[2] ** 2) ** 0.5 +
-				" km/s	"
-		);
 	});
 }
 

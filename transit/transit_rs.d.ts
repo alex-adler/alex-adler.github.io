@@ -1,34 +1,36 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {number} a_x
-* @param {number} a_y
-* @param {number} a_z
-* @param {number} r_x
-* @param {number} r_y
-* @param {number} r_z
-* @param {number} v_x
-* @param {number} v_y
-* @param {number} v_z
+* @param {number} acceleration
+* @param {Float64Array} mercury_data
+* @param {Float64Array} venus_data
+* @param {Float64Array} earth_data
+* @param {Float64Array} mars_data
+* @param {Float64Array} jupiter_data
+* @param {Float64Array} saturn_data
+* @param {Float64Array} uranus_data
+* @param {Float64Array} neptune_data
+* @param {number} current_time_s
+* @param {number} start_body_index
+* @param {number} end_body_index
 * @param {number} dt
 * @param {number} rk4_iterations
-* @param {number} macro_iterations
 * @returns {Array<any>}
 */
-export function get_acc_orbit(a_x: number, a_y: number, a_z: number, r_x: number, r_y: number, r_z: number, v_x: number, v_y: number, v_z: number, dt: number, rk4_iterations: number, macro_iterations: number): Array<any>;
+export function get_acc_orbit(acceleration: number, mercury_data: Float64Array, venus_data: Float64Array, earth_data: Float64Array, mars_data: Float64Array, jupiter_data: Float64Array, saturn_data: Float64Array, uranus_data: Float64Array, neptune_data: Float64Array, current_time_s: number, start_body_index: number, end_body_index: number, dt: number, rk4_iterations: number): Array<any>;
 /**
-* @param {number} left
-* @param {number} right
+* @param {Float64Array} a
 * @returns {number}
 */
-export function add(left: number, right: number): number;
+export function add(a: Float64Array): number;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly get_acc_orbit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => number;
+  readonly get_acc_orbit: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number, q: number, r: number, s: number, t: number, u: number, v: number) => number;
   readonly add: (a: number, b: number) => number;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
