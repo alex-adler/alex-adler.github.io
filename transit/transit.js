@@ -1405,6 +1405,9 @@ function generate() {
     opt.value = key;
     opt.innerHTML = body.name;
     dropDown.appendChild(opt);
+    if (body.name === "Earth") {
+      dropDown.value = key;
+    }
     orbits[key] = new Orbit(
       body.semiMajorAxis_0_km,
       body.eccentricity_0,
