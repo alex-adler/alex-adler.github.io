@@ -1391,6 +1391,8 @@ var transit_rs_default = __wbg_init;
 
 // transit/transit.ts
 var AU_km2 = 1496e5;
+var consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+var initialDraw = false;
 function generate() {
   let table = document.getElementById("output-table");
   let dropDown = document.getElementById("location-drop-down");
@@ -1423,7 +1425,6 @@ function generate() {
     let o = orbits[i];
     infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
   }
-  let consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
   consideredBodies.forEach((b) => {
     let elements = new Float64Array(7);
     elements[0] = space_time[b].semiMajorAxis_0_km;
@@ -1436,10 +1437,38 @@ function generate() {
     rust_array.push(elements);
   });
   infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Mercury"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
-  infiniteCanvas.addDrawFunction(
-    accelerationTransfer.bind(this, rust_array, (Date.now() - 9466848e5) / 1e3, consideredBodies.indexOf("Earth"), consideredBodies.indexOf("Mars")),
-    checkIfCanvasNeedsUpdating
-  );
+  const a = 33e-4;
+  console.log("Performing transfer at " + (a * 1e3 / 9.81).toFixed(2) + "g");
+  consideredBodies.forEach((b) => {
+    if (b === "Earth")
+      return;
+    transit_rs_default().then(() => {
+      let dt = 100;
+      let rk4_iterations = 10;
+      let trajectory = get_acc_orbit(
+        a,
+        rust_array[0],
+        rust_array[1],
+        rust_array[2],
+        rust_array[3],
+        rust_array[4],
+        rust_array[5],
+        rust_array[6],
+        rust_array[7],
+        (Date.now() - 9466848e5) / 1e3,
+        consideredBodies.indexOf("Earth"),
+        consideredBodies.indexOf(b),
+        dt,
+        rk4_iterations
+      );
+      let transferDuration = trajectory.length * dt * rk4_iterations;
+      console.log(
+        "Transfer between Earth and " + b + " took " + (transferDuration / 86400).toFixed(2) + " days and cost " + a * transferDuration + " km/s \u0394V"
+      );
+      infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, trajectory), checkIfCanvasNeedsUpdating);
+      initialDraw = false;
+    });
+  });
 }
 function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
@@ -1449,38 +1478,16 @@ function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset
     }
   });
 }
-function accelerationTransfer(orbitalData, currentTime, startBody, endBody, ctx, canvasUnit, reset, currentScale) {
-  transit_rs_default().then(() => {
-    let a = 1e-3;
-    let dt = 10;
-    let iterations_small = 100;
-    let trajectory = get_acc_orbit(
-      a,
-      orbitalData[0],
-      orbitalData[1],
-      orbitalData[2],
-      orbitalData[3],
-      orbitalData[4],
-      orbitalData[5],
-      orbitalData[6],
-      orbitalData[7],
-      currentTime,
-      startBody,
-      endBody,
-      dt,
-      iterations_small
-    );
-    let scale = canvasUnit / (5 * 1496e5);
-    console.log(trajectory.length / 3 + " points");
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 1 / currentScale;
-    ctx.beginPath();
-    ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
-    for (let i = 1; i < trajectory.length / 3; i++) {
-      ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
-    }
-    ctx.stroke();
-  });
+function accelerationTransfer(trajectory, ctx, canvasUnit, reset, currentScale) {
+  let scale = canvasUnit / (5 * 1496e5);
+  ctx.strokeStyle = "Yellow";
+  ctx.lineWidth = 1 / currentScale;
+  ctx.beginPath();
+  ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
+  for (let i = 1; i < trajectory.length / 3; i++) {
+    ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
+  }
+  ctx.stroke();
 }
 function drawSun(context, displayUnit, reset, currentScale) {
   const radius_km = 696e3;
@@ -1491,7 +1498,6 @@ function drawSun(context, displayUnit, reset, currentScale) {
   context.fillStyle = "white";
   context.fill();
 }
-var initialDraw = false;
 function checkIfCanvasNeedsUpdating() {
   if (initialDraw)
     return false;

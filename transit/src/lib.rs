@@ -128,7 +128,7 @@ pub fn get_acc_orbit(
         x_dot: bodies[start_body_index].v,
     };
 
-    let max_loops = 1000;
+    let max_loops = 10000;
     let mut final_step: u32 = 0;
 
     // Acceleration phase
@@ -189,39 +189,16 @@ pub fn get_acc_orbit(
             dt: dt as f64,
         };
         result = orbit.propagate();
-        // bodies.iter_mut().for_each(|b| b.propagate(dt));
         trajectory.push(result.x.x);
         trajectory.push(result.x.y);
         trajectory.push(result.x.z);
+        bodies.iter_mut().for_each(|b| b.propagate(dt));
         final_step = i;
     }
 
     if final_step == max_loops {
         log!("Failed to match velocity with body {}", end_body_index);
     }
-
-    let duration: u32 = final_step * dt * rk4_iterations;
-    log!(
-        "Transit took {:.2} days and cost {:.2} km/s ΔV",
-        duration as f64 / 86400.0,
-        acceleration * duration as f64
-    );
-
-    // Final orbit
-    // for _ in final_step..(final_step + max_loops) {
-    //     let orbit = ConstAccOrbit {
-    //         // Acceleration is 0 once we've matched speeds
-    //         a: V::zeros(),
-    //         μ: 1.32712440018e11,
-    //         x_0: result,
-    //         iterations: rk4_iterations,
-    //         dt: dt as f64,
-    //     };
-    //     result = orbit.propagate();
-    //     trajectory.push(result.x.x);
-    //     trajectory.push(result.x.y);
-    //     trajectory.push(result.x.z);
-    // }
 
     trajectory.into_iter().map(JsValue::from_f64).collect()
 }

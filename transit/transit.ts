@@ -5,6 +5,9 @@ import { InfiniteCanvas } from "./infinite_canvas.ts";
 import init, { get_acc_orbit, add } from "./transit_rs.js";
 
 const AU_km = 1.496e8;
+const consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+
+let initialDraw = false;
 
 function generate() {
 	let table = document.getElementById("output-table") as HTMLTableElement;
@@ -54,8 +57,6 @@ function generate() {
 		infiniteCanvas.addDrawFunction(o.draw.bind(o), checkIfCanvasNeedsUpdating);
 	}
 
-	let consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
-
 	consideredBodies.forEach((b) => {
 		let elements = new Float64Array(7);
 		elements[0] = body_data.space_time[b].semiMajorAxis_0_km;
@@ -69,10 +70,48 @@ function generate() {
 	});
 
 	infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Mercury"], orbits["Mars"], 1000), checkIfCanvasNeedsUpdating);
-	infiniteCanvas.addDrawFunction(
-		accelerationTransfer.bind(this, rust_array, (Date.now() - 946684800000) / 1000, consideredBodies.indexOf("Earth"), consideredBodies.indexOf("Mars")),
-		checkIfCanvasNeedsUpdating
-	);
+
+	const a = 3.3e-3;
+
+	console.log("Performing transfer at " + ((a * 1000) / 9.81).toFixed(2) + "g");
+
+	consideredBodies.forEach((b) => {
+		if (b === "Earth") return;
+		init().then(() => {
+			let dt = 100;
+			let rk4_iterations = 10;
+			let trajectory = get_acc_orbit(
+				a,
+				rust_array[0],
+				rust_array[1],
+				rust_array[2],
+				rust_array[3],
+				rust_array[4],
+				rust_array[5],
+				rust_array[6],
+				rust_array[7],
+				(Date.now() - 946684800000) / 1000,
+				consideredBodies.indexOf("Earth"),
+				consideredBodies.indexOf(b),
+				dt,
+				rk4_iterations
+			);
+			let transferDuration = trajectory.length * dt * rk4_iterations;
+			console.log(
+				"Transfer between " +
+					"Earth" +
+					" and " +
+					b +
+					" took " +
+					(transferDuration / 86400).toFixed(2) +
+					" days and cost " +
+					a * transferDuration +
+					" km/s ΔV"
+			);
+			infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, trajectory), checkIfCanvasNeedsUpdating);
+			initialDraw = false;
+		});
+	});
 
 	// for (const key in body_data.space_time) {
 	// 	if (Object.prototype.hasOwnProperty.call(bodies, key)) {
@@ -111,48 +150,16 @@ function impulseTransfer(
 	});
 }
 
-function accelerationTransfer(
-	orbitalData: Float64Array[],
-	currentTime: number,
-	startBody: number,
-	endBody: number,
-	ctx: CanvasRenderingContext2D,
-	canvasUnit: number,
-	reset: () => void,
-	currentScale: number
-): void {
-	init().then(() => {
-		let a = 1e-3;
-		let dt = 10;
-		let iterations_small = 100;
-		let trajectory = get_acc_orbit(
-			a,
-			orbitalData[0],
-			orbitalData[1],
-			orbitalData[2],
-			orbitalData[3],
-			orbitalData[4],
-			orbitalData[5],
-			orbitalData[6],
-			orbitalData[7],
-			currentTime,
-			startBody,
-			endBody,
-			dt,
-			iterations_small
-		);
-
-		let scale = canvasUnit / (5 * 1.496e8); // divided by 5 AU
-		console.log(trajectory.length / 3 + " points");
-		ctx.strokeStyle = "red";
-		ctx.lineWidth = 1 / currentScale;
-		ctx.beginPath();
-		ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
-		for (let i = 1; i < trajectory.length / 3; i++) {
-			ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
-		}
-		ctx.stroke();
-	});
+function accelerationTransfer(trajectory: number[], ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number): void {
+	let scale = canvasUnit / (5 * 1.496e8); // divided by 5 AU
+	ctx.strokeStyle = "Yellow";
+	ctx.lineWidth = 1 / currentScale;
+	ctx.beginPath();
+	ctx.moveTo(trajectory[0] * scale, trajectory[1] * scale);
+	for (let i = 1; i < trajectory.length / 3; i++) {
+		ctx.lineTo(trajectory[3 * i + 0] * scale, trajectory[3 * i + 1] * scale);
+	}
+	ctx.stroke();
 }
 
 function drawSun(context: CanvasRenderingContext2D, displayUnit: number, reset: () => void, currentScale: number): void {
@@ -172,7 +179,6 @@ function drawSquares(context: CanvasRenderingContext2D, displayUnit: number): vo
 	context.fillRect(0, 0, -displayUnit, -displayUnit);
 }
 
-let initialDraw = false;
 function checkIfCanvasNeedsUpdating(): boolean {
 	if (initialDraw) return false;
 	else {
