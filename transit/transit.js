@@ -1444,7 +1444,7 @@ function generate() {
     if (b === "Earth")
       return;
     transit_rs_default().then(() => {
-      let dt = 100;
+      let dt = 10;
       let rk4_iterations = 10;
       let trajectory = get_acc_orbit(
         a,

@@ -82,7 +82,7 @@ function generate() {
 	consideredBodies.forEach((b) => {
 		if (b === "Earth") return;
 		init().then(() => {
-			let dt = 100;
+			let dt = 10;
 			let rk4_iterations = 10;
 			let trajectory = get_acc_orbit(
 				a,

@@ -132,7 +132,7 @@ pub fn get_acc_orbit(
     trajectory.push(bodies[start_body_index].x.y);
     trajectory.push(bodies[start_body_index].x.z);
 
-    let max_loops = 10000;
+    let max_loops = 50000;
     let mut final_step: u32 = 0;
 
     // Acceleration phase
@@ -172,13 +172,14 @@ pub fn get_acc_orbit(
             end_body_index
         );
     }
-
+    let mut matched_velocity = false;
     // Deceleration phase
-    for i in final_step..(final_step + max_loops) {
+    for _ in final_step..(final_step + max_loops) {
         let a;
         // Deal with if the velocities are very close (or identical) by assuming we match speeds
         if (bodies[end_body_index].v - result.x_dot).norm() < 1.0 {
             result.x_dot = bodies[end_body_index].v;
+            matched_velocity = true;
             break;
         }
 
@@ -197,11 +198,14 @@ pub fn get_acc_orbit(
         trajectory.push(result.x.y);
         trajectory.push(result.x.z);
         bodies.iter_mut().for_each(|b| b.propagate(dt));
-        final_step = i;
     }
 
-    if final_step == max_loops {
-        log!("Failed to match velocity with body {}", end_body_index);
+    if !matched_velocity {
+        log!(
+            "Failed to match velocity with body {}, dV {:.2} km/s",
+            end_body_index,
+            (bodies[end_body_index].v - result.x_dot).norm()
+        );
     }
 
     trajectory.into_iter().map(JsValue::from_f64).collect()
