@@ -4,7 +4,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Mercury",
     GM_km3_s2: 22031.86855,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 2440,
     surface_gravity_ms: 3.7005960343321687,
     semiMajorAxis_0_km: 5790907025241733e-8,
@@ -26,7 +26,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Venus",
     GM_km3_s2: 324858.592,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 6051.893,
     surface_gravity_ms: 8.869760144761234,
     semiMajorAxis_0_km: 1082081565316098e-7,
@@ -63,7 +63,7 @@ var space_time = {
     initialWeekDay: 6,
     initialYearProgress: 0,
     GM_km3_s2: 398600.435436,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 6378.137,
     surface_gravity_ms: 9.798285322749217,
     semiMajorAxis_0_km: 1496534962738141e-7,
@@ -100,7 +100,7 @@ var space_time = {
     initialWeekDay: 0,
     initialYearProgress: 0,
     GM_km3_s2: 42828.375214,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 3396.19,
     surface_gravity_ms: 3.7131940089349422,
     semiMajorAxis_0_km: 2279390120013493e-7,
@@ -137,7 +137,7 @@ var space_time = {
     initialWeekDay: 0,
     initialYearProgress: 0,
     GM_km3_s2: 62.6325,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 469.7,
     surface_gravity_ms: 0.2838955771940551,
     semiMajorAxis_0_km: 4138616544134015e-7,
@@ -159,7 +159,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Jupiter",
     GM_km3_s2: 1266865319e-1,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 71492,
     surface_gravity_ms: 24.786519847888645,
     semiMajorAxis_0_km: 7786731611090481e-7,
@@ -238,7 +238,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Saturn",
     GM_km3_s2: 37931206234e-3,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 60268,
     surface_gravity_ms: 10.442947496734448,
     semiMajorAxis_0_km: 1433364815997285e-6,
@@ -298,7 +298,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Uranus",
     GM_km3_s2: 5793951256e-3,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 25559,
     surface_gravity_ms: 8.8692545868098,
     semiMajorAxis_0_km: 2876758957338404e-6,
@@ -339,7 +339,7 @@ var space_time = {
     generatedTimeZone: false,
     name: "Neptune",
     GM_km3_s2: 683509997e-2,
-    GM_km3_s2_primary: 1327e8,
+    GM_km3_s2_primary: 132712440018,
     radius_km: 24766,
     surface_gravity_ms: 11.14379550029934,
     semiMajorAxis_0_km: 4503002396427352e-6,
@@ -809,9 +809,7 @@ m(f, "identity", new w().setIdentity());
 var AU_km = 1496e5;
 var scalePerKm = 1 / (5 * AU_km);
 var Orbit = class {
-  // v_radial = 0;
-  // v_perpendicular = 0;
-  constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, meanAnomaly_deg, GM_km3_s2, GM_km3_s2_primary, radius_km) {
+  constructor(a_km, e, i_deg, longitudeOfAscendingNode_deg, argumentOfPeriapsis_deg, trueAnomaly_deg, GM_km3_s2, GM_km3_s2_primary, radius_km) {
     this.GM_km3_s2 = 0;
     this.GM_km3_s2_primary = 0;
     this.semiMajorAxis_km = 0;
@@ -822,12 +820,9 @@ var Orbit = class {
     this.longitudeOfAscendingNode_rad = 0;
     this.argumentOfPeriapsis_deg = 0;
     this.argumentOfPeriapsis_rad = 0;
-    this.meanAnomaly_0_deg = 0;
     this.meanAnomaly_0_rad = 0;
     this.semiMinorAxis_km = 0;
-    this.meanAnomaly_deg = 0;
     this.meanAnomaly_rad = 0;
-    this.eccentricAnomaly_deg = 0;
     this.trueAnomaly_rad = 0;
     this.trueAnomaly_deg = 0;
     this.radius_km = 0;
@@ -841,8 +836,7 @@ var Orbit = class {
       this.inclination_deg = i_deg;
     this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
     this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
-    this.meanAnomaly_0_deg = meanAnomaly_deg;
-    this.meanAnomaly_0_rad = degToRad(this.meanAnomaly_0_deg);
+    this.trueAnomaly_rad = degToRad(trueAnomaly_deg);
     this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
     this.GM_km3_s2 = GM_km3_s2;
     this.GM_km3_s2_primary = GM_km3_s2_primary;
@@ -933,11 +927,10 @@ var Orbit = class {
     ctx.restore();
   }
   keplersEquation(E_rad) {
-    return E_rad - this.eccentricity * Math.sin(E_rad) - degToRad(this.meanAnomaly_deg);
+    return E_rad - this.eccentricity * Math.sin(E_rad) - this.meanAnomaly_rad;
   }
   updatePositionVector() {
-    let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
-    this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
+    let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), this.meanAnomaly_rad, null);
     this.trueAnomaly_rad = 2 * Math.atan2(
       (1 + this.eccentricity) ** 0.5 * Math.sin(eccentricAnomaly_rad / 2),
       (1 - this.eccentricity) ** 0.5 * Math.cos(eccentricAnomaly_rad / 2)
@@ -976,8 +969,13 @@ var Orbit = class {
     this.argumentOfPeriapsis_rad = degToRad(this.argumentOfPeriapsis_deg);
     this.inclination_rad = degToRad(this.inclination_deg);
     this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
-    this.meanAnomaly_rad = (this.meanAnomaly_0_rad + t_ms / 1e3 * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5) % (2 * Math.PI);
-    this.meanAnomaly_deg = radToDeg(this.meanAnomaly_rad);
+    let eccentricAnomaly_rad = 2 * Math.atan2(
+      (1 - this.eccentricity) ** 0.5 * Math.sin(this.trueAnomaly_rad / 2),
+      (1 + this.eccentricity) ** 0.5 * Math.cos(this.trueAnomaly_rad / 2)
+    );
+    this.meanAnomaly_rad = eccentricAnomaly_rad - this.eccentricity * Math.sin(eccentricAnomaly_rad);
+    this.meanAnomaly_rad += t_ms / 1e3 * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5;
+    this.meanAnomaly_rad %= 2 * Math.PI;
     this.updatePositionVector();
   }
 };

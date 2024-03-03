@@ -211,39 +211,39 @@ bodies["Neptune"] = new Celestial("Neptune");
 bodies["Triton"] = new Celestial("Triton", 5.876854 * 24, 60182 * 24, 0, 0);
 
 // Data from https://ssd.jpl.nasa.gov/horizons/app.html#/
-bodies["Mercury"].setPhysicalParameters(1.327e11, 22031.86855, 2440);
+bodies["Mercury"].setPhysicalParameters(1.32712440018e11, 22031.86855, 2440);
 bodies["Mercury"].setJ2000OrbitalElements(5.790907025241733e7, 2.056302515978038e-1, 7.005014362233553, 4.833053877672862e1, 2.912427943500334e1);
 bodies["Mercury"].setTrueAnomaly(1.751155302923815e2);
 
-bodies["Venus"].setPhysicalParameters(1.327e11, 324858.592, 6051.893);
+bodies["Venus"].setPhysicalParameters(1.32712440018e11, 324858.592, 6051.893);
 bodies["Venus"].setJ2000OrbitalElements(1.082081565316098e8, 6.755697268576816e-3, 3.394589632757466, 7.66783751109416e1, 5.518541504725159e1);
 bodies["Venus"].setTrueAnomaly(4.990452231912491e1);
 
-bodies["Earth"].setPhysicalParameters(1.327e11, 398600.435436, 6378.137);
+bodies["Earth"].setPhysicalParameters(1.32712440018e11, 398600.435436, 6378.137);
 bodies["Earth"].setJ2000OrbitalElements(1.496534962738141e8, 1.704239718110438e-2, 2.668809336274974e-4, 1.639748712430063e2, 2.977671795415902e2);
 bodies["Earth"].setTrueAnomaly(3.581260865474801e2);
 
-bodies["Mars"].setPhysicalParameters(1.327e11, 42828.375214, 3396.19);
+bodies["Mars"].setPhysicalParameters(1.32712440018e11, 42828.375214, 3396.19);
 bodies["Mars"].setJ2000OrbitalElements(2.279390120013493e8, 9.33146065415545e-2, 1.849876654038142, 4.956199905920329e1, 2.865373583154345e2);
 bodies["Mars"].setTrueAnomaly(2.302024685501411e1);
 
-bodies["Ceres"].setPhysicalParameters(1.327e11, 62.6325, 469.7);
+bodies["Ceres"].setPhysicalParameters(1.32712440018e11, 62.6325, 469.7);
 bodies["Ceres"].setJ2000OrbitalElements(4.138616544134015e8, 7.837505504042046e-2, 1.058336067354914e1, 8.049436497118826e1, 7.392278732202695e1);
 bodies["Ceres"].setTrueAnomaly(7.121193766358798);
 
-bodies["Jupiter"].setPhysicalParameters(1.327e11, 126686531.9, 71492);
+bodies["Jupiter"].setPhysicalParameters(1.32712440018e11, 126686531.9, 71492);
 bodies["Jupiter"].setJ2000OrbitalElements(7.786731611090481e8, 4.892305962953223e-2, 1.304655711046047, 1.004888615724618e2, 2.751197059498091e2);
 bodies["Jupiter"].setTrueAnomaly(2.063463654069944e1);
 
-bodies["Saturn"].setPhysicalParameters(1.327e11, 37931206.234, 60268);
+bodies["Saturn"].setPhysicalParameters(1.32712440018e11, 37931206.234, 60268);
 bodies["Saturn"].setJ2000OrbitalElements(1.433364815997285e9, 5.559928887285597e-2, 2.48436877980734, 1.136930130794106e2, 3.359006492558044e2);
 bodies["Saturn"].setTrueAnomaly(3.160917716241848e2);
 
-bodies["Uranus"].setPhysicalParameters(1.327e11, 5793951.256, 25559);
+bodies["Uranus"].setPhysicalParameters(1.32712440018e11, 5793951.256, 25559);
 bodies["Uranus"].setJ2000OrbitalElements(2.876758957338404e9, 4.439336258840319e-2, 7.723604869115734e-1, 7.396006633963485e1, 9.661122696481169e1);
 bodies["Uranus"].setTrueAnomaly(1.458440420932308e2);
 
-bodies["Neptune"].setPhysicalParameters(1.327e11, 6835099.97, 24766);
+bodies["Neptune"].setPhysicalParameters(1.32712440018e11, 6835099.97, 24766);
 bodies["Neptune"].setJ2000OrbitalElements(4.503002396427352e9, 1.127490587339749e-2, 1.764331194766304, 1.318103417756993e2, 2.66115451343762e2);
 bodies["Neptune"].setTrueAnomaly(2.659963939182547e2);
 

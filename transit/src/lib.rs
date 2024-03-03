@@ -128,6 +128,10 @@ pub fn get_acc_orbit(
         x_dot: bodies[start_body_index].v,
     };
 
+    trajectory.push(bodies[start_body_index].x.x);
+    trajectory.push(bodies[start_body_index].x.y);
+    trajectory.push(bodies[start_body_index].x.z);
+
     let max_loops = 10000;
     let mut final_step: u32 = 0;
 

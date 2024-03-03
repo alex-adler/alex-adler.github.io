@@ -15,14 +15,11 @@ export class Orbit {
 	longitudeOfAscendingNode_rad: number = 0;
 	argumentOfPeriapsis_deg: number = 0;
 	argumentOfPeriapsis_rad: number = 0;
-	meanAnomaly_0_deg: number = 0;
 	meanAnomaly_0_rad: number = 0;
 
 	semiMinorAxis_km: number = 0;
 
-	meanAnomaly_deg: number = 0;
 	meanAnomaly_rad: number = 0;
-	eccentricAnomaly_deg: number = 0;
 	trueAnomaly_rad: number = 0;
 	trueAnomaly_deg: number = 0;
 
@@ -33,15 +30,13 @@ export class Orbit {
 
 	velocity = new Vector();
 
-	// v_radial = 0;
-	// v_perpendicular = 0;
 	constructor(
 		a_km: number,
 		e: number,
 		i_deg: number,
 		longitudeOfAscendingNode_deg: number,
 		argumentOfPeriapsis_deg: number,
-		meanAnomaly_deg: number,
+		trueAnomaly_deg: number,
 		GM_km3_s2: number,
 		GM_km3_s2_primary: number,
 		radius_km: number
@@ -52,8 +47,7 @@ export class Orbit {
 		this.longitudeOfAscendingNode_deg = longitudeOfAscendingNode_deg;
 		this.argumentOfPeriapsis_deg = argumentOfPeriapsis_deg;
 
-		this.meanAnomaly_0_deg = meanAnomaly_deg;
-		this.meanAnomaly_0_rad = degToRad(this.meanAnomaly_0_deg);
+		this.trueAnomaly_rad = degToRad(trueAnomaly_deg);
 
 		this.semiMinorAxis_km = a_km * Math.sqrt(1 - this.eccentricity ** 2);
 
@@ -65,7 +59,6 @@ export class Orbit {
 	}
 	draw(ctx: CanvasRenderingContext2D, canvasUnit: number, reset: () => void, currentScale: number) {
 		if (this.semiMajorAxis_km == undefined) return;
-
 		// The scale (in pixels per km) is the number of pixels displayed on the canvas divided by a number of kilometers
 		let scale = canvasUnit * scalePerKm;
 
@@ -185,11 +178,10 @@ export class Orbit {
 		ctx.restore(); // restore clipping region to default
 	}
 	keplersEquation(E_rad: number): number {
-		return E_rad - this.eccentricity * Math.sin(E_rad) - degToRad(this.meanAnomaly_deg);
+		return E_rad - this.eccentricity * Math.sin(E_rad) - this.meanAnomaly_rad;
 	}
 	updatePositionVector() {
-		let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), degToRad(this.meanAnomaly_deg), null);
-		this.eccentricAnomaly_deg = radToDeg(eccentricAnomaly_rad);
+		let eccentricAnomaly_rad = newtonRaphson(this.keplersEquation.bind(this), this.meanAnomaly_rad, null);
 		this.trueAnomaly_rad =
 			2 *
 			Math.atan2(
@@ -236,7 +228,6 @@ export class Orbit {
 		let velocity_matrix = Q.multiply(new Matrix(3, 1, [[-Math.sin(this.trueAnomaly_rad)], [this.eccentricity + Math.cos(this.trueAnomaly_rad)], [0]]));
 		this.velocity = new Vector();
 		for (let i = 0; i < velocity_matrix.rows; i++) {
-			// this.velocity.values[i][0] *= this.GM_km3_s2_primary / angular_momentum;
 			this.velocity.addAValue();
 			this.velocity[i] = -(velocity_matrix.values[i][0] * this.GM_km3_s2_primary) / angular_momentum;
 		}
@@ -247,8 +238,15 @@ export class Orbit {
 		this.inclination_rad = degToRad(this.inclination_deg);
 		this.longitudeOfAscendingNode_rad = degToRad(this.longitudeOfAscendingNode_deg);
 
-		this.meanAnomaly_rad = (this.meanAnomaly_0_rad + (t_ms / 1000) * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5) % (2 * Math.PI);
-		this.meanAnomaly_deg = radToDeg(this.meanAnomaly_rad);
+		let eccentricAnomaly_rad =
+			2 *
+			Math.atan2(
+				(1 - this.eccentricity) ** 0.5 * Math.sin(this.trueAnomaly_rad / 2),
+				(1 + this.eccentricity) ** 0.5 * Math.cos(this.trueAnomaly_rad / 2)
+			);
+		this.meanAnomaly_rad = eccentricAnomaly_rad - this.eccentricity * Math.sin(eccentricAnomaly_rad);
+		this.meanAnomaly_rad += (t_ms / 1000) * (this.GM_km3_s2_primary / this.semiMajorAxis_km ** 3) ** 0.5;
+		this.meanAnomaly_rad %= 2 * Math.PI;
 
 		this.updatePositionVector();
 	}
