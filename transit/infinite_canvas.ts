@@ -107,7 +107,12 @@ export class InfiniteCanvas {
 		needsUpdating: () => boolean
 	) {
 		this.#drawFunctions.push(drawFunction);
-		this.#needsUpdating.push(needsUpdating);
+		// Return the index of the function in the array
+		return this.#needsUpdating.push(needsUpdating) - 1;
+	}
+	removeDrawFunction(index: number[]) {
+		this.#drawFunctions.splice(index[0], index.length);
+		this.#needsUpdating.splice(index[0], index.length);
 	}
 	#draw(): void {
 		// Check if the viewport needs updating or if any of the elements need to be redrawn

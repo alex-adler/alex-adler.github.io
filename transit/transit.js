@@ -1119,7 +1119,11 @@ var InfiniteCanvas = class {
   #needsUpdating;
   addDrawFunction(drawFunction, needsUpdating) {
     this.#drawFunctions.push(drawFunction);
-    this.#needsUpdating.push(needsUpdating);
+    return this.#needsUpdating.push(needsUpdating) - 1;
+  }
+  removeDrawFunction(index) {
+    this.#drawFunctions.splice(index[0], index.length);
+    this.#needsUpdating.splice(index[0], index.length);
   }
   #draw() {
     if (view.isDirty() || this.#needsUpdating.length && this.#needsUpdating.some((e) => e())) {
@@ -1388,24 +1392,67 @@ async function __wbg_init(input) {
 var transit_rs_default = __wbg_init;
 
 // transit/transit.ts
+var infiniteCanvas;
 var AU_km2 = 1496e5;
 var consideredBodies = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
 var initialDraw = false;
+var transferFunctionIndices = [];
+var rust_array = [];
+function changeLocation() {
+  let dropDown = document.getElementById("location-drop-down");
+  infiniteCanvas.removeDrawFunction(transferFunctionIndices);
+  transferFunctionIndices = [];
+  addAccelerationTransits(dropDown.value);
+}
+function addAccelerationTransits(home) {
+  const a = 33e-4;
+  console.log("Performing transfer at " + (a * 1e3 / 9.81).toFixed(2) + "g");
+  consideredBodies.forEach((b) => {
+    if (b === home)
+      return;
+    transit_rs_default().then(() => {
+      let dt = 10;
+      let rk4_iterations = 10;
+      let trajectory = get_acc_orbit(
+        a,
+        rust_array[0],
+        rust_array[1],
+        rust_array[2],
+        rust_array[3],
+        rust_array[4],
+        rust_array[5],
+        rust_array[6],
+        rust_array[7],
+        (Date.now() - 9466848e5) / 1e3,
+        consideredBodies.indexOf(home),
+        consideredBodies.indexOf(b),
+        dt,
+        rk4_iterations
+      );
+      let transferDuration = trajectory.length * dt * rk4_iterations;
+      console.log(
+        "Transfer between " + home + " and " + b + " takes " + (transferDuration / 86400).toFixed(2) + " days and cost " + a * transferDuration + " km/s \u0394V"
+      );
+      transferFunctionIndices.push(infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, trajectory), checkIfCanvasNeedsUpdating));
+      initialDraw = false;
+    });
+  });
+}
 function generate() {
   let table = document.getElementById("output-table");
   let dropDown = document.getElementById("location-drop-down");
   let canvas = document.getElementById("orbital-canvas");
+  dropDown.onchange = changeLocation;
   let orbits = {};
-  let rust_array = [];
   for (const key in space_time) {
     let opt = document.createElement("option");
     let body = space_time[key];
     opt.value = key;
     opt.innerHTML = body.name;
-    dropDown.appendChild(opt);
-    if (body.name === "Earth") {
+    if (consideredBodies.includes(body.name))
+      dropDown.appendChild(opt);
+    if (body.name === "Earth")
       dropDown.value = key;
-    }
     orbits[key] = new Orbit(
       body.semiMajorAxis_0_km,
       body.eccentricity_0,
@@ -1419,7 +1466,7 @@ function generate() {
     );
     orbits[key].updatePosition(Date.now() - 9466848e5);
   }
-  const infiniteCanvas = new InfiniteCanvas(canvas);
+  infiniteCanvas = new InfiniteCanvas(canvas);
   infiniteCanvas.addDrawFunction(drawSun, checkIfCanvasNeedsUpdating);
   document.addEventListener("contextmenu", (e) => e.preventDefault(), false);
   for (let i in orbits) {
@@ -1438,38 +1485,7 @@ function generate() {
     rust_array.push(elements);
   });
   infiniteCanvas.addDrawFunction(impulseTransfer.bind(this, orbits["Mercury"], orbits["Mars"], 1e3), checkIfCanvasNeedsUpdating);
-  const a = 33e-4;
-  console.log("Performing transfer at " + (a * 1e3 / 9.81).toFixed(2) + "g");
-  consideredBodies.forEach((b) => {
-    if (b === "Earth")
-      return;
-    transit_rs_default().then(() => {
-      let dt = 10;
-      let rk4_iterations = 10;
-      let trajectory = get_acc_orbit(
-        a,
-        rust_array[0],
-        rust_array[1],
-        rust_array[2],
-        rust_array[3],
-        rust_array[4],
-        rust_array[5],
-        rust_array[6],
-        rust_array[7],
-        (Date.now() - 9466848e5) / 1e3,
-        consideredBodies.indexOf("Earth"),
-        consideredBodies.indexOf(b),
-        dt,
-        rk4_iterations
-      );
-      let transferDuration = trajectory.length * dt * rk4_iterations;
-      console.log(
-        "Transfer between Earth and " + b + " took " + (transferDuration / 86400).toFixed(2) + " days and cost " + a * transferDuration + " km/s \u0394V"
-      );
-      infiniteCanvas.addDrawFunction(accelerationTransfer.bind(this, trajectory), checkIfCanvasNeedsUpdating);
-      initialDraw = false;
-    });
-  });
+  changeLocation();
 }
 function impulseTransfer(bodyStart, bodyEnd, deltaV_km_s, ctx, canvasUnit, reset, currentScale) {
   transit_rs_default().then(() => {
