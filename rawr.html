@@ -6,8 +6,15 @@
 
 		<link rel="stylesheet" href="general/nav.css" />
 		<link rel="stylesheet" href="rawr/rawr.css" />
-		<script type="application/javascript" src="general/nav.js"></script>
-		<script type="application/javascript" src="rawr/rawr.js"></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+			integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+			crossorigin="anonymous"
+			defer
+		></script>
+		<script src="general/nav.js"></script>
+		<script src="rawr/rawr.js"></script>
+		<script type="module" src="rawr/webgl-demo.js"></script>
 
 		<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
@@ -122,12 +129,15 @@
 	</nav>
 
 	<main class="main-content">
-		<body onload="rawr()">
+		<body>
+			<!-- <body onload="gl_main()"> -->
+			<!-- <body onload="rawr()"> -->
 			<h1>Raw Reader</h1>
 			<p>Please provide an RAF file</p>
 			<input type="file" id="file-input" />
 			<h3>Contents of the file:</h3>
 			<pre id="raw-header"></pre>
+			<canvas id="gl-canvas" width="640" height="480"></canvas>
 		</body>
 	</main>
 </html>
