@@ -1,3 +1,7 @@
+body {
+	margin: 0;
+}
+
 h1 {
 	text-align: center;
 	margin: 10rem auto;
@@ -9,21 +13,8 @@ p {
 	text-align: center;
 }
 
-table {
-	width: 80vw;
-	margin-top: 10vh;
-	margin-left: auto;
-	margin-right: auto;
-	border-spacing: 0;
-}
-
-th {
-	height: 30px;
-}
-
-td {
-	height: 20px;
-	vertical-align: middle;
-	font-family: "Roboto Mono", monospace;
-	text-align: center;
+canvas {
+	border: 1px solid black;
+	width: 100vw;
+	height: 75vw;
 }
