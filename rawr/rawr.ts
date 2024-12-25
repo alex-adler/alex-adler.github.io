@@ -22,7 +22,7 @@ function display_jpeg(b64: string) {
 	img.src = b64;
 
 	img.onload = function () {
-		console.log("Displaying JPEG of size " + img.width + " x " + img.height + ": " + img.src);
+		console.log("Displaying JPEG of size " + img.width + " x " + img.height);
 		canvas.width = img.width;
 		canvas.height = img.height;
 		console.log("Image Onload");
@@ -76,9 +76,9 @@ function parse(buf: Uint8Array) {
 	let directory_version = buf.slice(pos, (pos += 4));
 	output.innerHTML += "Directory v" + new TextDecoder().decode(directory_version) + " (" + directory_version.toString() + ")\n";
 
-	//     20 bytes “unknown”
+	//     20 bytes “unknown” (Probably padding)
 	let unknown = buf.slice(pos, (pos += 20));
-	output.innerHTML += "Unknown " + unknown.toString() + "\n";
+	// output.innerHTML += "Unknown " + unknown.toString() + "\n";
 
 	//     Jpeg image offset (4 bytes)
 	const jpeg_offset_raw = buf.slice(pos, (pos += 4));
@@ -90,18 +90,22 @@ function parse(buf: Uint8Array) {
 	output.innerHTML += "JPEG length " + jpeg_length + " (" + jpeg_length_raw.toString() + ")\n";
 
 	//     Meta container Offset (4 bytes)
-	const meta_offset = buf.slice(pos, (pos += 4));
-	output.innerHTML += "Meta offset " + new DataView(meta_offset.buffer).getUint32(0) + " (" + meta_offset.toString() + ")\n";
+	const meta_offset_raw = buf.slice(pos, (pos += 4));
+	const meta_offset = new DataView(meta_offset_raw.buffer).getUint32(0);
+	output.innerHTML += "Meta offset " + meta_offset + " (" + meta_offset_raw.toString() + ")\n";
 	//     Meta container Length (4 bytes)
-	const meta_length = buf.slice(pos, (pos += 4));
-	output.innerHTML += "Meta length " + new DataView(meta_length.buffer).getUint32(0) + " (" + meta_length.toString() + ")\n";
+	const meta_length_raw = buf.slice(pos, (pos += 4));
+	const meta_length = new DataView(meta_length_raw.buffer).getUint32(0);
+	output.innerHTML += "Meta length " + meta_length + " (" + meta_length_raw.toString() + ")\n";
 
 	//     CFA Offset (4 bytes)
-	const cfa_offset = buf.slice(pos, (pos += 4));
-	output.innerHTML += "CFA offset " + new DataView(cfa_offset.buffer).getUint32(0) + " (" + cfa_offset.toString() + ")\n";
+	const cfa_offset_raw = buf.slice(pos, (pos += 4));
+	const cfa_offset = new DataView(cfa_offset_raw.buffer).getUint32(0);
+	output.innerHTML += "CFA offset " + cfa_offset + " (" + cfa_offset_raw.toString() + ")\n";
 	//     CFA Length (4 bytes)
-	const cfa_length = buf.slice(pos, (pos += 4));
-	output.innerHTML += "CFA length " + new DataView(cfa_length.buffer).getUint32(0) + " (" + cfa_length.toString() + ")\n";
+	const cfa_length_raw = buf.slice(pos, (pos += 4));
+	const cfa_length = new DataView(cfa_length_raw.buffer).getUint32(0);
+	output.innerHTML += "CFA length " + cfa_length + " (" + cfa_length_raw.toString() + ")\n";
 
 	//     (Jpeg image offset must be greater) 12 bytes unknown.
 	//     (Jpeg image offset must be greater) Some offset (4 bytes)
@@ -119,8 +123,87 @@ function parse(buf: Uint8Array) {
 	//         2 bytes: tag ID
 	//         2 bytes: size of record (N)
 	//         N bytes: data
+	pos = meta_offset;
+	const record_count = new DataView(buf.slice(pos, (pos += 4)).buffer).getUint32(0);
+	console.log("Number of meta records: " + record_count);
+	for (let i = 0; i < record_count; i++) {
+		const tag_id = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0);
+		const record_size = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0);
+		const record_data = buf.slice(pos, (pos += record_size));
+		// console.log("Record with ID: " + tag_id + " of size " + record_size);
+
+		switch (tag_id) {
+			case 0x100:
+				output.innerHTML +=
+					"\tSensor Dimensions: " +
+					new DataView(record_data.slice(0, 2).buffer).getUint16(0) +
+					" x " +
+					new DataView(record_data.slice(2, 4).buffer).getUint16(0) +
+					" (" +
+					record_data.toString() +
+					")\n";
+				break;
+			case 0x110:
+				output.innerHTML += "\tActive area Top Left: " + record_data.toString() + "\n";
+				break;
+			case 0x111:
+				output.innerHTML +=
+					"\tActive area Height Width: " +
+					new DataView(record_data.slice(0, 2).buffer).getUint16(0) +
+					" x " +
+					new DataView(record_data.slice(2, 4).buffer).getUint16(0) +
+					" (" +
+					record_data.toString() +
+					")\n";
+				break;
+			case 0x115:
+				output.innerHTML +=
+					"\tAspect Ratio: " +
+					new DataView(record_data.slice(0, 2).buffer).getUint16(0) +
+					" x " +
+					new DataView(record_data.slice(2, 4).buffer).getUint16(0) +
+					" (" +
+					record_data.toString() +
+					")\n";
+				break;
+			case 0x121:
+				output.innerHTML += "\tRaw Image Size: " + +" (" + record_data.toString() + ")\n";
+				break;
+			case 0x130:
+				// Fuji Layout?
+				output.innerHTML += "\tRaw Info: " + record_data.toString() + "\n";
+				break;
+			case 0x131:
+				// XTransLayout?
+				output.innerHTML += "\tCFA Pattern: " + record_data.toString() + "\n";
+				break;
+			case 0x2f00:
+				// WB_GRGBLevels
+				output.innerHTML += "\tWB_GRGBLevels: " + record_data.toString() + "\n";
+				break;
+			case 0x2ff0:
+				// WB_GRGBLevels?
+				output.innerHTML += "\tCamera Multiplier: " + record_data.toString() + "\n";
+				break;
+			case 0x4000:
+				output.innerHTML += "\tBlack Level: " + record_data.toString() + "\n";
+				break;
+			case 0x9200:
+				output.innerHTML += "\tRelative Exposure: " + record_data.toString() + "\n";
+				break;
+			case 0x9650:
+				output.innerHTML += "\tRaw Exposure Bias: " + record_data.toString() + "\n";
+				break;
+			case 0xc000:
+				console.log("RAF data of size " + record_size + " with data " + record_data);
+				break;
+			default:
+				console.log("Unknown tag: 0x" + tag_id.toString(16) + " of size " + record_size + " with data " + record_data);
+		}
+	}
 
 	// CFA Offset
+	pos = cfa_offset;
 
 	//     TIFF container.
 	//     RAW data. Maybe compressed.
