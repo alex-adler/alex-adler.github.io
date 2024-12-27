@@ -31,22 +31,6 @@ function display_jpeg(b64: string) {
 	img.onerror = function (stuff) {
 		console.log("Img Onerror:", stuff);
 	};
-
-	// const image_data = ctx.createImageData(width, heigh);
-	// const data = image_data.data;
-	// console.log(data);
-	// for (let i = 0; i < data.length; i += 4) {
-	// 	// data[i] = 0;
-	// 	// data[i] = 0xff;
-	// 	// data[i + 1] = 0;
-	// 	// data[i + 1] = 0xff;
-	// 	// data[i + 2] = 0;
-	// 	// data[i + 2] = 120;
-	// 	data[i + 3] = 0xff;
-	// }
-	// data[0] = 0xff;
-	// data[5] = 0xff;
-	// ctx.putImageData(image_data, 0, 0);
 }
 
 function parse(buf: Uint8Array) {
@@ -195,7 +179,8 @@ function parse(buf: Uint8Array) {
 				output.innerHTML += "\tRaw Exposure Bias: " + record_data.toString() + "\n";
 				break;
 			case 0xc000:
-				console.log("RAF data of size " + record_size + " with data " + record_data);
+				console.log("RAF data of size " + record_size);
+				// console.log("RAF data of size " + record_size + " with data " + record_data);
 				break;
 			default:
 				console.log("Unknown tag: 0x" + tag_id.toString(16) + " of size " + record_size + " with data " + record_data);
@@ -207,6 +192,107 @@ function parse(buf: Uint8Array) {
 
 	//     TIFF container.
 	//     RAW data. Maybe compressed.
+	output.innerHTML += "TIFF container";
+	const tiff_byte_order = new TextDecoder().decode(buf.slice(pos, (pos += 2)));
+	let little_endian = false;
+	if (tiff_byte_order === "II") {
+		output.innerHTML += " (little endian):\n";
+		little_endian = true;
+	} else if (tiff_byte_order === "MM") {
+		output.innerHTML += " (big endian):\n";
+		little_endian = false;
+	} else {
+		output.innerHTML += " (unknown endianness " + tiff_byte_order + "):\n";
+	}
+
+	const tiff_format_version = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
+	if (tiff_format_version !== 42) {
+		console.log("TIFF Format Version " + tiff_format_version.toString() + "is unsupported");
+		return;
+	}
+
+	const ifd_offset = new DataView(buf.slice(pos, (pos += 4)).buffer).getUint32(0, little_endian);
+	output.innerHTML += "\tImage File Directory offset " + ifd_offset + "\n";
+
+	if (pos != cfa_offset + ifd_offset) console.log("Warning: Moving pos");
+	pos = cfa_offset + ifd_offset;
+	const ifd_field_count = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
+	output.innerHTML += "\t" + ifd_field_count + " IFDs\n";
+	for (let i = 0; i < 5; i++) {
+		pos = parse_IFD(buf, pos, little_endian, output);
+	}
+
+	// Start of raw image data
+	pos = cfa_offset + 2048;
+
+	let canvas = document.getElementById("raw-canvas") as HTMLCanvasElement;
+	let ctx = canvas.getContext("2d");
+
+	const width = 11808;
+	const height = 8754;
+
+	canvas.width = width;
+	canvas.height = height;
+
+	const image_data = ctx.createImageData(width, height);
+	const data = image_data.data;
+	console.log(data);
+	for (let i = 0; i < data.length / 4; i++) {
+		// Pixel data should be 16 bit but canvas is only 8 bit so we ignore the LSB
+		// let pixel_data = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
+		// let pixel_data = buf[pos];
+		let pixel_data = buf[pos + 1];
+		pos += 2;
+
+		// Apply gamma curve
+		// pixel_data *= 1.5;
+		pixel_data **= 1.5;
+
+		data[4 * i] = pixel_data;
+		data[4 * i + 1] = pixel_data;
+		data[4 * i + 2] = pixel_data;
+		data[4 * i + 3] = 0xff;
+	}
+	ctx.putImageData(image_data, 0, 0);
+	console.log("Finished parsing the image at position " + pos);
+}
+
+function parse_IFD(buf: Uint8Array, pos: number, little_endian: boolean, output: HTMLParagraphElement) {
+	// const ifd_tag = buf.slice(pos, (pos += 2));
+	const ifd_tag = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
+	const ifd_field_type = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
+	const ifd_value_count = new DataView(buf.slice(pos, (pos += 4)).buffer).getUint32(0, little_endian);
+	const ifd_value_offset = new DataView(buf.slice(pos, (pos += 4)).buffer).getUint32(0, little_endian);
+	switch (ifd_tag) {
+		case 0xf001:
+			output.innerHTML += "RawImageFullWidth: Type " + ifd_field_type + "; Count " + ifd_value_count + "; Value/Offset " + ifd_value_offset + "\n";
+			break;
+		case 0xf002:
+			output.innerHTML += "RawImageFullHeight: Type " + ifd_field_type + "; Count " + ifd_value_count + "; Value/Offset " + ifd_value_offset + "\n";
+			break;
+		case 0xf003:
+			output.innerHTML +=
+				"RAF 0xf003: IFD Field Type " + ifd_field_type + "; IFD Value Count " + ifd_value_count + "; IFD Value/Offset " + ifd_value_offset + "\n";
+			break;
+		case 0xf006:
+			output.innerHTML +=
+				"RAF 0xf006: IFD Field Type " + ifd_field_type + "; IFD Value Count " + ifd_value_count + "; IFD Value/Offset " + ifd_value_offset + "\n";
+			break;
+		default:
+			output.innerHTML +=
+				"IFD tag " +
+				ifd_tag +
+				"; IFD Field Type " +
+				ifd_field_type +
+				"; IFD Value Count " +
+				ifd_value_count +
+				"; IFD Value/Offset " +
+				ifd_value_offset +
+				"\n";
+	}
+	// console.log(buf.slice(pos, (pos += 6)).toString());
+	pos += 6;
+	return pos;
 }
 
 function readSingleFile() {
