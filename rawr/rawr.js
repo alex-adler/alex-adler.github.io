@@ -200,11 +200,14 @@ function parse(buf) {
         pos = parse_IFD(buf, pos, little_endian, output);
     }
     // Start of raw image data
-    pos = cfa_offset + 2048;
+    const raw_data_start = cfa_offset + 2048;
+    pos = raw_data_start;
     let canvas = document.getElementById("raw-canvas");
     let ctx = canvas.getContext("2d");
     const width = 11808;
     const height = 8754;
+    // canvas.width = 1920;
+    // canvas.height = 1080;
     canvas.width = width;
     canvas.height = height;
     const image_data = ctx.createImageData(width, height);
@@ -217,15 +220,26 @@ function parse(buf) {
         let pixel_data = buf[pos + 1];
         pos += 2;
         // Apply gamma curve
-        // pixel_data *= 1.5;
         pixel_data **= 1.5;
-        data[4 * i] = pixel_data;
-        data[4 * i + 1] = pixel_data;
-        data[4 * i + 2] = pixel_data;
+        let row_number = Math.floor(i / width);
+        let column_number = i % width;
+        if ((row_number + column_number) % 2 === 1) {
+            data[4 * i + 1] = pixel_data / 2; // Green
+            // data[4 * i + 1] = 0xff; // Green
+        }
+        else if (row_number % 2 === 0) {
+            // data[4 * i] = 0xff; // Red
+            data[4 * i] = pixel_data; // Red
+        }
+        else {
+            data[4 * i + 2] = pixel_data; // Blue
+            // data[4 * i + 2] = 0xff; // Blue
+        }
+        // data[4 * i] = 0xff; // Red
+        // data[4 * i + 2] = 0xff; // Blue
         data[4 * i + 3] = 0xff;
     }
     ctx.putImageData(image_data, 0, 0);
-    console.log("Finished parsing the image at position " + pos);
 }
 function parse_IFD(buf, pos, little_endian, output) {
     // const ifd_tag = buf.slice(pos, (pos += 2));

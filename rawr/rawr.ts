@@ -223,7 +223,8 @@ function parse(buf: Uint8Array) {
 	}
 
 	// Start of raw image data
-	pos = cfa_offset + 2048;
+	const raw_data_start = cfa_offset + 2048;
+	pos = raw_data_start;
 
 	let canvas = document.getElementById("raw-canvas") as HTMLCanvasElement;
 	let ctx = canvas.getContext("2d");
@@ -231,12 +232,15 @@ function parse(buf: Uint8Array) {
 	const width = 11808;
 	const height = 8754;
 
+	// canvas.width = 1920;
+	// canvas.height = 1080;
 	canvas.width = width;
 	canvas.height = height;
 
 	const image_data = ctx.createImageData(width, height);
 	const data = image_data.data;
 	console.log(data);
+
 	for (let i = 0; i < data.length / 4; i++) {
 		// Pixel data should be 16 bit but canvas is only 8 bit so we ignore the LSB
 		// let pixel_data = new DataView(buf.slice(pos, (pos += 2)).buffer).getUint16(0, little_endian);
@@ -245,16 +249,26 @@ function parse(buf: Uint8Array) {
 		pos += 2;
 
 		// Apply gamma curve
-		// pixel_data *= 1.5;
 		pixel_data **= 1.5;
 
-		data[4 * i] = pixel_data;
-		data[4 * i + 1] = pixel_data;
-		data[4 * i + 2] = pixel_data;
+		let row_number = Math.floor(i / width);
+		let column_number = i % width;
+
+		if ((row_number + column_number) % 2 === 1) {
+			data[4 * i + 1] = pixel_data / 2; // Green
+			// data[4 * i + 1] = 0xff; // Green
+		} else if (row_number % 2 === 0) {
+			// data[4 * i] = 0xff; // Red
+			data[4 * i] = pixel_data; // Red
+		} else {
+			data[4 * i + 2] = pixel_data; // Blue
+			// data[4 * i + 2] = 0xff; // Blue
+		}
+		// data[4 * i] = 0xff; // Red
+		// data[4 * i + 2] = 0xff; // Blue
 		data[4 * i + 3] = 0xff;
 	}
 	ctx.putImageData(image_data, 0, 0);
-	console.log("Finished parsing the image at position " + pos);
 }
 
 function parse_IFD(buf: Uint8Array, pos: number, little_endian: boolean, output: HTMLParagraphElement) {

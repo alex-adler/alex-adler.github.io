@@ -15,6 +15,8 @@ p {
 
 canvas {
 	border: 1px solid black;
+	/* width: 1920px;
+	height: 1080px; */
 	width: 100vw;
 	height: 75vw;
 }
