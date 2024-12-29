@@ -1,3 +1,4 @@
 node_modules/
 **/target/
 ./transit/.gitignore
+space_time/data/space_time_generator.js
