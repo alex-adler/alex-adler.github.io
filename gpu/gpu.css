@@ -1,0 +1,22 @@
+body {
+	margin: 0;
+}
+
+h1 {
+	text-align: center;
+	margin: 10rem auto;
+	margin-bottom: 2rem;
+	padding: 0 2rem;
+}
+
+p {
+	text-align: center;
+}
+
+canvas {
+	border: 1px solid black;
+	/* width: 1920px;
+	height: 1080px; */
+	width: 100vw;
+	height: 75vw;
+}

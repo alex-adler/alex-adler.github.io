@@ -1,5 +1,5 @@
 node_modules/
 **/target/
-./transit/.gitignore
-./gpu/.gitignore
+transit/.gitignore
+gpu/.gitignore
 space_time/data/space_time_generator.js
