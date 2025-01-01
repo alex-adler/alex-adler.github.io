@@ -2,8 +2,8 @@
 	"compilerOptions": {
 		"noImplicitAny": true,
 		// "noEmit": true,``
-		// "allowImportingTsExten``sions": true,
+		// "allowImportingTsExtensions": true,
 		"target": "ES2017"
 	},
-	"include": ["arean_freight/**/*", "space_time/**/*", "trains/**/*", "projects/**/*", "testing/**/*", "rawr/**/*"]
+	"include": ["arean_freight/**/*", "space_time/**/*", "trains/**/*", "projects/**/*", "testing/**/*", "rawr/**/*", "gpu/**/*"]
 }
