@@ -41,19 +41,51 @@ impl Vertex {
 }
 
 #[rustfmt::skip]
+const VERTICES_RAW: &[Vertex] = &[
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, 
+
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, 
+Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 1.0] }, 
+
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
+Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 1.0] }, 
+];
+
+#[rustfmt::skip]
 const VERTICES: &[Vertex] = &[
-	Vertex { position: [-0.0868241, 0.49240386, 0.0], 	color: [0.5, 0.0, 0.5] }, // A
-    Vertex { position: [-0.49513406, 0.06958647, 0.0],	color: [1.0, 0.0, 0.5] }, // B
-    Vertex { position: [-0.21918549, -0.44939706, 0.0],	color: [0.5, 0.0, 0.5] }, // C
-    Vertex { position: [0.35966998, -0.3473291, 0.0],	color: [0.5, 0.0, 1.0] }, // D
-    Vertex { position: [0.44147372, 0.2347359, 0.0],	color: [0.5, 0.0, 0.5] }, // E
-	];
+    Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 0.5] }, 
+	Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, 
+    Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
+    Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
+    Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 0.5] }, 
+    Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 0.5] }, 
+    Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
+    ];
 
 #[rustfmt::skip]
 const INDICES: &[u16] = &[
-    0, 1, 4,
-    1, 2, 4,
-    2, 3, 4,
+    0, 1, 2,
+    0, 2, 3,
+    0, 3, 4,
+    0, 4, 5,
+    0, 5, 6,
+    0, 6, 1,
 ];
 
 struct State<'a> {
@@ -66,6 +98,7 @@ struct State<'a> {
     render_pipeline: wgpu::RenderPipeline,
     alt_render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
+    raw_vertex_buffer: wgpu::Buffer,
     num_vertices: u32,
     index_buffer: wgpu::Buffer,
     num_indices: u32,
@@ -147,7 +180,13 @@ impl<'a> State<'a> {
             contents: bytemuck::cast_slice(VERTICES),
             usage: wgpu::BufferUsages::VERTEX,
         });
-        let num_vertices = VERTICES.len() as u32;
+
+        let raw_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(VERTICES_RAW),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+        let num_vertices = VERTICES_RAW.len() as u32;
 
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
@@ -258,6 +297,7 @@ impl<'a> State<'a> {
             render_pipeline,
             alt_render_pipeline,
             vertex_buffer,
+            raw_vertex_buffer,
             num_vertices,
             index_buffer,
             num_indices,
@@ -336,8 +376,12 @@ impl<'a> State<'a> {
                 timestamp_writes: None,
             });
             if self.use_alt_render_pipeline {
-                render_pass.set_pipeline(&self.alt_render_pipeline);
-                render_pass.draw(0..3, 0..1); // Draw something with 3 vertices and 1 instance
+                // render_pass.set_pipeline(&self.alt_render_pipeline);
+                // render_pass.draw(0..3, 0..1); // Draw something with 3 vertices and 1 instance
+
+                render_pass.set_pipeline(&self.render_pipeline);
+                render_pass.set_vertex_buffer(0, self.raw_vertex_buffer.slice(..));
+                render_pass.draw(0..self.num_vertices, 0..1);
             } else {
                 render_pass.set_pipeline(&self.render_pipeline);
                 render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
