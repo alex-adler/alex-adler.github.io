@@ -42,29 +42,29 @@ impl Vertex {
 
 #[rustfmt::skip]
 const VERTICES_RAW: &[Vertex] = &[
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 1.0] }, 
-Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
+Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
+Vertex { position: [0.25, 0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 2
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
-Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
+Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 2
+Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
-Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
+Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
+Vertex { position: [-0.5, 0.0, 0.0],	color: [0.5, 0.0, 0.5] }, // 4
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, 
-Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
+Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, // 4
+Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 1.0] }, 
-Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
+Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
+Vertex { position: [0.25, -0.433, 0.0],	color: [1.0, 0.0, 1.0] }, // 6
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 1.0] }, 
-Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 1.0] }, 
-Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 1.0] }, 
+Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
+Vertex { position: [0.25, -0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 6
+Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
 ];
 
 #[rustfmt::skip]
