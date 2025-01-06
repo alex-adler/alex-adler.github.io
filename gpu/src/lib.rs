@@ -1,3 +1,5 @@
+mod texture;
+
 use std::iter;
 
 use winit::{
@@ -16,7 +18,7 @@ use wasm_bindgen::prelude::*;
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 struct Vertex {
     position: [f32; 3],
-    color: [f32; 3],
+    tex_coords: [f32; 2],
 }
 
 impl Vertex {
@@ -33,59 +35,54 @@ impl Vertex {
                 wgpu::VertexAttribute {
                     offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x3,
+                    format: wgpu::VertexFormat::Float32x2,
                 },
             ],
         }
     }
 }
 
-#[rustfmt::skip]
-const VERTICES_RAW: &[Vertex] = &[
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
-Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
-Vertex { position: [0.25, 0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 2
+// #[rustfmt::skip]
+// const VERTICES_RAW: &[Vertex] = &[
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
+// Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
+// Vertex { position: [0.25, 0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 2
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
-Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 2
-Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
+// Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 2
+// Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
-Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
-Vertex { position: [-0.5, 0.0, 0.0],	color: [0.5, 0.0, 0.5] }, // 4
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, // 0
+// Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, // 3
+// Vertex { position: [-0.5, 0.0, 0.0],	color: [0.5, 0.0, 0.5] }, // 4
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
-Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, // 4
-Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
+// Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 1.0] }, // 4
+// Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
-Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
-Vertex { position: [0.25, -0.433, 0.0],	color: [1.0, 0.0, 1.0] }, // 6
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [1.0, 0.0, 1.0] }, // 0
+// Vertex { position: [-0.25, -0.433, 0.0],color: [1.0, 0.0, 1.0] }, // 5
+// Vertex { position: [0.25, -0.433, 0.0],	color: [1.0, 0.0, 1.0] }, // 6
 
-Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
-Vertex { position: [0.25, -0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 6
-Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
-];
+// Vertex { position: [0.0, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 0
+// Vertex { position: [0.25, -0.433, 0.0],	color: [0.1, 0.0, 0.1] }, // 6
+// Vertex { position: [0.5, 0.0, 0.0], 	color: [0.1, 0.0, 0.1] }, // 1
+// ];
 
 #[rustfmt::skip]
 const VERTICES: &[Vertex] = &[
-    Vertex { position: [0.0, 0.0, 0.0], 	color: [0.5, 1.0, 0.5] }, 
-	Vertex { position: [0.5, 0.0, 0.0], 	color: [0.5, 0.0, 0.5] }, 
-    Vertex { position: [0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
-    Vertex { position: [-0.25, 0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
-    Vertex { position: [-0.5, 0.0, 0.0],	color: [1.0, 0.0, 0.5] }, 
-    Vertex { position: [-0.25, -0.433, 0.0],color: [0.5, 0.0, 0.5] }, 
-    Vertex { position: [0.25, -0.433, 0.0],	color: [0.5, 0.0, 0.5] }, 
-    ];
+    Vertex { position: [-0.0868241, 0.49240386, 0.0], tex_coords: [0.4131759, 0.00759614], }, // A
+    Vertex { position: [-0.49513406, 0.06958647, 0.0], tex_coords: [0.0048659444, 0.43041354], }, // B
+    Vertex { position: [-0.21918549, -0.44939706, 0.0], tex_coords: [0.28081453, 0.949397], }, // C
+    Vertex { position: [0.35966998, -0.3473291, 0.0], tex_coords: [0.85967, 0.84732914], }, // D
+    Vertex { position: [0.44147372, 0.2347359, 0.0], tex_coords: [0.9414737, 0.2652641], }, // E
+];
 
 #[rustfmt::skip]
 const INDICES: &[u16] = &[
-    0, 1, 2,
-    0, 2, 3,
-    0, 3, 4,
-    0, 4, 5,
-    0, 5, 6,
-    0, 6, 1,
+    0, 1, 4,
+    1, 2, 4,
+    2, 3, 4,
 ];
 
 struct State<'a> {
@@ -98,10 +95,14 @@ struct State<'a> {
     render_pipeline: wgpu::RenderPipeline,
     alt_render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
-    raw_vertex_buffer: wgpu::Buffer,
-    num_vertices: u32,
+    // raw_vertex_buffer: wgpu::Buffer,
+    // num_vertices: u32,
     index_buffer: wgpu::Buffer,
     num_indices: u32,
+    diffuse_bind_group: wgpu::BindGroup,
+    diffuse_texture: texture::Texture,
+    alt_diffuse_bind_group: wgpu::BindGroup,
+    alt_diffuse_texture: texture::Texture,
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
     // unsafe references to the window's resources.
@@ -175,18 +176,86 @@ impl<'a> State<'a> {
             view_formats: vec![],
         };
 
+        let diffuse_bytes = include_bytes!("happy-tree.png");
+        let diffuse_texture =
+            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "happy-tree.png").unwrap();
+
+        let alt_diffuse_bytes = include_bytes!("happy-tree-cartoon.png");
+        let alt_diffuse_texture = texture::Texture::from_bytes(
+            &device,
+            &queue,
+            alt_diffuse_bytes,
+            "happy-tree-cartoon.png",
+        )
+        .unwrap();
+
+        let texture_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        // This should match the filterable field of the
+                        // corresponding Texture entry above.
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+                label: Some("texture_bind_group_layout"),
+            });
+
+        let diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+                },
+            ],
+            label: Some("diffuse_bind_group"),
+        });
+
+        let alt_diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&alt_diffuse_texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&alt_diffuse_texture.sampler),
+                },
+            ],
+            label: Some("alt_diffuse_bind_group"),
+        });
+
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
             contents: bytemuck::cast_slice(VERTICES),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
-        let raw_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES_RAW),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-        let num_vertices = VERTICES_RAW.len() as u32;
+        // let raw_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        //     label: Some("Vertex Buffer"),
+        //     contents: bytemuck::cast_slice(VERTICES_RAW),
+        //     usage: wgpu::BufferUsages::VERTEX,
+        // });
+        // let num_vertices = VERTICES_RAW.len() as u32;
 
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
@@ -205,7 +274,7 @@ impl<'a> State<'a> {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[],
+                bind_group_layouts: &[&texture_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -297,10 +366,14 @@ impl<'a> State<'a> {
             render_pipeline,
             alt_render_pipeline,
             vertex_buffer,
-            raw_vertex_buffer,
-            num_vertices,
+            // raw_vertex_buffer,
+            // num_vertices,
             index_buffer,
             num_indices,
+            diffuse_bind_group,
+            diffuse_texture,
+            alt_diffuse_bind_group,
+            alt_diffuse_texture,
             window,
             clear_colour: wgpu::Color::BLACK,
         }
@@ -375,21 +448,22 @@ impl<'a> State<'a> {
                 occlusion_query_set: None,
                 timestamp_writes: None,
             });
-            if self.use_alt_render_pipeline {
-                // render_pass.set_pipeline(&self.alt_render_pipeline);
-                // render_pass.draw(0..3, 0..1); // Draw something with 3 vertices and 1 instance
+            render_pass.set_pipeline(&self.render_pipeline);
 
-                render_pass.set_pipeline(&self.render_pipeline);
-                render_pass.set_vertex_buffer(0, self.raw_vertex_buffer.slice(..));
-                render_pass.draw(0..self.num_vertices, 0..1);
-            } else {
-                render_pass.set_pipeline(&self.render_pipeline);
-                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            render_pass.set_bind_group(
+                0,
+                if self.use_alt_render_pipeline {
+                    &self.alt_diffuse_bind_group
+                } else {
+                    &self.diffuse_bind_group
+                },
+                &[],
+            );
 
-                render_pass
-                    .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
-            };
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
         }
 
         self.queue.submit(iter::once(encoder.finish()));
