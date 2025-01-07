@@ -59,9 +59,9 @@ impl CameraUniform {
 			0.0, 0.0, 0.0, 1.0,
 		);
         // self.camera_uniform = ROTATION_X * self.camera_uniform.view_proj;
-        // self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
-        self.view_proj =
-            (OPENGL_TO_WGPU_MATRIX * (camera.build_view_projection_matrix() * ROTATION_X)).into();
+        self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
+        // self.view_proj =
+        //     (OPENGL_TO_WGPU_MATRIX * (camera.build_view_projection_matrix() * ROTATION_X)).into();
         // self.view_proj =
         //     (ROTATION_X * (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix())).into();
     }
