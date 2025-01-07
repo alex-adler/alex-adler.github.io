@@ -1,6 +1,7 @@
 mod camera;
 mod texture;
 
+use core::f32;
 use std::iter;
 
 use camera::*;
@@ -88,6 +89,7 @@ struct State<'a> {
     // unsafe references to the window's resources.
     window: &'a Window,
     clear_colour: wgpu::Color,
+    angle_rad: f32,
 }
 
 impl<'a> State<'a> {
@@ -241,7 +243,7 @@ impl<'a> State<'a> {
         let camera_controller = CameraController::new(0.2);
 
         let mut camera_uniform = CameraUniform::new();
-        camera_uniform.update_view_proj(&camera);
+        camera_uniform.update_view_proj(&camera, 0.0);
 
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
@@ -410,6 +412,7 @@ impl<'a> State<'a> {
             alt_diffuse_texture,
             window,
             clear_colour: wgpu::Color::BLACK,
+            angle_rad: 0.0,
         }
     }
 
@@ -457,8 +460,11 @@ impl<'a> State<'a> {
     }
 
     fn update(&mut self) {
+        self.angle_rad += 0.02;
+        self.angle_rad %= 2.0 * f32::consts::PI;
         self.camera_controller.update_camera(&mut self.camera);
-        self.camera_uniform.update_view_proj(&self.camera);
+        self.camera_uniform
+            .update_view_proj(&self.camera, self.angle_rad);
         self.queue.write_buffer(
             &self.camera_buffer,
             0,

@@ -38,7 +38,7 @@ impl Camera {
 pub struct CameraUniform {
     // We can't use cgmath with bytemuck directly, so we'll have
     // to convert the Matrix4 into a 4x4 f32 array
-    view_proj: [[f32; 4]; 4],
+    pub view_proj: [[f32; 4]; 4],
 }
 
 impl CameraUniform {
@@ -49,8 +49,21 @@ impl CameraUniform {
         }
     }
 
-    pub fn update_view_proj(&mut self, camera: &Camera) {
-        self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
+    pub fn update_view_proj(&mut self, camera: &Camera, angle_rad: f32) {
+        // let angle_rad: f32 = 0.1;
+        #[rustfmt::skip]
+		let ROTATION_X: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
+			1.0, 0.0, 0.0, 0.0,
+			0.0, angle_rad.cos(), -angle_rad.sin(), 0.0,
+			0.0, angle_rad.sin(), angle_rad.cos(), 0.0,
+			0.0, 0.0, 0.0, 1.0,
+		);
+        // self.camera_uniform = ROTATION_X * self.camera_uniform.view_proj;
+        // self.view_proj = (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix()).into();
+        self.view_proj =
+            (OPENGL_TO_WGPU_MATRIX * (camera.build_view_projection_matrix() * ROTATION_X)).into();
+        // self.view_proj =
+        //     (ROTATION_X * (OPENGL_TO_WGPU_MATRIX * camera.build_view_projection_matrix())).into();
     }
 }
 
