@@ -35,7 +35,7 @@ fn vs_main(
     model: VertexInput,
     instance: InstanceInput,
 ) -> VertexOutput {
-	let model_matrix = mat4x4<f32>(
+	var model_matrix = mat4x4<f32>(
         instance.model_matrix_0,
         instance.model_matrix_1,
         instance.model_matrix_2,
@@ -44,9 +44,14 @@ fn vs_main(
     var out: VertexOutput;
     out.tex_coords = model.tex_coords;
 
-	var angle_rad: f32 = 0.05 * scene_time.frame_num  * model_matrix[0][0] * model_matrix[1][1] * model_matrix[2][2];
+	// Change the y position
+	model_matrix[3][1] = abs(cos(0.05*scene_time.frame_num)) * 1.5 + model_matrix[3][1];
 
-	var rotation = mat4x4<f32>(	1.0, 0.0, 			0.0, 				0.0,
+	// Rotation speed is a function of the position of the instance
+	let angle_rad: f32 = 0.001 * scene_time.frame_num  * model_matrix[3][0] * model_matrix[3][1] * model_matrix[3][2];
+
+	// Rotate about the x axis
+	let rotation = mat4x4<f32>(	1.0, 0.0, 			0.0, 				0.0,
 								0.0, cos(angle_rad), -sin(angle_rad), 	0.0,
 								0.0, sin(angle_rad), cos(angle_rad), 	0.0,
 								0.0, 0.0, 			0.0, 				1.0);
