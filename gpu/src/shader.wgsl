@@ -13,6 +13,13 @@ struct CameraUniform {
 @group(1) @binding(0)
 var<uniform> camera: CameraUniform;
 
+struct SceneTime {
+    frame_num: f32,
+    reserved: vec3<f32>, // There are 7 additional f32 values that are sent in this struct so that it is 32 bytes long
+};
+@group(2) @binding(0)
+var<uniform> scene_time: SceneTime;
+
 struct VertexInput {
     @location(0) position: vec3<f32>,
     @location(1) tex_coords: vec2<f32>,
@@ -36,7 +43,15 @@ fn vs_main(
     );
     var out: VertexOutput;
     out.tex_coords = model.tex_coords;
-    out.clip_position = camera.view_proj * model_matrix * vec4<f32>(model.position, 1.0);
+
+	var angle_rad: f32 = 0.05 * scene_time.frame_num  * model_matrix[0][0] * model_matrix[1][1] * model_matrix[2][2];
+
+	var rotation = mat4x4<f32>(	1.0, 0.0, 			0.0, 				0.0,
+								0.0, cos(angle_rad), -sin(angle_rad), 	0.0,
+								0.0, sin(angle_rad), cos(angle_rad), 	0.0,
+								0.0, 0.0, 			0.0, 				1.0);
+
+    out.clip_position = camera.view_proj * model_matrix * rotation * vec4<f32>(model.position, 1.0);
     return out;
 }
 

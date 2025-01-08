@@ -130,6 +130,27 @@ impl InstanceRaw {
     }
 }
 
+// We need this for Rust to store our data correctly for the shaders
+#[repr(C)]
+// This is so we can store this in a buffer
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+struct SceneTime {
+    frame_num: f32,
+    padding: [f32; 7], //  The struct needs to be 32 Bytes
+}
+
+impl SceneTime {
+    fn new() -> Self {
+        Self {
+            frame_num: 0.0,
+            padding: [0.0; 7],
+        }
+    }
+    fn tick(&mut self) {
+        self.frame_num += 1.0;
+    }
+}
+
 struct State<'a> {
     surface: wgpu::Surface<'a>,
     device: wgpu::Device,
@@ -157,6 +178,10 @@ struct State<'a> {
     diffuse_texture: texture::Texture,
     alt_diffuse_bind_group: wgpu::BindGroup,
     alt_diffuse_texture: texture::Texture,
+
+    scene_time: SceneTime,
+    scene_time_buffer: wgpu::Buffer,
+    scene_time_bind_group: wgpu::BindGroup,
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -349,6 +374,37 @@ impl<'a> State<'a> {
             label: Some("camera_bind_group"),
         });
 
+        let scene_time = SceneTime::new();
+        let scene_time_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Scene Time"),
+            contents: bytemuck::cast_slice(&[scene_time]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let scene_time_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: Some("scene_time_bind_group_layout"),
+            });
+
+        let scene_time_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &scene_time_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: scene_time_buffer.as_entire_binding(),
+            }],
+            label: Some("scene_time_bind_group"),
+        });
+
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
             contents: bytemuck::cast_slice(VERTICES),
@@ -411,7 +467,11 @@ impl<'a> State<'a> {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&texture_bind_group_layout, &camera_bind_group_layout],
+                bind_group_layouts: &[
+                    &texture_bind_group_layout,
+                    &camera_bind_group_layout,
+                    &scene_time_bind_group_layout,
+                ],
                 push_constant_ranges: &[],
             });
 
@@ -474,6 +534,11 @@ impl<'a> State<'a> {
             diffuse_texture,
             alt_diffuse_bind_group,
             alt_diffuse_texture,
+
+            scene_time,
+            scene_time_bind_group,
+            scene_time_buffer,
+
             window,
             clear_colour: wgpu::Color::BLACK,
             angle_rad: 0.0,
@@ -522,6 +587,13 @@ impl<'a> State<'a> {
             0,
             bytemuck::cast_slice(&[self.camera_uniform]),
         );
+
+        self.scene_time.tick();
+        self.queue.write_buffer(
+            &self.scene_time_buffer,
+            0,
+            bytemuck::cast_slice(&[self.scene_time]),
+        );
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -555,6 +627,7 @@ impl<'a> State<'a> {
 
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
+            render_pass.set_bind_group(2, &self.scene_time_bind_group, &[]);
 
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
