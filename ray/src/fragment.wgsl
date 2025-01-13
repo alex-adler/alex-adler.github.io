@@ -18,7 +18,15 @@ struct Sphere {
     radius: f32,
 }
 
+const OBJECT_COUNT: u32 = 2;
+alias Scene = array<Sphere, OBJECT_COUNT>;
+var<private> scene: Scene = Scene(
+    Sphere(vec3(0.0, 0.0 , -1.0), 0.5),
+    Sphere(vec3(0.0, -100.5 , -1.0), 100.0),
+);
+
 const FOCAL_DISTANCE: f32 = 1.0;
+const F32_MAX: f32 = 3.40282346638528859812e+38;
 
 fn sky_colour(ray: Ray) ->vec3f {
     // Get a value that goes from 1 to 0 as you go down
@@ -69,9 +77,19 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
 
     let direction = vec3(uv, -FOCAL_DISTANCE);
     let ray = Ray(origin, direction);
-    let sphere = Sphere(vec3(0.0, 0.0 , -1.0), 0.5);
-    if intersect_sphere(ray, sphere) > 0.0 {
-        return vec4(0.03, 1.0, 0.76, 1.0);
+
+    // Look for closest object that the ray interesects
+    var closest_t = F32_MAX;
+    for (var i = 0u; i < OBJECT_COUNT; i += 1u) {
+        // Loop through each object
+        let t = intersect_sphere(ray, scene[i]);
+        if t > 0. && t < closest_t {
+            closest_t = t;
+        }
+    }
+    // Check that we found an object
+    if closest_t < F32_MAX {
+        return vec4(0.03, 1.0, 0.76, 1.) * saturate(1.0 - closest_t);
     }
 
     return vec4(sky_colour(ray), 1.0);
