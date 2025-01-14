@@ -1,12 +1,12 @@
 // ----------------------- Fragment shader ----------------------- 
-struct SceneData {
+struct Uniforms {
     frame_num: u32,
     width: u32,
     height: u32,
     reserved: vec3<f32>, // There are 5 additional f32 values that are sent in this struct so that it is 32 bytes long
 };
 @group(0) @binding(0)
-var<uniform> scene_data: SceneData;
+var<uniform> uniforms: Uniforms;
 
 struct Ray {
     origin: vec3f,
@@ -84,10 +84,10 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 @fragment
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     let origin = vec3(0.);    
-    let aspect_ratio = f32(scene_data.width) / f32(scene_data.height);
+    let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
 
     // Normalize the viewport coordinates
-    var uv = pos.xy / vec2f(f32(scene_data.width-1u), f32(scene_data.height-1u));
+    var uv = pos.xy / vec2f(f32(uniforms.width-1u), f32(uniforms.height-1u));
 
     // Map 'uv' from y-down (normalized) viewport coordinates to camera coordinates
     // (y-up, x-right, right hand, screen height is 2 units)

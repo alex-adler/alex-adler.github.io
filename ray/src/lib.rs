@@ -19,14 +19,14 @@ use wasm_bindgen::prelude::*;
 #[repr(C)]
 // This is so we can store this in a buffer
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-struct SceneData {
+struct Uniforms {
     frame_num: u32,
     width: u32,
     height: u32,
     padding: [f32; 5], //  The struct needs to be 32 Bytes
 }
 
-impl SceneData {
+impl Uniforms {
     fn new() -> Self {
         Self {
             frame_num: 0,
@@ -53,9 +53,9 @@ struct State<'a> {
 
     render_pipeline: wgpu::RenderPipeline,
 
-    scene_data: SceneData,
-    scene_data_buffer: wgpu::Buffer,
-    scene_data_bind_group: wgpu::BindGroup,
+    uniforms: Uniforms,
+    uniforms_buffer: wgpu::Buffer,
+    uniforms_bind_group: wgpu::BindGroup,
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -131,14 +131,14 @@ impl<'a> State<'a> {
             view_formats: vec![],
         };
 
-        let scene_data = SceneData::new();
-        let scene_data_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Scene Data"),
-            contents: bytemuck::cast_slice(&[scene_data]),
+        let uniforms = Uniforms::new();
+        let uniforms_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Uniforms"),
+            contents: bytemuck::cast_slice(&[uniforms]),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        let scene_data_bind_group_layout =
+        let uniforms_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[wgpu::BindGroupLayoutEntry {
                     binding: 0,
@@ -150,16 +150,16 @@ impl<'a> State<'a> {
                     },
                     count: None,
                 }],
-                label: Some("scene_data_bind_group_layout"),
+                label: Some("uniforms_bind_group_layout"),
             });
 
-        let scene_data_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &scene_data_bind_group_layout,
+        let uniforms_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &uniforms_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
-                resource: scene_data_buffer.as_entire_binding(),
+                resource: uniforms_buffer.as_entire_binding(),
             }],
-            label: Some("scene_data_bind_group"),
+            label: Some("uniforms_bind_group"),
         });
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -174,12 +174,10 @@ impl<'a> State<'a> {
             ),
         });
 
-        // let shader = device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
-
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&scene_data_bind_group_layout],
+                bind_group_layouts: &[&uniforms_bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -229,9 +227,9 @@ impl<'a> State<'a> {
             size,
             render_pipeline,
 
-            scene_data,
-            scene_data_bind_group,
-            scene_data_buffer,
+            uniforms,
+            uniforms_bind_group,
+            uniforms_buffer,
 
             window,
             clear_colour: wgpu::Color::BLACK,
@@ -249,7 +247,7 @@ impl<'a> State<'a> {
             self.config.width = new_size.width;
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
-            self.scene_data.update(new_size.width, new_size.height);
+            self.uniforms.update(new_size.width, new_size.height);
         }
     }
 
@@ -272,11 +270,11 @@ impl<'a> State<'a> {
         self.angle_rad += 0.02;
         self.angle_rad %= 2.0 * f32::consts::PI;
 
-        self.scene_data.tick();
+        self.uniforms.tick();
         self.queue.write_buffer(
-            &self.scene_data_buffer,
+            &self.uniforms_buffer,
             0,
-            bytemuck::cast_slice(&[self.scene_data]),
+            bytemuck::cast_slice(&[self.uniforms]),
         );
     }
 
@@ -311,7 +309,7 @@ impl<'a> State<'a> {
             // These first two bind groups are now inside the DrawModel trait
             // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             // render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
-            render_pass.set_bind_group(0, &self.scene_data_bind_group, &[]);
+            render_pass.set_bind_group(0, &self.uniforms_bind_group, &[]);
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.draw(0..6, 0..1);
         }
