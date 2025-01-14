@@ -24,6 +24,11 @@ struct Intersection {
     t: f32,
 }
 
+struct Scatter {
+    attenuation: vec3f,
+    ray: Ray,
+}
+
 const OBJECT_COUNT: u32 = 2;
 alias Scene = array<Sphere, OBJECT_COUNT>;
 var<private> scene: Scene = Scene(
@@ -31,49 +36,11 @@ var<private> scene: Scene = Scene(
     Sphere(vec3(0., -100.5 , -1.), 100.),
 );
 
-const FOCAL_DISTANCE: f32 = 1.;
 const F32_MAX: f32 = 3.40282346638528859812e+38;
+const EPSILON: f32 = 1e-2;
 
-struct Rng {
-  state: u32,
-};
-var<private> rng: Rng;
-
-fn init_rng(pixel: vec2u) {
-    // Seed the PRNG using the scalar index of the pixel and the current frame count.
-    let seed = (pixel.x + pixel.y * uniforms.width) ^ jenkins_hash(uniforms.frame_num);
-    rng.state = jenkins_hash(seed);
-}
-
-// A slightly modified version of the "One-at-a-Time Hash" function by Bob Jenkins.
-// See https://www.burtleburtle.net/bob/hash/doobs.html
-fn jenkins_hash(i: u32) -> u32 {
-    var x = i;
-    x += x << 10u;
-    x ^= x >> 6u;
-    x += x << 3u;
-    x ^= x >> 11u;
-    x += x << 15u;
-    return x;
-}
-
-// The 32-bit "xor" function from Marsaglia G., "Xorshift RNGs", Section 3.
-fn xorshift32() -> u32 {
-    var x = rng.state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    rng.state = x;
-    return x;
-}
-
-// Returns a random float in the range [0...1]. This sets the floating point exponent to zero and
-// sets the most significant 23 bits of a random 32-bit unsigned integer as the mantissa. That
-// generates a number in the range [1, 1.9999999], which is then mapped to [0, 0.9999999] by
-// subtraction. See Ray Tracing Gems II, Section 14.3.4.
-fn rand_f32() -> f32 {
-    return bitcast<f32>(0x3f800000u | (xorshift32() >> 9u)) - 1.;
-}
+const FOCAL_DISTANCE: f32 = 1.;
+const MAX_PATH_LENGTH: u32 = 6u;
 
 fn sky_colour(ray: Ray) ->vec3f {
     // Get a value that goes from 1 to 0 as you go down
@@ -84,12 +51,28 @@ fn sky_colour(ray: Ray) ->vec3f {
     return (1. - t) * vec3(1.) + t * vec3(1., 0.5, 0.3);
 }
 
+// Get the position of point on a ray at a given time
 fn point_on_ray(ray: Ray, t: f32) -> vec3f{
     return ray.origin + t * ray.direction;
 }
 
+fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
+    let reflected = reflect(input_ray.direction, hit.normal);
+    // Bump the start of the reflected ray a little bit off the surface to 
+    // try to minimize self intersections due to floating point errors
+    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
+    let attenuation = vec3(0.4); // TODO: Remove hardcoded value
+    return Scatter(attenuation, output_ray);
+}
+
+// Create an empty intersection
 fn no_intersection() -> Intersection {
     return Intersection(vec3(0.), -1.);
+}
+
+// Calculate if an intersection has occured
+fn is_intersection(hit: Intersection) -> bool {
+    return hit.t > 0.;
 }
 
 fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
@@ -112,8 +95,8 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     let mb = -b;
     let t1 = (mb - sqrt_d) * recip_a;
     let t2 = (mb + sqrt_d) * recip_a;
-    let t = select(t2, t1, t1 > 0.);
-    if t <= 0. {
+    let t = select(t2, t1, t1 > EPSILON);
+    if t <= EPSILON {
         // Check if the solution is for time = 0
         return no_intersection();
     }
@@ -123,10 +106,25 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     return Intersection(N, t);
 }
 
+fn intersect_scene(ray: Ray) -> Intersection {
+    var closest_hit = Intersection(vec3(0.), F32_MAX);
+    for (var i = 0u; i < OBJECT_COUNT; i += 1u) {
+        // Loop through each object
+        let hit = intersect_sphere(ray, scene[i]);
+        if hit.t > 0. && hit.t < closest_hit.t {
+            closest_hit = hit;
+        }
+    }
+    if closest_hit.t < F32_MAX {
+        return closest_hit;
+    }
+    return no_intersection();
+}
+
 @fragment
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     // Seed the Random Number Generator
-    init_rng(vec2u(pos.xy));
+    init_rng(vec2u(pos.xy), uniforms.width, uniforms.frame_num);
     let origin = vec3(0.);    
     let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
 
@@ -139,27 +137,24 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     uv = (2. * uv - vec2(1.)) * vec2(aspect_ratio,  -1.);
 
     let direction = vec3(uv, -FOCAL_DISTANCE);
-    let ray = Ray(origin, direction);
+    var ray = Ray(origin, direction);
+    var throughput = vec3f(1.);
+    var radiance_sample = vec3(0.);
 
-    // Look for closest object that the ray interesects
-    var closest_hit = Intersection(vec3(0.), F32_MAX);
-    for (var i = 0u; i < OBJECT_COUNT; i += 1u) {
-        // var sphere = scene[i];
-        // sphere.radius += sin(f32(uniforms.frame_num) * 0.02) * 0.2;
-        // let hit = intersect_sphere(ray, sphere);
-        // Loop through each object
-        let hit = intersect_sphere(ray, scene[i]);
-        if hit.t > 0. && hit.t < closest_hit.t {
-            closest_hit = hit;
+    // Propagate the ray into the scene and get the final colours
+    var path_length = 0u;
+    while path_length < MAX_PATH_LENGTH {
+        let hit = intersect_scene(ray);
+        if !is_intersection(hit) {
+            // If not intersection was found, return the colout of the sky and terminate the path
+            radiance_sample = sky_colour(ray);
+            break;
         }
-    }
-    var radiance_sample: vec3f;
-    // Check that we found an object
-    if closest_hit.t < F32_MAX {
-        // Display the normal scaled from [-1, 1] to [0, 1]
-        radiance_sample = vec3(0.5 * closest_hit.normal + vec3(0.5));
-    } else {
-        radiance_sample = sky_colour(ray);
+
+        let scattered = scatter(ray, hit);
+        throughput *= scattered.attenuation;
+        ray = scattered.ray;
+        path_length += 1u;
     }
 
     // Fetch the old sum of samples

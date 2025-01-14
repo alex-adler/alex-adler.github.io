@@ -189,8 +189,9 @@ impl<'a> State<'a> {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(
                 format!(
-                    "{}{}",
+                    "{}{}{}",
                     include_str!("vertex.wgsl"),
+                    include_str!("rng.wgsl"),
                     include_str!("fragment.wgsl")
                 )
                 .into(),
