@@ -5,8 +5,9 @@ struct Uniforms {
     height: u32,
     reserved: vec3<f32>, // There are 5 additional f32 values that are sent in this struct so that it is 32 bytes long
 };
-@group(0) @binding(0)
-var<uniform> uniforms: Uniforms;
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(1) var radiance_samples_old: texture_2d<f32>;
+@group(0) @binding(2) var radiance_samples_new: texture_storage_2d<rgba32float, write>;
 
 struct Ray {
     origin: vec3f,
@@ -99,17 +100,35 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     // Look for closest object that the ray interesects
     var closest_hit = Intersection(vec3(0.), F32_MAX);
     for (var i = 0u; i < OBJECT_COUNT; i += 1u) {
+        var sphere = scene[i];
+        sphere.radius += sin(f32(uniforms.frame_num) * 0.02) * 0.2;
+        let hit = intersect_sphere(ray, sphere);
         // Loop through each object
-        let hit = intersect_sphere(ray, scene[i]);
+        // let hit = intersect_sphere(ray, scene[i]);
         if hit.t > 0. && hit.t < closest_hit.t {
             closest_hit = hit;
         }
     }
+    var radiance_sample: vec3f;
     // Check that we found an object
     if closest_hit.t < F32_MAX {
         // Display the normal scaled from [-1, 1] to [0, 1]
-        return vec4(0.5 * closest_hit.normal + vec3(0.5), 1.);
+        radiance_sample = vec3(0.5 * closest_hit.normal + vec3(0.5));
+    } else {
+        radiance_sample = sky_colour(ray);
     }
 
-    return vec4(sky_colour(ray), 1.);
+    // Fetch the old sum of samples
+    var old_sum: vec3f;
+    if uniforms.frame_num > 1 {
+        old_sum = textureLoad(radiance_samples_old, vec2u(pos.xy), 0).xyz;
+    } else {
+        old_sum = vec3(0.);
+    }
+
+    // Compute and store the new sum
+    let new_sum = radiance_sample + old_sum;
+    textureStore(radiance_samples_new, vec2u(pos.xy), vec4(new_sum, 0.));
+
+    return vec4(new_sum / f32(uniforms.frame_num), 1.);
 }

@@ -12,6 +12,8 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+mod helpers;
+
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
@@ -56,7 +58,7 @@ struct State<'a> {
 
     uniforms: Uniforms,
     uniforms_buffer: wgpu::Buffer,
-    uniforms_bind_group: wgpu::BindGroup,
+    display_bind_groups: [wgpu::BindGroup; 2],
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -134,9 +136,15 @@ impl<'a> State<'a> {
             mapped_at_creation: false,
         });
 
-        let uniforms_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[wgpu::BindGroupLayoutEntry {
+        let radiance_samples = helpers::create_sample_textures(
+            &device,
+            limits.max_texture_dimension_2d,
+            limits.max_texture_dimension_2d,
+        );
+
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Buffer {
@@ -145,18 +153,37 @@ impl<'a> State<'a> {
                         min_binding_size: None,
                     },
                     count: None,
-                }],
-                label: Some("uniforms_bind_group_layout"),
-            });
-
-        let uniforms_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &uniforms_bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniforms_buffer.as_entire_binding(),
-            }],
-            label: Some("uniforms_bind_group"),
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::StorageTexture {
+                        access: wgpu::StorageTextureAccess::WriteOnly,
+                        format: wgpu::TextureFormat::Rgba32Float,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                    },
+                    count: None,
+                },
+            ],
+            label: Some("bind_group_layout"),
         });
+
+        let display_bind_groups = helpers::create_display_bind_groups(
+            &device,
+            &bind_group_layout,
+            &radiance_samples,
+            &uniforms_buffer,
+        );
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
@@ -173,7 +200,7 @@ impl<'a> State<'a> {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&uniforms_bind_group_layout],
+                bind_group_layouts: &[&bind_group_layout],
                 push_constant_ranges: &[],
             });
 
@@ -226,7 +253,7 @@ impl<'a> State<'a> {
             render_pipeline,
 
             uniforms,
-            uniforms_bind_group,
+            display_bind_groups,
             uniforms_buffer,
 
             window,
@@ -307,7 +334,11 @@ impl<'a> State<'a> {
             // These first two bind groups are now inside the DrawModel trait
             // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             // render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
-            render_pass.set_bind_group(0, &self.uniforms_bind_group, &[]);
+            render_pass.set_bind_group(
+                0,
+                &self.display_bind_groups[(self.uniforms.frame_num % 2) as usize],
+                &[],
+            );
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.draw(0..6, 0..1);
         }
