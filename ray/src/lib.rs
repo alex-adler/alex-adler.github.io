@@ -3,7 +3,7 @@ use std::iter;
 
 // use cgmath::prelude::*;
 
-use wgpu::util::DeviceExt;
+use wgpu::Limits;
 
 use winit::{
     event::*,
@@ -45,6 +45,7 @@ impl Uniforms {
 }
 
 struct State<'a> {
+    limits: Limits,
     surface: wgpu::Surface<'a>,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -66,7 +67,7 @@ struct State<'a> {
 }
 
 impl<'a> State<'a> {
-    async fn new(window: &'a Window) -> State<'a> {
+    async fn new(window: &'a Window, limits: Limits) -> State<'a> {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -95,13 +96,7 @@ impl<'a> State<'a> {
                 &wgpu::DeviceDescriptor {
                     label: None,
                     required_features: wgpu::Features::empty(),
-                    // WebGL doesn't support all of wgpu's features, so if
-                    // we're building for the web we'll have to disable some.
-                    required_limits: if cfg!(target_arch = "wasm32") {
-                        wgpu::Limits::downlevel_webgl2_defaults()
-                    } else {
-                        wgpu::Limits::default()
-                    },
+                    required_limits: limits.clone(),
                     memory_hints: Default::default(),
                 },
                 // Some(&std::path::Path::new("trace")), // Trace path
@@ -132,10 +127,11 @@ impl<'a> State<'a> {
         };
 
         let uniforms = Uniforms::new();
-        let uniforms_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let uniforms_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Uniforms"),
-            contents: bytemuck::cast_slice(&[uniforms]),
+            size: std::mem::size_of::<Uniforms>() as u64,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
         });
 
         let uniforms_bind_group_layout =
@@ -220,6 +216,8 @@ impl<'a> State<'a> {
         });
 
         Self {
+            limits,
+
             surface,
             device,
             queue,
@@ -335,6 +333,14 @@ pub async fn run() {
     let event_loop = EventLoop::new().unwrap();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
+    // WebGL doesn't support all of wgpu's features, so if
+    // we're building for the web we'll have to disable some.
+    let limits = if cfg!(target_arch = "wasm32") {
+        wgpu::Limits::downlevel_webgl2_defaults()
+    } else {
+        wgpu::Limits::default()
+    };
+
     #[cfg(target_arch = "wasm32")]
     {
         // Winit prevents sizing with CSS, so we have to set
@@ -362,9 +368,10 @@ pub async fn run() {
     }
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state = State::new(&window).await;
+    let mut state = State::new(&window, limits).await;
     let mut surface_configured = false;
 
+    // TODO: replace run with run_app
     event_loop
         .run(move |event, control_flow| {
             match event {
@@ -373,7 +380,6 @@ pub async fn run() {
                     window_id,
                 } if window_id == state.window().id() => {
                     if !state.input(event) {
-                        // UPDATED!
                         match event {
                             WindowEvent::CloseRequested
                             | WindowEvent::KeyboardInput {
@@ -385,10 +391,18 @@ pub async fn run() {
                                     },
                                 ..
                             } => control_flow.exit(),
-                            WindowEvent::Resized(physical_size) => {
-                                // TODO: Check if we are trying to make a window larger than the current Limits allows
+                            WindowEvent::Resized(mut physical_size) => {
+                                // Check if we are trying to make a window larger than the current Limits allows
+                                if physical_size.width > state.limits.max_texture_dimension_2d {
+                                    log::warn!("Trying to resize window width to be larger than the maximum texture size");
+                                    physical_size.width = state.limits.max_texture_dimension_2d;
+                                }
+                                if physical_size.height > state.limits.max_texture_dimension_2d {
+                                    log::warn!("Trying to resize window height to be larger than the maximum texture size");
+                                    physical_size.height = state.limits.max_texture_dimension_2d;
+                                }
                                 surface_configured = true;
-                                state.resize(*physical_size);
+                                state.resize(physical_size);
                             }
                             WindowEvent::RedrawRequested => {
                                 // This tells winit that we want another frame after this one
