@@ -40,7 +40,7 @@ const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
 
 const FOCAL_DISTANCE: f32 = 1.;
-const MAX_PATH_LENGTH: u32 = 6u;
+const MAX_PATH_LENGTH: u32 = 13u;
 
 fn sky_colour(ray: Ray) ->vec3f {
     // Get a value that goes from 1 to 0 as you go down
@@ -61,7 +61,7 @@ fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Bump the start of the reflected ray a little bit off the surface to 
     // try to minimize self intersections due to floating point errors
     let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
-    let attenuation = vec3(0.4); // TODO: Remove hardcoded value
+    let attenuation = vec3(.4); // TODO: Remove hardcoded value
     return Scatter(attenuation, output_ray);
 }
 
@@ -146,8 +146,8 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     while path_length < MAX_PATH_LENGTH {
         let hit = intersect_scene(ray);
         if !is_intersection(hit) {
-            // If not intersection was found, return the colout of the sky and terminate the path
-            radiance_sample = sky_colour(ray);
+            // If not intersection was found, return the colour of the sky and terminate the path
+            radiance_sample += throughput * sky_colour(ray);
             break;
         }
 
@@ -169,5 +169,7 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     let new_sum = radiance_sample + old_sum;
     textureStore(radiance_samples_new, vec2u(pos.xy), vec4(new_sum, 0.));
 
-    return vec4(new_sum / f32(uniforms.frame_num), 1.);
+    // Apply gamma correction to go from linear colour space to sRGB (gamma = 2.2)
+    let colour = new_sum / f32(uniforms.frame_num);
+    return vec4(pow(colour, vec3(1. / 2.2)), 1.);
 }
