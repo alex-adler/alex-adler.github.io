@@ -78,7 +78,7 @@ impl<'a> State<'a> {
             #[cfg(not(target_arch = "wasm32"))]
             backends: wgpu::Backends::PRIMARY,
             #[cfg(target_arch = "wasm32")]
-            backends: wgpu::Backends::GL, // TODO: Figure out if we can change to WebGPU
+            backends: wgpu::Backends::BROWSER_WEBGPU,
             ..Default::default()
         });
 
@@ -93,6 +93,12 @@ impl<'a> State<'a> {
             .await
             .unwrap();
 
+        // log::warn!("Adapter: {:?}", adapter.features());
+        // log::warn!(
+        //     "Adapter downlevel: {:?}",
+        //     adapter.get_downlevel_capabilities()
+        // );
+
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -106,6 +112,8 @@ impl<'a> State<'a> {
             )
             .await
             .unwrap();
+
+        // log::warn!("Device: {:?}", device.features());
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an Srgb surface texture. Using a different
@@ -210,13 +218,13 @@ impl<'a> State<'a> {
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
-                entry_point: "vs_main",
+                entry_point: Some("vs_main"),
                 buffers: &[],
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
-                entry_point: "fs_main",
+                entry_point: Some("fs_main"),
                 targets: &[Some(wgpu::ColorTargetState {
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
@@ -366,12 +374,8 @@ pub async fn run() {
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
     // WebGL doesn't support all of wgpu's features, so if
-    // we're building for the web we'll have to disable some.
-    let limits = if cfg!(target_arch = "wasm32") {
-        wgpu::Limits::downlevel_webgl2_defaults()
-    } else {
-        wgpu::Limits::default()
-    };
+    // we're building for that (or other old APIs) we'll have to disable some.
+    let limits = wgpu::Limits::default();
 
     #[cfg(target_arch = "wasm32")]
     {
