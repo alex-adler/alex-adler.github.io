@@ -15,3 +15,14 @@ canvas {
 	background-color: black;
 	display: block;
 }
+
+h1 {
+	text-align: center;
+	margin: 40vh auto;
+	margin-bottom: 2rem;
+	padding: 0 2rem;
+}
+
+p {
+	text-align: center;
+}

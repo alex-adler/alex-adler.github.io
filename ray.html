@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="initial-scale=1.0" />
 
+		<link rel="stylesheet" href="general/nav.css" />
 		<link rel="stylesheet" href="ray/ray.css" />
 		<script type="module" src="ray/ray.js"></script>
 
@@ -17,7 +18,10 @@
 
 	<main class="main-content">
 		<body id="ray-body">
-			<!-- <h1>Ray Tracer</h1> -->
+			<div id="webgpu-missing" style="display: none">
+				<h1>WebGPU not supported</h1>
+				<p>Please enable it or check <a href="http://webgpu.io" target="_blank">webgpu.io</a> for help</p>
+			</div>
 			<!-- <canvas id="wgpu-canvas" width="640" height="480"></canvas> -->
 		</body>
 	</main>
