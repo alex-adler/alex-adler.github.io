@@ -4,6 +4,7 @@ use std::iter;
 // use cgmath::prelude::*;
 
 use algebra::Vec3;
+use bytemuck::Zeroable;
 use wgpu::Limits;
 
 use winit::{
@@ -35,9 +36,9 @@ struct Uniforms {
 }
 
 impl Uniforms {
-    fn new(camera: CameraUniforms) -> Self {
+    fn new() -> Self {
         Self {
-            camera,
+            camera: CameraUniforms::zeroed(),
             frame_num: 0,
             width: 0,
             height: 0,
@@ -50,6 +51,9 @@ impl Uniforms {
     fn update(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
+    }
+    fn reset_samples(&mut self) {
+        self.frame_num = 0;
     }
 }
 
@@ -72,7 +76,7 @@ struct State<'a> {
     // unsafe references to the window's resources.
     window: &'a Window,
     clear_colour: wgpu::Color,
-    angle_rad: f32,
+    camera: Camera,
 }
 
 impl<'a> State<'a> {
@@ -141,7 +145,7 @@ impl<'a> State<'a> {
             Vec3::new(0., 1., 0.),
         );
 
-        let uniforms = Uniforms::new(*camera.uniforms());
+        let uniforms = Uniforms::new();
         let uniforms_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Uniforms"),
             size: std::mem::size_of::<Uniforms>() as u64,
@@ -269,7 +273,7 @@ impl<'a> State<'a> {
 
             window,
             clear_colour: wgpu::Color::BLACK,
-            angle_rad: 0.0,
+            camera,
         }
     }
 
@@ -284,7 +288,7 @@ impl<'a> State<'a> {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
             self.uniforms.update(new_size.width, new_size.height);
-            self.uniforms.frame_num = 0;
+            self.uniforms.reset_samples();
         }
     }
 
@@ -303,19 +307,31 @@ impl<'a> State<'a> {
         }
     }
 
-    fn update(&mut self) {
-        self.angle_rad += 0.02;
-        self.angle_rad %= 2.0 * f32::consts::PI;
+    fn device_input(&mut self, event: &DeviceEvent) {
+        match event {
+            DeviceEvent::MouseWheel { delta } => {
+                let delta = match delta {
+                    MouseScrollDelta::PixelDelta(delta) => 0.001 * delta.y as f32,
+                    MouseScrollDelta::LineDelta(_, y) => y * 0.1,
+                };
+                self.camera.zoom(delta);
+                self.uniforms.reset_samples();
+            }
+            _ => (),
+        }
+    }
 
+    fn update(&mut self) {}
+
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        self.uniforms.camera = *self.camera.uniforms();
         self.uniforms.tick();
         self.queue.write_buffer(
             &self.uniforms_buffer,
             0,
             bytemuck::cast_slice(&[self.uniforms]),
         );
-    }
 
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output
             .texture
@@ -343,9 +359,6 @@ impl<'a> State<'a> {
                 timestamp_writes: None,
             });
 
-            // These first two bind groups are now inside the DrawModel trait
-            // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
-            // render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
             render_pass.set_bind_group(
                 0,
                 &self.display_bind_groups[(self.uniforms.frame_num % 2) as usize],
@@ -474,6 +487,7 @@ pub async fn run() {
                         }
                     }
                 }
+                Event::DeviceEvent { event, .. } => {state.device_input(&event)}
                 _ => {}
             }
         })
