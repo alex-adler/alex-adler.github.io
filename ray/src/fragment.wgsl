@@ -1,9 +1,17 @@
 // ----------------------- Fragment shader ----------------------- 
+struct CameraUniforms {
+  origin: vec3f,
+  u: vec3f,
+  v: vec3f,
+  w: vec3f,
+}
+
 struct Uniforms {
+    camera: CameraUniforms,
     frame_num: u32,
     width: u32,
     height: u32,
-    reserved: vec3<f32>, // There are 5 additional f32 values that are sent in this struct so that it is 32 bytes long
+    // reserved: vec3<f32>, // There are 5 additional f32 values that are sent in this struct so that it is 32 bytes long
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var radiance_samples_old: texture_2d<f32>;
@@ -128,7 +136,8 @@ fn intersect_scene(ray: Ray) -> Intersection {
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     // Seed the Random Number Generator
     init_rng(vec2u(pos.xy), uniforms.width, uniforms.frame_num);
-    let origin = vec3(0.);    
+
+    let origin = uniforms.camera.origin;
     let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
 
     // Normalize the viewport coordinates
@@ -139,7 +148,9 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     // (y-up, x-right, right hand, screen height is 2 units)
     uv = (2. * uv - vec2(1.)) * vec2(aspect_ratio,  -1.);
 
-    let direction = vec3(uv, -FOCAL_DISTANCE);
+    // Compute the scene-space ray direction by rotating the camera-space vector into a new basis
+    let camera_rotation = mat3x3(uniforms.camera.u, uniforms.camera.v, uniforms.camera.w);
+    let direction = camera_rotation * vec3(uv, FOCAL_DISTANCE);
     var ray = Ray(origin, direction);
     var throughput = vec3f(1.);
     var radiance_sample = vec3(0.);

@@ -3,6 +3,7 @@ use std::iter;
 
 // use cgmath::prelude::*;
 
+use algebra::Vec3;
 use wgpu::Limits;
 
 use winit::{
@@ -12,7 +13,11 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+mod algebra;
+mod camera;
 mod helpers;
+
+use crate::camera::{Camera, CameraUniforms};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -22,19 +27,21 @@ use wasm_bindgen::prelude::*;
 // This is so we can store this in a buffer
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 struct Uniforms {
+    camera: CameraUniforms,
     frame_num: u32,
     width: u32,
     height: u32,
-    padding: [f32; 5], //  The struct needs to be 32 Bytes
+    _padding: u32,
 }
 
 impl Uniforms {
-    fn new() -> Self {
+    fn new(camera: CameraUniforms) -> Self {
         Self {
+            camera,
             frame_num: 0,
             width: 0,
             height: 0,
-            padding: [0.0; 5],
+            _padding: 0,
         }
     }
     fn tick(&mut self) {
@@ -93,12 +100,6 @@ impl<'a> State<'a> {
             .await
             .unwrap();
 
-        // log::warn!("Adapter: {:?}", adapter.features());
-        // log::warn!(
-        //     "Adapter downlevel: {:?}",
-        //     adapter.get_downlevel_capabilities()
-        // );
-
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -112,8 +113,6 @@ impl<'a> State<'a> {
             )
             .await
             .unwrap();
-
-        // log::warn!("Device: {:?}", device.features());
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an Srgb surface texture. Using a different
@@ -136,7 +135,13 @@ impl<'a> State<'a> {
             view_formats: vec![],
         };
 
-        let uniforms = Uniforms::new();
+        let camera = Camera::look_at(
+            Vec3::new(0., 0.75, 1.),
+            Vec3::new(0., -0.5, -1.),
+            Vec3::new(0., 1., 0.),
+        );
+
+        let uniforms = Uniforms::new(*camera.uniforms());
         let uniforms_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Uniforms"),
             size: std::mem::size_of::<Uniforms>() as u64,
