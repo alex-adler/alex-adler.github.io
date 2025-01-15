@@ -144,11 +144,8 @@ impl<'a> State<'a> {
             mapped_at_creation: false,
         });
 
-        let radiance_samples = helpers::create_sample_textures(
-            &device,
-            limits.max_texture_dimension_2d,
-            limits.max_texture_dimension_2d,
-        );
+        // TODO: Figure out why chrome doesn't like the textures to be any bigger
+        let radiance_samples = helpers::create_sample_textures(&device, 4096, 4096);
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[
