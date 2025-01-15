@@ -279,6 +279,7 @@ impl<'a> State<'a> {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
             self.uniforms.update(new_size.width, new_size.height);
+            self.uniforms.frame_num = 0;
         }
     }
 
