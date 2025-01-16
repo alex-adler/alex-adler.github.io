@@ -11,7 +11,6 @@ struct Uniforms {
     frame_num: u32,
     width: u32,
     height: u32,
-    // reserved: vec3<f32>, // There are 5 additional f32 values that are sent in this struct so that it is 32 bytes long
 };
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var radiance_samples_old: texture_2d<f32>;
@@ -25,13 +24,15 @@ struct Ray {
 struct Sphere {
     center: vec3f,
     radius: f32,
-    colour: vec3f,
+    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    albedo: vec3f,
 }
 
 struct Intersection {
     normal: vec3f,
     t: f32,
     colour: vec3f,
+    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
 }
 
 struct Scatter {
@@ -42,9 +43,9 @@ struct Scatter {
 const OBJECT_COUNT: u32 = 3;
 alias Scene = array<Sphere, OBJECT_COUNT>;
 var<private> scene: Scene = Scene(
-    Sphere(vec3(1., 0. , -1.), 0.5, vec3(0.5, 0.2, 0.8)),
-    Sphere(vec3(-1., 0. , 0.), 0.5, vec3(0.5, 0.2, 0.1)),
-    Sphere(vec3(0., -100.5 , -1.), 100., vec3(0.1, 0.2, 0.6)),
+    Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8)),
+    Sphere(vec3(-1., 0. , 0.), 0.5, 1, vec3(0.5, 0.2, 0.1)),
+    Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6)),
 );
 
 const F32_MAX: f32 = 3.40282346638528859812e+38;
@@ -67,18 +68,52 @@ fn point_on_ray(ray: Ray, t: f32) -> vec3f{
     return ray.origin + t * ray.direction;
 }
 
-fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    let reflected = reflect(input_ray.direction, hit.normal);
-    // Bump the start of the reflected ray a little bit off the surface to 
+fn generate_random_unit_vector() -> vec3f{
+    // return vec3f(0.); // For replacing the line below when wanting to see the cargo-wgsl output
+    return normalize(vec3f(rand_f32()*2.-1., rand_f32()*2.-1., rand_f32()*2.-1.));
+}
+
+fn lambertian_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
+    let reflected = hit.normal + generate_random_unit_vector();
+    // Bump the start of the reflected ray a little bit off the surface to
     // try to minimize self intersections due to floating point errors
     let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
     let attenuation = hit.colour;
     return Scatter(attenuation, output_ray);
 }
 
+fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
+    let reflected = reflect(input_ray.direction, hit.normal);
+    // Bump the start of the reflected ray a little bit off the surface to
+    // try to minimize self intersections due to floating point errors
+    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
+    let attenuation = hit.colour;
+    return Scatter(attenuation, output_ray);
+}
+
+fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
+    let reflected = reflect(input_ray.direction, hit.normal);
+    // Bump the start of the reflected ray a little bit off the surface to
+    // try to minimize self intersections due to floating point errors
+    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
+    let attenuation = hit.colour;
+    return Scatter(attenuation, output_ray);
+}
+
+
+fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
+    if hit.material == 0 {
+        return lambertian_scatter(input_ray, hit);
+    } else if hit.material == 1 {
+        return metallic_scatter(input_ray, hit);
+    } else {
+        return dielectric_scatter(input_ray, hit);
+    }
+}
+
 // Create an empty intersection
 fn no_intersection() -> Intersection {
-    return Intersection(vec3(0.), -1., vec3f(0.));
+    return Intersection(vec3(0.), -1., vec3f(0.), 0);
 }
 
 // Calculate if an intersection has occured
@@ -114,7 +149,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 
     let p = point_on_ray(ray, t);
     let N = (p - sphere.center) / sphere.radius;
-    return Intersection(N, t, sphere.colour);
+    return Intersection(N, t, sphere.albedo, sphere.material);
 }
 
 fn intersect_scene(ray: Ray) -> Intersection {
