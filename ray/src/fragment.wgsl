@@ -39,11 +39,12 @@ struct Scatter {
     ray: Ray,
 }
 
-const OBJECT_COUNT: u32 = 2;
+const OBJECT_COUNT: u32 = 3;
 alias Scene = array<Sphere, OBJECT_COUNT>;
 var<private> scene: Scene = Scene(
-    Sphere(vec3(0., 0. , -1.), 0.5, vec3(0.5, 0.2, 0.8)),
-    Sphere(vec3(0., -100.5 , -1.), 100., vec3(0.7, 0.4, 0.6)),
+    Sphere(vec3(1., 0. , -1.), 0.5, vec3(0.5, 0.2, 0.8)),
+    Sphere(vec3(-1., 0. , 0.), 0.5, vec3(0.5, 0.2, 0.1)),
+    Sphere(vec3(0., -100.5 , -1.), 100., vec3(0.1, 0.2, 0.6)),
 );
 
 const F32_MAX: f32 = 3.40282346638528859812e+38;

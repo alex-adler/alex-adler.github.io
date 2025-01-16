@@ -77,7 +77,7 @@ struct State<'a> {
     window: &'a Window,
     clear_colour: wgpu::Color,
     camera: Camera,
-    mouse_button_pressed: bool,
+    mouse_button_pressed: [bool; 3],
 }
 
 impl<'a> State<'a> {
@@ -140,10 +140,12 @@ impl<'a> State<'a> {
             view_formats: vec![],
         };
 
-        let camera = Camera::look_at(
-            Vec3::new(0., 0.75, 1.),
-            Vec3::new(0., -0.5, -1.),
+        let camera = Camera::with_spherical_coords(
+            Vec3::new(0., 0., -1.),
             Vec3::new(0., 1., 0.),
+            2.,
+            0.,
+            0.,
         );
 
         let uniforms = Uniforms::new();
@@ -275,7 +277,7 @@ impl<'a> State<'a> {
             window,
             clear_colour: wgpu::Color::BLACK,
             camera,
-            mouse_button_pressed: false,
+            mouse_button_pressed: [false; 3],
         }
     }
 
@@ -320,18 +322,21 @@ impl<'a> State<'a> {
                 self.uniforms.reset_samples();
             }
             DeviceEvent::Button { button, state } => {
-                if *state == ElementState::Pressed {
-                    log::warn!("Pressed mouse button {}", button);
-                    // 0 - Left
-                    // 1 - Right
-                    // 2 - Middle
+                if *button <= 3 {
+                    self.mouse_button_pressed[*button as usize] = *state == ElementState::Pressed;
                 }
-                // NOTE: If multiple mouse buttons are pressed, releasing any of them will set this to false.
-                self.mouse_button_pressed = *state == ElementState::Pressed;
+                // 0 - Left
+                // 1 - Right
+                // 2 - Middle
             }
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
-                if self.mouse_button_pressed {
-                    self.camera.pan(*dx as f32 * 0.01, *dy as f32 * -0.01);
+                let dx = *dx as f32 * 0.01;
+                let dy = *dy as f32 * -0.01;
+                if self.mouse_button_pressed[0] {
+                    self.camera.orbit(dx, dy);
+                    self.uniforms.reset_samples();
+                } else if self.mouse_button_pressed[1] {
+                    self.camera.pan(dx, dy);
                     self.uniforms.reset_samples();
                 }
             }
