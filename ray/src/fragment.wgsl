@@ -26,6 +26,7 @@ struct Sphere {
     radius: f32,
     material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
     albedo: vec3f,
+    refraction_index: f32,
 }
 
 struct Intersection {
@@ -33,6 +34,7 @@ struct Intersection {
     t: f32,
     colour: vec3f,
     material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    refraction_index: f32,
 }
 
 struct Scatter {
@@ -40,12 +42,15 @@ struct Scatter {
     ray: Ray,
 }
 
-const OBJECT_COUNT: u32 = 3;
+const OBJECT_COUNT: u32 = 4;
 alias Scene = array<Sphere, OBJECT_COUNT>;
 var<private> scene: Scene = Scene(
-    Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8)),
-    Sphere(vec3(-1., 0. , 0.), 0.5, 1, vec3(0.5, 0.2, 0.1)),
-    Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6)),
+    Sphere(vec3(-1., 0. , 0.), 0.5, 2, vec3(1., 1., 1.), 0.67),
+    Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8), 0.),
+    Sphere(vec3(-1., 0. , -2.), 0.5, 1, vec3(0.5, 0.2, 0.1), 0.),
+    // Sphere(vec3(1., 0. , -3.), 0.5, 2, vec3(1., 1., 1.), 1.5),
+    // Sphere(vec3(1., 0. , -3.), 0.4, 2, vec3(1., 1., 1.), 1./1.5),
+    Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6), 0.),
 );
 
 const F32_MAX: f32 = 3.40282346638528859812e+38;
@@ -92,14 +97,23 @@ fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 }
 
 fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    let reflected = reflect(input_ray.direction, hit.normal);
-    // Bump the start of the reflected ray a little bit off the surface to
-    // try to minimize self intersections due to floating point errors
-    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
+    // Figure out which side of the surface we are hitting
+    let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
+    
+    var output_ray_direction = refract(normalize(input_ray.direction), normal, hit.refraction_index);
+
+    var output_ray = input_ray;
+    // If angle is less than the critical angle, reflection occurs instead and the function returns vec3(0.)
+    if output_ray_direction.x == 0. && output_ray_direction.y == 0. && output_ray_direction.z == 0. {
+        output_ray_direction = reflect(input_ray.direction, normal);
+        output_ray = Ray(point_on_ray(input_ray, hit.t) + normal * EPSILON, output_ray_direction);
+    } else {
+        output_ray = Ray(point_on_ray(input_ray, hit.t), output_ray_direction);
+    }
+
     let attenuation = hit.colour;
     return Scatter(attenuation, output_ray);
 }
-
 
 fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     if hit.material == 0 {
@@ -113,7 +127,7 @@ fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
 // Create an empty intersection
 fn no_intersection() -> Intersection {
-    return Intersection(vec3(0.), -1., vec3f(0.), 0);
+    return Intersection(vec3(0.), -1., vec3f(0.), 0, 0.);
 }
 
 // Calculate if an intersection has occured
@@ -149,7 +163,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 
     let p = point_on_ray(ray, t);
     let N = (p - sphere.center) / sphere.radius;
-    return Intersection(N, t, sphere.albedo, sphere.material);
+    return Intersection(N, t, sphere.albedo, sphere.material, sphere.refraction_index);
 }
 
 fn intersect_scene(ray: Ray) -> Intersection {
