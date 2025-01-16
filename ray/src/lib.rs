@@ -5,6 +5,7 @@ use std::iter;
 
 use algebra::Vec3;
 use bytemuck::Zeroable;
+use web_sys::js_sys::Date;
 use wgpu::Limits;
 
 use winit::{
@@ -22,6 +23,14 @@ use crate::camera::{Camera, CameraUniforms};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+
+#[cfg(target_arch = "wasm32")]
+#[link(wasm_import_module = "./ray.js")]
+extern "C" {
+    fn update_fps(new_fps: u32);
+}
+
+const FPS_HISTORY_LENGTH: usize = 60;
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -78,6 +87,9 @@ struct State<'a> {
     clear_colour: wgpu::Color,
     camera: Camera,
     mouse_button_pressed: [bool; 3],
+    last_frame_time: Date,
+    frame_rate_history: [f32; FPS_HISTORY_LENGTH],
+    frame_rate_pos: usize,
 }
 
 impl<'a> State<'a> {
@@ -278,6 +290,9 @@ impl<'a> State<'a> {
             clear_colour: wgpu::Color::BLACK,
             camera,
             mouse_button_pressed: [false; 3],
+            last_frame_time: Date::new_0(),
+            frame_rate_history: [60.; FPS_HISTORY_LENGTH],
+            frame_rate_pos: 0,
         }
     }
 
@@ -350,6 +365,26 @@ impl<'a> State<'a> {
     fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        // TODO: Calculate FPS
+        // let last = self.last_frame_time.get_milliseconds();
+        let current_date = Date::new_0();
+        let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
+        let fps = (1. / elapsed as f32) * 1000.;
+        self.frame_rate_history[self.frame_rate_pos] = fps;
+
+        let mut fps_mean = 0.;
+        for f in self.frame_rate_history {
+            fps_mean += f;
+        }
+        fps_mean /= self.frame_rate_history.len() as f32;
+
+        unsafe {
+            update_fps(fps_mean.round() as u32);
+        }
+        self.last_frame_time = current_date;
+        self.frame_rate_pos += 1;
+        self.frame_rate_pos %= self.frame_rate_history.len();
+
         self.uniforms.camera = *self.camera.uniforms();
         self.uniforms.tick();
         self.queue.write_buffer(

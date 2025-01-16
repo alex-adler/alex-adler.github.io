@@ -23,6 +23,12 @@ h1 {
 	padding: 0 2rem;
 }
 
+h2 {
+	position: absolute;
+	text-align: right;
+	right: 1rem;
+}
+
 p {
 	text-align: center;
 }
