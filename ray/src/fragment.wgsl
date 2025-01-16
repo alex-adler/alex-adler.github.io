@@ -78,6 +78,12 @@ fn generate_random_unit_vector() -> vec3f{
     return normalize(vec3f(rand_f32()*2.-1., rand_f32()*2.-1., rand_f32()*2.-1.));
 }
 
+fn is_reflective_schlick(cosine: f32, refraction_index: f32) -> bool {
+    var r0 = (1. - refraction_index) / (1. + refraction_index);
+    r0 = r0*r0;
+    return (r0 + (1.-r0)*pow((1. - cosine),5)) > rand_f32();
+}
+
 fn lambertian_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     let reflected = hit.normal + generate_random_unit_vector();
     // Bump the start of the reflected ray a little bit off the surface to
@@ -100,12 +106,15 @@ fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Figure out which side of the surface we are hitting
     let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
     
-    var output_ray_direction = refract(normalize(input_ray.direction), normal, hit.refraction_index);
+    let input_direction = normalize(input_ray.direction);
+    var output_ray_direction = refract(input_direction, normal, hit.refraction_index);
+
+    let cos_theta = min(dot(-input_direction, normal), 1.0);
 
     var output_ray = input_ray;
     // If angle is less than the critical angle, reflection occurs instead and the function returns vec3(0.)
-    if output_ray_direction.x == 0. && output_ray_direction.y == 0. && output_ray_direction.z == 0. {
-        output_ray_direction = reflect(input_ray.direction, normal);
+    if (output_ray_direction.x == 0. && output_ray_direction.y == 0. && output_ray_direction.z == 0.) || is_reflective_schlick(cos_theta, hit.refraction_index) {
+        output_ray_direction = reflect(input_direction, normal);
         output_ray = Ray(point_on_ray(input_ray, hit.t) + normal * EPSILON, output_ray_direction);
     } else {
         output_ray = Ray(point_on_ray(input_ray, hit.t), output_ray_direction);
