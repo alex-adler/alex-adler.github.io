@@ -330,13 +330,16 @@ impl<'a> State<'a> {
                 // 2 - Middle
             }
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
-                let dx = *dx as f32 * 0.01;
-                let dy = *dy as f32 * -0.01;
+                let dx = *dx as f32 * -0.01;
+                let dy = *dy as f32 * 0.01;
                 if self.mouse_button_pressed[0] {
                     self.camera.orbit(dx, dy);
                     self.uniforms.reset_samples();
                 } else if self.mouse_button_pressed[1] {
                     self.camera.pan(dx, dy);
+                    self.uniforms.reset_samples();
+                } else if self.mouse_button_pressed[2] {
+                    self.camera.zoom(-dy);
                     self.uniforms.reset_samples();
                 }
             }

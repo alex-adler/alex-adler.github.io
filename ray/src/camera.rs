@@ -84,6 +84,7 @@ impl Camera {
         self.calculate_uniforms();
     }
 
+    #[allow(unused)]
     pub fn look_at(origin: Vec3, center: Vec3, up: Vec3) -> Camera {
         let center_to_origin = origin - center;
         let distance = center_to_origin.length().max(0.01); // Prevent distance of 0
