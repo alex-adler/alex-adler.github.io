@@ -77,6 +77,7 @@ struct State<'a> {
     window: &'a Window,
     clear_colour: wgpu::Color,
     camera: Camera,
+    mouse_button_pressed: bool,
 }
 
 impl<'a> State<'a> {
@@ -274,6 +275,7 @@ impl<'a> State<'a> {
             window,
             clear_colour: wgpu::Color::BLACK,
             camera,
+            mouse_button_pressed: false,
         }
     }
 
@@ -307,7 +309,7 @@ impl<'a> State<'a> {
         }
     }
 
-    fn device_input(&mut self, event: &DeviceEvent) {
+    fn mouse_input(&mut self, event: &DeviceEvent) {
         match event {
             DeviceEvent::MouseWheel { delta } => {
                 let delta = match delta {
@@ -316,6 +318,22 @@ impl<'a> State<'a> {
                 };
                 self.camera.zoom(delta);
                 self.uniforms.reset_samples();
+            }
+            DeviceEvent::Button { button, state } => {
+                if *state == ElementState::Pressed {
+                    log::warn!("Pressed mouse button {}", button);
+                    // 0 - Left
+                    // 1 - Right
+                    // 2 - Middle
+                }
+                // NOTE: If multiple mouse buttons are pressed, releasing any of them will set this to false.
+                self.mouse_button_pressed = *state == ElementState::Pressed;
+            }
+            DeviceEvent::MouseMotion { delta: (dx, dy) } => {
+                if self.mouse_button_pressed {
+                    self.camera.pan(*dx as f32 * 0.01, *dy as f32 * -0.01);
+                    self.uniforms.reset_samples();
+                }
             }
             _ => (),
         }
@@ -487,7 +505,7 @@ pub async fn run() {
                         }
                     }
                 }
-                Event::DeviceEvent { event, .. } => {state.device_input(&event)}
+                Event::DeviceEvent { event, .. } => {state.mouse_input(&event)}
                 _ => {}
             }
         })
