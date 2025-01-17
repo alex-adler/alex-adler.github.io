@@ -31,6 +31,7 @@ extern "C" {
 }
 
 const FPS_HISTORY_LENGTH: usize = 60;
+const MAX_OBJECT_COUNT: usize = 64;
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -66,6 +67,17 @@ impl Uniforms {
     }
 }
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+struct Sphere {
+    center: Vec3,
+    radius: f32,
+    albedo: Vec3,
+    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    refraction_index: f32,
+    _pad: [f32; 3],
+}
+
 struct State<'a> {
     limits: Limits,
     surface: wgpu::Surface<'a>,
@@ -79,6 +91,9 @@ struct State<'a> {
     uniforms: Uniforms,
     uniforms_buffer: wgpu::Buffer,
     display_bind_groups: [wgpu::BindGroup; 2],
+
+    scene: [Sphere; MAX_OBJECT_COUNT],
+    scene_buffer: wgpu::Buffer,
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -168,6 +183,38 @@ impl<'a> State<'a> {
             mapped_at_creation: false,
         });
 
+        let mut scene = [Sphere::zeroed(); MAX_OBJECT_COUNT];
+        scene[0] = Sphere {
+            center: Vec3::new(0., -100.5, -1.),
+            albedo: Vec3::new(0.1, 0.2, 0.6),
+            radius: 100.,
+            material: 1,
+            refraction_index: 0.,
+            _pad: [0.0; 3],
+        };
+        scene[1] = Sphere {
+            center: Vec3::new(1., 0., -1.),
+            albedo: Vec3::new(0.5, 0.2, 0.8),
+            radius: 0.5,
+            material: 0,
+            refraction_index: 0.,
+            _pad: [0.0; 3],
+        };
+        scene[2] = Sphere {
+            center: Vec3::new(-1., 0., 0.),
+            albedo: Vec3::new(1., 1., 1.),
+            radius: 0.5,
+            material: 2,
+            refraction_index: 0.67,
+            _pad: [0.0; 3],
+        };
+        let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Scene"),
+            size: (std::mem::size_of::<Sphere>() * MAX_OBJECT_COUNT) as u64,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
         // TODO: Figure out why chrome doesn't like the textures to be any bigger
         let radiance_samples = helpers::create_sample_textures(&device, 4096, 4096);
 
@@ -186,6 +233,16 @@ impl<'a> State<'a> {
                 wgpu::BindGroupLayoutEntry {
                     binding: 1,
                     visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
                         view_dimension: wgpu::TextureViewDimension::D2,
@@ -194,7 +251,7 @@ impl<'a> State<'a> {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: 3,
                     visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::WriteOnly,
@@ -212,15 +269,16 @@ impl<'a> State<'a> {
             &bind_group_layout,
             &radiance_samples,
             &uniforms_buffer,
+            &scene_buffer,
         );
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(
                 format!(
-                    "{}{}{}",
+                    "{}{}",
                     include_str!("vertex.wgsl"),
-                    include_str!("rng.wgsl"),
+                    // include_str!("rng.wgsl"),
                     include_str!("fragment.wgsl")
                 )
                 .into(),
@@ -285,6 +343,9 @@ impl<'a> State<'a> {
             uniforms,
             display_bind_groups,
             uniforms_buffer,
+
+            scene,
+            scene_buffer,
 
             window,
             clear_colour: wgpu::Color::BLACK,
@@ -365,8 +426,7 @@ impl<'a> State<'a> {
     fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        // TODO: Calculate FPS
-        // let last = self.last_frame_time.get_milliseconds();
+        // Calculate FPS
         let current_date = Date::new_0();
         let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
         let fps = (1. / elapsed as f32) * 1000.;
@@ -385,6 +445,7 @@ impl<'a> State<'a> {
         self.frame_rate_pos += 1;
         self.frame_rate_pos %= self.frame_rate_history.len();
 
+        // Update Uniforms
         self.uniforms.camera = *self.camera.uniforms();
         self.uniforms.tick();
         self.queue.write_buffer(
@@ -393,6 +454,11 @@ impl<'a> State<'a> {
             bytemuck::cast_slice(&[self.uniforms]),
         );
 
+        // Update scene
+        self.queue
+            .write_buffer(&self.scene_buffer, 0, bytemuck::cast_slice(&[self.scene]));
+
+        // Prepare pipeline
         let output = self.surface.get_current_texture()?;
         let view = output
             .texture
@@ -420,12 +486,15 @@ impl<'a> State<'a> {
                 timestamp_writes: None,
             });
 
+            // Swap the textures around for storing the previous frame
             render_pass.set_bind_group(
                 0,
                 &self.display_bind_groups[(self.uniforms.frame_num % 2) as usize],
                 &[],
             );
             render_pass.set_pipeline(&self.render_pipeline);
+
+            // Provide vertices to cover the screen
             render_pass.draw(0..6, 0..1);
         }
 

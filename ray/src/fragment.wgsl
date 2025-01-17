@@ -1,3 +1,45 @@
+// ----------------------- RNG Tools ----------------------- 
+struct Rng {
+  state: u32,
+};
+var<private> rng: Rng;
+
+fn init_rng(pixel: vec2u, width: u32, frame_num: u32) {
+    // Seed the PRNG using the scalar index of the pixel and the current frame count.
+    let seed = (pixel.x + pixel.y * width) ^ jenkins_hash(frame_num);
+    rng.state = jenkins_hash(seed);
+}
+
+// A slightly modified version of the "One-at-a-Time Hash" function by Bob Jenkins.
+// See https://www.burtleburtle.net/bob/hash/doobs.html
+fn jenkins_hash(i: u32) -> u32 {
+    var x = i;
+    x += x << 10u;
+    x ^= x >> 6u;
+    x += x << 3u;
+    x ^= x >> 11u;
+    x += x << 15u;
+    return x;
+}
+
+// The 32-bit "xor" function from Marsaglia G., "Xorshift RNGs", Section 3.
+fn xorshift32() -> u32 {
+    var x = rng.state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    rng.state = x;
+    return x;
+}
+
+// Returns a random float in the range [0...1]. This sets the floating point exponent to zero and
+// sets the most significant 23 bits of a random 32-bit unsigned integer as the mantissa. That
+// generates a number in the range [1, 1.9999999], which is then mapped to [0, 0.9999999] by
+// subtraction. See Ray Tracing Gems II, Section 14.3.4.
+fn rand_f32() -> f32 {
+    return bitcast<f32>(0x3f800000u | (xorshift32() >> 9u)) - 1.;
+}
+
 // ----------------------- Fragment shader ----------------------- 
 struct CameraUniforms {
   origin: vec3f,
@@ -12,21 +54,25 @@ struct Uniforms {
     width: u32,
     height: u32,
 };
+
+// Order of members is very important for aligning purposes
+struct Sphere {
+    center: vec3f,
+    radius: f32,
+    albedo: vec3f,
+    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    refraction_index: f32,
+}
+
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var radiance_samples_old: texture_2d<f32>;
-@group(0) @binding(2) var radiance_samples_new: texture_storage_2d<rgba32float, write>;
+@group(0) @binding(1) var<storage, read> scene: array<Sphere>;
+@group(0) @binding(2) var radiance_samples_old: texture_2d<f32>;
+@group(0) @binding(3) var radiance_samples_new: texture_storage_2d<rgba32float, write>;
+
 
 struct Ray {
     origin: vec3f,
     direction: vec3f,
-}
-
-struct Sphere {
-    center: vec3f,
-    radius: f32,
-    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
-    albedo: vec3f,
-    refraction_index: f32,
 }
 
 struct Intersection {
@@ -42,16 +88,16 @@ struct Scatter {
     ray: Ray,
 }
 
-const OBJECT_COUNT: u32 = 4;
-alias Scene = array<Sphere, OBJECT_COUNT>;
-var<private> scene: Scene = Scene(
-    Sphere(vec3(-1., 0. , 0.), 0.5, 2, vec3(1., 1., 1.), 0.67),
-    Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8), 0.),
-    Sphere(vec3(-1., 0. , -2.), 0.5, 1, vec3(0.5, 0.2, 0.1), 0.),
-    // Sphere(vec3(1., 0. , -3.), 0.5, 2, vec3(1., 1., 1.), 1.5),
-    // Sphere(vec3(1., 0. , -3.), 0.4, 2, vec3(1., 1., 1.), 1./1.5),
-    Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6), 0.),
-);
+// const OBJECT_COUNT: u32 = 4;
+// alias Scene = array<Sphere>;
+// var<private> scene: Scene = Scene(
+//     Sphere(vec3(-1., 0. , 0.), 0.5, 2, vec3(1., 1., 1.), 0.67),
+//     Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8), 0.),
+//     Sphere(vec3(-1., 0. , -2.), 0.5, 1, vec3(0.5, 0.2, 0.1), 0.),
+//     // Sphere(vec3(1., 0. , -3.), 0.5, 2, vec3(1., 1., 1.), 1.5),
+//     // Sphere(vec3(1., 0. , -3.), 0.4, 2, vec3(1., 1., 1.), 1./1.5),
+//     Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6), 0.),
+// );
 
 const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
@@ -81,7 +127,7 @@ fn generate_random_unit_vector() -> vec3f{
 fn is_reflective_schlick(cosine: f32, refraction_index: f32) -> bool {
     var r0 = (1. - refraction_index) / (1. + refraction_index);
     r0 = r0*r0;
-    return (r0 + (1.-r0)*pow((1. - cosine),5)) > rand_f32();
+    return (r0 + (1.-r0)*pow((1. - cosine), 5.)) > rand_f32();
 }
 
 fn lambertian_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
@@ -148,6 +194,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     let v = ray.origin - sphere.center;
     let a = dot(ray.direction, ray.direction);
     let b = dot(v, ray.direction);
+    // let c = dot(v, v) - .25;
     let c = dot(v, v) - sphere.radius * sphere.radius;
 
     // Find roots for the quadratic
@@ -171,19 +218,25 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     }
 
     let p = point_on_ray(ray, t);
+    // let N = (p - sphere.center) / .5;
     let N = (p - sphere.center) / sphere.radius;
+    // return Intersection(N, t, vec3(0.5, 0.2, 0.8), 0, 0.);
+    // return Intersection(N, t, sphere.albedo, 0, 0.);
     return Intersection(N, t, sphere.albedo, sphere.material, sphere.refraction_index);
 }
 
 fn intersect_scene(ray: Ray) -> Intersection {
     var closest_hit = no_intersection();
     closest_hit.t = F32_MAX;
-    for (var i = 0u; i < OBJECT_COUNT; i += 1u) {
-        // Loop through each object
-        let hit = intersect_sphere(ray, scene[i]);
-        if hit.t > 0. && hit.t < closest_hit.t {
-            closest_hit = hit;
-        }
+    for (var i = 0u; i < arrayLength(&scene); i += 1u) {
+		// Ignore the rest of the buffer that has uninitialised spheres
+		if(scene[i].radius > 0.) {
+			// Loop through each object
+			let hit = intersect_sphere(ray, scene[i]);
+			if hit.t > 0. && hit.t < closest_hit.t {
+				closest_hit = hit;
+			}
+		}
     }
     if closest_hit.t < F32_MAX {
         return closest_hit;

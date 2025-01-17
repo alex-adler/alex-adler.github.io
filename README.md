@@ -29,6 +29,19 @@ Flightradar24 for a civilization that has spread throughout the solar system.
 -   [ ] Different page style for each location
 -   [ ] Moons
 
+### Ray
+
+WebGPU based ray tracer
+
+-   [ ] Triangle based meshes
+-   [ ] Import models (glTF and USD)
+-   [ ] Move models
+-   [ ] PBR / BSF materials
+-   [ ] Volumes
+-   [ ] Lenses
+-   [ ] UI
+-   [ ] Fluid simulation?
+
 ## Development
 
 Compiler for scss:
@@ -49,7 +62,7 @@ Transit is currently using ESLint to bundle files:
 ./node_modules/.bin/esbuild transit/transit.ts --bundle --format=esm --outdir=transit --watch
 ```
 
-Transit's rust code can be compiled into wasm by using the following command from inside the `transit` directory:
+Transit, Ray, and GPU's rust code can be compiled into wasm by using the following command from inside the relevant directory:
 
 ```bash
 wasm-pack build --target web -d . --no-pack

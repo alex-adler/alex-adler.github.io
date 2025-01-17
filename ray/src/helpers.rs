@@ -26,6 +26,7 @@ pub fn create_display_bind_groups(
     layout: &wgpu::BindGroupLayout,
     textures: &[wgpu::Texture; 2],
     uniforms_buffer: &wgpu::Buffer,
+    scene_buffer: &wgpu::Buffer,
 ) -> [wgpu::BindGroup; 2] {
     let views = [
         textures[0].create_view(&wgpu::TextureViewDescriptor::default()),
@@ -47,10 +48,18 @@ pub fn create_display_bind_groups(
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::TextureView(&views[0]),
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: scene_buffer,
+                        offset: 0,
+                        size: None,
+                    }),
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&views[0]),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
                     resource: wgpu::BindingResource::TextureView(&views[1]),
                 },
             ],
@@ -70,10 +79,18 @@ pub fn create_display_bind_groups(
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::TextureView(&views[1]),
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: scene_buffer,
+                        offset: 0,
+                        size: None,
+                    }),
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&views[1]),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
                     resource: wgpu::BindingResource::TextureView(&views[0]),
                 },
             ],
