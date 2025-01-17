@@ -5,7 +5,7 @@ use std::iter;
 
 use algebra::Vec3;
 use bytemuck::Zeroable;
-use web_sys::js_sys::Date;
+use web_sys::js_sys::{Date, Math::random};
 use wgpu::Limits;
 
 use winit::{
@@ -31,7 +31,7 @@ extern "C" {
 }
 
 const FPS_HISTORY_LENGTH: usize = 60;
-const MAX_OBJECT_COUNT: usize = 64;
+const MAX_OBJECT_COUNT: usize = 1024;
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -167,12 +167,10 @@ impl<'a> State<'a> {
             view_formats: vec![],
         };
 
-        let camera = Camera::with_spherical_coords(
-            Vec3::new(0., 0., -1.),
+        let camera = Camera::look_at(
+            Vec3::new(13., 2., 3.),
+            Vec3::new(0., 0., 0.),
             Vec3::new(0., 1., 0.),
-            2.,
-            0.,
-            0.,
         );
 
         let uniforms = Uniforms::new();
@@ -185,26 +183,55 @@ impl<'a> State<'a> {
 
         let mut scene = [Sphere::zeroed(); MAX_OBJECT_COUNT];
         scene[0] = Sphere {
-            center: Vec3::new(0., -100.5, -1.),
-            albedo: Vec3::new(0.1, 0.2, 0.6),
-            radius: 100.,
+            center: Vec3::new(0., -1000., -1.),
+            albedo: Vec3::new(0.5, 0.5, 0.5),
+            radius: 1000.,
             material: 1,
             refraction_index: 0.,
             _pad: [0.0; 3],
         };
-        scene[1] = Sphere {
-            center: Vec3::new(1., 0., -1.),
-            albedo: Vec3::new(0.5, 0.2, 0.8),
-            radius: 0.5,
-            material: 0,
-            refraction_index: 0.,
+        let mut sphere_num = 1;
+        for a in -11..11 {
+            for b in -11..11 {
+                scene[sphere_num] = Sphere {
+                    center: Vec3::new(
+                        (a as f64 + 0.9 * random()) as f32,
+                        0.2,
+                        (b as f64 + 0.9 * random()) as f32,
+                    ),
+                    albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
+                        .normalized(),
+                    radius: 0.2,
+                    material: (random() * 3.) as u32,
+                    refraction_index: 1. / 1.5,
+                    _pad: [0.0; 3],
+                };
+                sphere_num += 1;
+            }
+        }
+        scene[sphere_num] = Sphere {
+            center: Vec3::new(0., 1., 0.),
+            albedo: Vec3::new(1., 1., 1.),
+            radius: 1.0,
+            material: 2,
+            refraction_index: 0.67,
             _pad: [0.0; 3],
         };
-        scene[2] = Sphere {
-            center: Vec3::new(-1., 0., 0.),
-            albedo: Vec3::new(1., 1., 1.),
-            radius: 0.5,
-            material: 2,
+        sphere_num += 1;
+        scene[sphere_num] = Sphere {
+            center: Vec3::new(-4., 1., 0.),
+            albedo: Vec3::new(0.4, 0.2, 0.1),
+            radius: 1.0,
+            material: 0,
+            refraction_index: 0.67,
+            _pad: [0.0; 3],
+        };
+        sphere_num += 1;
+        scene[sphere_num] = Sphere {
+            center: Vec3::new(4., 1., 0.),
+            albedo: Vec3::new(0.7, 0.6, 0.5),
+            radius: 1.0,
+            material: 1,
             refraction_index: 0.67,
             _pad: [0.0; 3],
         };

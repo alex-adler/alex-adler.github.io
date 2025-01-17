@@ -88,30 +88,19 @@ struct Scatter {
     ray: Ray,
 }
 
-// const OBJECT_COUNT: u32 = 4;
-// alias Scene = array<Sphere>;
-// var<private> scene: Scene = Scene(
-//     Sphere(vec3(-1., 0. , 0.), 0.5, 2, vec3(1., 1., 1.), 0.67),
-//     Sphere(vec3(1., 0. , -1.), 0.5, 0, vec3(0.5, 0.2, 0.8), 0.),
-//     Sphere(vec3(-1., 0. , -2.), 0.5, 1, vec3(0.5, 0.2, 0.1), 0.),
-//     // Sphere(vec3(1., 0. , -3.), 0.5, 2, vec3(1., 1., 1.), 1.5),
-//     // Sphere(vec3(1., 0. , -3.), 0.4, 2, vec3(1., 1., 1.), 1./1.5),
-//     Sphere(vec3(0., -100.5 , -1.), 100., 1, vec3(0.1, 0.2, 0.6), 0.),
-// );
-
 const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
 
-const FOCAL_DISTANCE: f32 = 1.;
-const MAX_PATH_LENGTH: u32 = 13u;
+const FOCAL_DISTANCE: f32 = 2.;
+const MAX_PATH_LENGTH: u32 = 8u;
 
 fn sky_colour(ray: Ray) ->vec3f {
     // Get a value that goes from 1 to 0 as you go down
     let t = 0.5 * (normalize(ray.direction).y + 1.);
     // Make a vertical linear gradient from light blue to white
-    // return (1. - t) * vec3(1.) + t * vec3(0.3, 0.5, 1.);
+    return (1. - t) * vec3(1.) + t * vec3(0.3, 0.5, 1.);
     // or use a rough approximation of twilight (From light red to white)
-    return (1. - t) * vec3(1.) + t * vec3(1., 0.5, 0.3);
+    // return (1. - t) * vec3(1.) + t * vec3(1., 0.5, 0.3);
 }
 
 // Get the position of point on a ray at a given time
