@@ -94,6 +94,7 @@ struct State<'a> {
 
     scene: [Sphere; MAX_OBJECT_COUNT],
     scene_buffer: wgpu::Buffer,
+    sphere_num: usize,
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -168,7 +169,7 @@ impl<'a> State<'a> {
         };
 
         let camera = Camera::look_at(
-            Vec3::new(13., 2., 3.),
+            Vec3::new(3., 2., 3.),
             Vec3::new(0., 0., 0.),
             Vec3::new(0., 1., 0.),
         );
@@ -191,24 +192,24 @@ impl<'a> State<'a> {
             _pad: [0.0; 3],
         };
         let mut sphere_num = 1;
-        for a in -11..11 {
-            for b in -11..11 {
-                scene[sphere_num] = Sphere {
-                    center: Vec3::new(
-                        (a as f64 + 0.9 * random()) as f32,
-                        0.2,
-                        (b as f64 + 0.9 * random()) as f32,
-                    ),
-                    albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
-                        .normalized(),
-                    radius: 0.2,
-                    material: (random() * 3.) as u32,
-                    refraction_index: 1. / 1.5,
-                    _pad: [0.0; 3],
-                };
-                sphere_num += 1;
-            }
-        }
+        // for a in -11..11 {
+        //     for b in -11..11 {
+        //         scene[sphere_num] = Sphere {
+        //             center: Vec3::new(
+        //                 (a as f64 + 0.9 * random()) as f32,
+        //                 0.2,
+        //                 (b as f64 + 0.9 * random()) as f32,
+        //             ),
+        //             albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
+        //                 .normalized(),
+        //             radius: 0.2,
+        //             material: (random() * 3.) as u32,
+        //             refraction_index: 1. / 1.5,
+        //             _pad: [0.0; 3],
+        //         };
+        //         sphere_num += 1;
+        //     }
+        // }
         scene[sphere_num] = Sphere {
             center: Vec3::new(0., 1., 0.),
             albedo: Vec3::new(1., 1., 1.),
@@ -235,6 +236,7 @@ impl<'a> State<'a> {
             refraction_index: 0.67,
             _pad: [0.0; 3],
         };
+        sphere_num += 1;
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Scene"),
             size: (std::mem::size_of::<Sphere>() * MAX_OBJECT_COUNT) as u64,
@@ -373,6 +375,7 @@ impl<'a> State<'a> {
 
             scene,
             scene_buffer,
+            sphere_num,
 
             window,
             clear_colour: wgpu::Color::BLACK,
@@ -410,6 +413,43 @@ impl<'a> State<'a> {
                 };
                 true
             }
+            WindowEvent::KeyboardInput {
+                event:
+                    KeyEvent {
+                        state: ElementState::Pressed,
+                        physical_key,
+                        ..
+                    },
+                ..
+            } => match physical_key {
+                PhysicalKey::Code(KeyCode::KeyA) => {
+                    self.scene[self.sphere_num] = Sphere {
+                        center: Vec3::new(
+                            (10. * random() - 5.0) as f32,
+                            (5. * random()) as f32,
+                            (10. * random() - 5.0) as f32,
+                        ),
+                        albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
+                            .normalized(),
+                        radius: 0.2,
+                        material: (random() * 3.) as u32,
+                        refraction_index: 1. / 1.5,
+                        _pad: [0.0; 3],
+                    };
+                    self.sphere_num += 1;
+                    self.uniforms.reset_samples();
+                    true
+                }
+                PhysicalKey::Code(KeyCode::KeyR) => {
+                    self.scene[self.sphere_num] = Sphere::zeroed();
+                    if self.sphere_num > 4 {
+                        self.sphere_num -= 1;
+                        self.uniforms.reset_samples();
+                    }
+                    true
+                }
+                _ => false,
+            },
             _ => false,
         }
     }
