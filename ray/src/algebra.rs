@@ -1,5 +1,6 @@
 use {
     bytemuck::{Pod, Zeroable},
+    cgmath::Vector3,
     std::ops,
 };
 
@@ -173,5 +174,15 @@ impl ops::Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Self::Output {
         Vec3([-self.x(), -self.y(), -self.z()])
+    }
+}
+
+impl Into<Vector3<f32>> for Vec3 {
+    fn into(self) -> Vector3<f32> {
+        Vector3::<f32> {
+            x: self.x(),
+            y: self.y(),
+            z: self.z(),
+        }
     }
 }

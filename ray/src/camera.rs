@@ -7,16 +7,17 @@ use crate::algebra::Vec3;
 #[derive(Debug, Copy, Clone, Pod, Zeroable)]
 #[repr(C)]
 pub struct CameraUniforms {
-    origin: Vec3,
+    pub origin: Vec3,
+    pub focal_distance: f32,
+    pub u: Vec3,
     _padding0: u32, //  Vectors need to be aligned to 32 Bytes
-    u: Vec3,
+    pub v: Vec3,
     _padding1: u32,
-    v: Vec3,
+    pub w: Vec3,
     _padding2: u32,
-    w: Vec3,
-    _padding3: u32,
 }
 
+#[derive(Debug)]
 pub struct Camera {
     uniforms: CameraUniforms,
     center: Vec3,
@@ -33,6 +34,7 @@ impl Camera {
         distance: f32,
         azimuth: f32,
         altitude: f32,
+        focal_distance: f32,
     ) -> Camera {
         let mut camera = Camera {
             uniforms: CameraUniforms::zeroed(),
@@ -43,6 +45,7 @@ impl Camera {
             altitude,
         };
         camera.calculate_uniforms();
+        camera.uniforms.focal_distance = focal_distance;
         camera
     }
 
@@ -85,12 +88,12 @@ impl Camera {
     }
 
     #[allow(unused)]
-    pub fn look_at(origin: Vec3, center: Vec3, up: Vec3) -> Camera {
+    pub fn look_at(origin: Vec3, center: Vec3, up: Vec3, focal_distance: f32) -> Camera {
         let center_to_origin = origin - center;
         let distance = center_to_origin.length().max(0.01); // Prevent distance of 0
         let neg_w = center_to_origin.normalized();
         let azimuth = neg_w.x().atan2(neg_w.z());
         let altitude = neg_w.y().asin();
-        Self::with_spherical_coords(center, up, distance, azimuth, altitude)
+        Self::with_spherical_coords(center, up, distance, azimuth, altitude, focal_distance)
     }
 }

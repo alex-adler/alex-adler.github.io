@@ -42,10 +42,11 @@ fn rand_f32() -> f32 {
 
 // ----------------------- Fragment shader ----------------------- 
 struct CameraUniforms {
-  origin: vec3f,
-  u: vec3f,
-  v: vec3f,
-  w: vec3f,
+    origin: vec3f,
+    focal_distance: f32,
+    u: vec3f,
+    v: vec3f,
+    w: vec3f,
 }
 
 struct Uniforms {
@@ -62,6 +63,7 @@ struct Sphere {
     albedo: vec3f,
     material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
     refraction_index: f32,
+    is_selected: u32,
 }
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -91,7 +93,6 @@ struct Scatter {
 const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
 
-const FOCAL_DISTANCE: f32 = 2.;
 const MAX_PATH_LENGTH: u32 = 8u;
 
 fn sky_colour(ray: Ray) ->vec3f {
@@ -212,6 +213,11 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     let N = (p - sphere.center) / sphere.radius;
     // return Intersection(N, t, vec3(0.5, 0.2, 0.8), 0, 0.);
     // return Intersection(N, t, sphere.albedo, 0, 0.);
+
+    if (sphere.is_selected > 0) && (d <= (.4 * sphere.radius)) {
+        return Intersection(N, t, vec3(1., 0., 0.), 0, 0.);
+    }
+
     return Intersection(N, t, sphere.albedo, sphere.material, sphere.refraction_index);
 }
 
@@ -252,7 +258,7 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
 
     // Compute the scene-space ray direction by rotating the camera-space vector into a new basis
     let camera_rotation = mat3x3(uniforms.camera.u, uniforms.camera.v, uniforms.camera.w);
-    let direction = camera_rotation * vec3(uv, FOCAL_DISTANCE);
+    let direction = camera_rotation * vec3(uv, uniforms.camera.focal_distance);
     var ray = Ray(origin, direction);
     var throughput = vec3f(1.);
     var radiance_sample = vec3(0.);

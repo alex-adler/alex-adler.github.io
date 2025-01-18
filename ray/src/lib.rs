@@ -5,10 +5,15 @@ use std::iter;
 
 use algebra::Vec3;
 use bytemuck::Zeroable;
-use web_sys::js_sys::{Date, Math::random};
+use select::{add_selection, clear_all_selections, get_selected_object, remove_selection};
+use web_sys::js_sys::{
+    Date,
+    Math::{abs, random},
+};
 use wgpu::Limits;
 
 use winit::{
+    dpi::PhysicalPosition,
     event::*,
     event_loop::EventLoop,
     keyboard::{KeyCode, PhysicalKey},
@@ -18,6 +23,7 @@ use winit::{
 mod algebra;
 mod camera;
 mod helpers;
+mod select;
 
 use crate::camera::{Camera, CameraUniforms};
 
@@ -30,8 +36,9 @@ extern "C" {
     fn update_fps(new_fps: u32);
 }
 
+const FOCAL_DISTANCE: f32 = 2.;
 const FPS_HISTORY_LENGTH: usize = 60;
-const MAX_OBJECT_COUNT: usize = 1024;
+pub const MAX_OBJECT_COUNT: usize = 1024;
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -75,7 +82,8 @@ struct Sphere {
     albedo: Vec3,
     material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
     refraction_index: f32,
-    _pad: [f32; 3],
+    is_selected: u32,
+    _pad: [f32; 2],
 }
 
 struct State<'a> {
@@ -100,8 +108,9 @@ struct State<'a> {
     // it gets dropped after it as the surface contains
     // unsafe references to the window's resources.
     window: &'a Window,
-    clear_colour: wgpu::Color,
     camera: Camera,
+    mouse_position: PhysicalPosition<f64>,
+    mouse_pressed_position: [PhysicalPosition<f64>; 3],
     mouse_button_pressed: [bool; 3],
     last_frame_time: Date,
     frame_rate_history: [f32; FPS_HISTORY_LENGTH],
@@ -172,6 +181,7 @@ impl<'a> State<'a> {
             Vec3::new(3., 2., 3.),
             Vec3::new(0., 0., 0.),
             Vec3::new(0., 1., 0.),
+            FOCAL_DISTANCE,
         );
 
         let uniforms = Uniforms::new();
@@ -189,7 +199,8 @@ impl<'a> State<'a> {
             radius: 1000.,
             material: 1,
             refraction_index: 0.,
-            _pad: [0.0; 3],
+            is_selected: 0,
+            _pad: [0.0; 2],
         };
         let mut sphere_num = 1;
         // for a in -11..11 {
@@ -216,7 +227,8 @@ impl<'a> State<'a> {
             radius: 1.0,
             material: 2,
             refraction_index: 0.67,
-            _pad: [0.0; 3],
+            is_selected: 0,
+            _pad: [0.0; 2],
         };
         sphere_num += 1;
         scene[sphere_num] = Sphere {
@@ -225,7 +237,8 @@ impl<'a> State<'a> {
             radius: 1.0,
             material: 0,
             refraction_index: 0.67,
-            _pad: [0.0; 3],
+            is_selected: 1,
+            _pad: [0.0; 2],
         };
         sphere_num += 1;
         scene[sphere_num] = Sphere {
@@ -234,7 +247,8 @@ impl<'a> State<'a> {
             radius: 1.0,
             material: 1,
             refraction_index: 0.67,
-            _pad: [0.0; 3],
+            is_selected: 0,
+            _pad: [0.0; 2],
         };
         sphere_num += 1;
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
@@ -359,6 +373,8 @@ impl<'a> State<'a> {
             cache: None,
         });
 
+        log::warn!("{:?}", camera);
+
         Self {
             limits,
 
@@ -378,8 +394,9 @@ impl<'a> State<'a> {
             sphere_num,
 
             window,
-            clear_colour: wgpu::Color::BLACK,
             camera,
+            mouse_position: PhysicalPosition { x: 0., y: 0. },
+            mouse_pressed_position: [PhysicalPosition { x: 0., y: 0. }; 3],
             mouse_button_pressed: [false; 3],
             last_frame_time: Date::new_0(),
             frame_rate_history: [60.; FPS_HISTORY_LENGTH],
@@ -405,12 +422,7 @@ impl<'a> State<'a> {
     fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
-                self.clear_colour = wgpu::Color {
-                    r: position.x as f64 / self.size.width as f64,
-                    g: position.y as f64 / self.size.height as f64,
-                    b: 1.0,
-                    a: 1.0,
-                };
+                self.mouse_position = *position;
                 true
             }
             WindowEvent::KeyboardInput {
@@ -434,7 +446,8 @@ impl<'a> State<'a> {
                         radius: 0.2,
                         material: (random() * 3.) as u32,
                         refraction_index: 1. / 1.5,
-                        _pad: [0.0; 3],
+                        is_selected: 0,
+                        _pad: [0.0; 2],
                     };
                     self.sphere_num += 1;
                     self.uniforms.reset_samples();
@@ -465,12 +478,46 @@ impl<'a> State<'a> {
                 self.uniforms.reset_samples();
             }
             DeviceEvent::Button { button, state } => {
-                if *button <= 3 {
-                    self.mouse_button_pressed[*button as usize] = *state == ElementState::Pressed;
-                }
                 // 0 - Left
                 // 1 - Right
                 // 2 - Middle
+                if *button <= 3 {
+                    self.mouse_button_pressed[*button as usize] = *state == ElementState::Pressed;
+
+                    if *state == ElementState::Pressed {
+                        self.mouse_pressed_position[*button as usize] = self.mouse_position;
+                    } else {
+                        let last_pos = &self.mouse_pressed_position[*button as usize];
+                        let pos = &self.mouse_position;
+                        // Allow for the mouse to move a little bit between being pressed and released
+                        if abs(pos.x - last_pos.x) < 5. && abs(pos.y - last_pos.y) < 5. {
+                            log::warn!("Selecting");
+                            // Check if there are any object we can select
+                            let hit_object = get_selected_object(
+                                &self.mouse_position,
+                                &self.uniforms,
+                                &self.scene,
+                            );
+
+                            if hit_object == usize::MAX {
+                                clear_all_selections(&mut self.scene);
+                            } else {
+                                match *button {
+                                    0 => {
+                                        add_selection(hit_object, &mut self.scene);
+                                    }
+                                    1 => {
+                                        remove_selection(hit_object, &mut self.scene);
+                                    }
+                                    _ => {
+                                        clear_all_selections(&mut self.scene);
+                                    }
+                                }
+                            }
+                            self.uniforms.reset_samples();
+                        }
+                    }
+                }
             }
             DeviceEvent::MouseMotion { delta: (dx, dy) } => {
                 let dx = *dx as f32 * -0.01;
@@ -544,7 +591,12 @@ impl<'a> State<'a> {
                     view: &view,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(self.clear_colour),
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.,
+                            g: 0.,
+                            b: 0.,
+                            a: 1.0,
+                        }),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
