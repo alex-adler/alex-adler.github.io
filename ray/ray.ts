@@ -17,5 +17,5 @@ window.onload = function () {
 
 export function update_fps(new_fps: Number) {
 	let text = document.getElementById("fps") as HTMLHeadingElement;
-	text.innerHTML = new_fps + " FPS"
+	text.innerHTML = new_fps.toFixed(4) + " FPS"
 }

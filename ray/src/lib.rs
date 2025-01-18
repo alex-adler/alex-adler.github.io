@@ -33,7 +33,7 @@ use wasm_bindgen::prelude::*;
 #[cfg(target_arch = "wasm32")]
 #[link(wasm_import_module = "./ray.js")]
 extern "C" {
-    fn update_fps(new_fps: u32);
+    fn update_fps(new_fps: f32);
 }
 
 const FOCAL_DISTANCE: f32 = 4.5;
@@ -300,24 +300,28 @@ impl<'a> State<'a> {
             Material::new_basic(Vec3::new(0.5, 0.5, 0.5), 0.),
         );
         let mut sphere_num = 1;
-        // for a in -11..11 {
-        //     for b in -11..11 {
-        //         scene[sphere_num] = Sphere {
-        //             center: Vec3::new(
-        //                 (a as f64 + 0.9 * random()) as f32,
-        //                 0.2,
-        //                 (b as f64 + 0.9 * random()) as f32,
-        //             ),
-        //             albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
-        //                 .normalized(),
-        //             radius: 0.2,
-        //             material: (random() * 3.) as u32,
-        //             refraction_index: 1. / 1.5,
-        //             _pad: [0.0; 3],
-        //         };
-        //         sphere_num += 1;
-        //     }
-        // }
+        for a in -11..11 {
+            for b in -11..11 {
+                scene[sphere_num] = Sphere::new(
+                    Vec3::new(
+                        (a as f64 + 0.9 * random()) as f32,
+                        0.2,
+                        (b as f64 + 0.9 * random()) as f32,
+                    ),
+                    0.2,
+                    Material::new(
+                        Vec3::new(random() as f32, random() as f32, random() as f32).normalized(),
+                        random() as f32,
+                        random() as f32,
+                        1. / 1.5,
+                        random() as f32,
+                        random() as f32,
+                        Vec3::new(random() as f32, random() as f32, random() as f32),
+                    ),
+                );
+                sphere_num += 1;
+            }
+        }
         scene[sphere_num] = Sphere::new(
             Vec3::new(2., 1., -2.),
             1.0,
@@ -677,7 +681,7 @@ impl<'a> State<'a> {
         fps_mean /= self.frame_rate_history.len() as f32;
 
         unsafe {
-            update_fps(fps_mean.round() as u32);
+            update_fps(fps_mean as f32);
         }
         self.last_frame_time = current_date;
         self.frame_rate_pos += 1;

@@ -1,7 +1,6 @@
 import init from "./ray_rs.js";
 function main() {
     init().then(() => console.log("WASM Loaded"));
-    update_fps(0);
 }
 window.onload = function () {
     if (!navigator.gpu) {
@@ -11,10 +10,9 @@ window.onload = function () {
         document.getElementById("fps").style.display = "none";
         return;
     }
-    console.log("Loading wasm");
     main();
 };
 export function update_fps(new_fps) {
     let text = document.getElementById("fps");
-    text.innerHTML = new_fps + " FPS";
+    text.innerHTML = new_fps.toFixed(4) + " FPS";
 }
