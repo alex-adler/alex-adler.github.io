@@ -88,12 +88,12 @@ impl Camera {
     }
 
     #[allow(unused)]
-    pub fn look_at(origin: Vec3, center: Vec3, up: Vec3, focal_distance: f32) -> Camera {
-        let center_to_origin = origin - center;
+    pub fn look_at(source: Vec3, dest: Vec3, up: Vec3, focal_distance: f32) -> Camera {
+        let center_to_origin = source - dest;
         let distance = center_to_origin.length().max(0.01); // Prevent distance of 0
         let neg_w = center_to_origin.normalized();
         let azimuth = neg_w.x().atan2(neg_w.z());
         let altitude = neg_w.y().asin();
-        Self::with_spherical_coords(center, up, distance, azimuth, altitude, focal_distance)
+        Self::with_spherical_coords(dest, up, distance, azimuth, altitude, focal_distance)
     }
 }

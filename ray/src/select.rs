@@ -17,6 +17,12 @@ impl Ray {
     }
 }
 
+impl Ray {
+    pub fn distance_to(&self, t: f32) -> f32 {
+        dot(t * self.direction, t * self.direction).sqrt()
+    }
+}
+
 fn intersect_sphere(ray: &Ray, sphere: Sphere) -> f32 {
     let v = ray.origin - Into::<Vector3<f32>>::into(sphere.center);
     let a = dot(ray.direction, ray.direction);
@@ -48,7 +54,7 @@ fn intersect_sphere(ray: &Ray, sphere: Sphere) -> f32 {
     }
 }
 
-fn intersect_scene(ray: &Ray, scene: &[Sphere; MAX_OBJECT_COUNT]) -> usize {
+fn intersect_scene(ray: &Ray, scene: &[Sphere; MAX_OBJECT_COUNT]) -> (usize, f32) {
     let mut closest_hit: f32 = f32::MAX;
     let mut hit_object_num: usize = 0;
     for i in 0..scene.len() {
@@ -63,9 +69,9 @@ fn intersect_scene(ray: &Ray, scene: &[Sphere; MAX_OBJECT_COUNT]) -> usize {
         }
     }
     if closest_hit < f32::MAX {
-        hit_object_num
+        (hit_object_num, ray.distance_to(closest_hit))
     } else {
-        usize::MAX
+        (usize::MAX, f32::MAX)
     }
 }
 
@@ -73,7 +79,7 @@ pub fn get_selected_object(
     pos: &PhysicalPosition<f64>,
     uniforms: &Uniforms,
     scene: &[Sphere; MAX_OBJECT_COUNT],
-) -> usize {
+) -> (usize, f32) {
     let mut u = (pos.x / (uniforms.width - 1) as f64) as f32;
     let mut v = (pos.y / (uniforms.height - 1) as f64) as f32;
 

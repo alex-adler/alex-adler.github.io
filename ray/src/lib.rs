@@ -530,9 +530,8 @@ impl<'a> State<'a> {
                         let pos = &self.mouse_position;
                         // Allow for the mouse to move a little bit between being pressed and released
                         if abs(pos.x - last_pos.x) < 5. && abs(pos.y - last_pos.y) < 5. {
-                            log::warn!("Selecting");
                             // Check if there are any object we can select
-                            let hit_object = get_selected_object(
+                            let (hit_object, dist_to_object) = get_selected_object(
                                 &self.mouse_position,
                                 &self.uniforms,
                                 &self.scene,
@@ -543,6 +542,7 @@ impl<'a> State<'a> {
                             } else {
                                 match *button {
                                     0 => {
+                                        log::warn!("Point is {} units away", dist_to_object);
                                         add_selection(hit_object, &mut self.scene);
                                     }
                                     1 => {
