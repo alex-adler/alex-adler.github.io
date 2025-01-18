@@ -154,8 +154,7 @@ fn reflect_ray(input_ray: Ray, hit: Intersection) -> Scatter {
 
 fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Figure out which side of the surface we are hitting
-    // TODO: replace dot with faceForward
-    let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
+    let normal = faceForward(hit.normal, input_ray.direction, hit.normal);
     let refraction_index = select(hit.material.refraction_index, 1./hit.material.refraction_index, dot(input_ray.direction, hit.normal) > 0.);
     
     let input_direction = normalize(input_ray.direction);
