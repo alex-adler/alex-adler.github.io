@@ -58,8 +58,9 @@ struct Uniforms {
 
 struct Material {
     albedo: vec3f,
-    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    alpha: f32,
     refraction_index: f32,
+    smoothness: f32,
 }
 
 // Order of members is very important for aligning purposes
@@ -140,8 +141,20 @@ fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     return Scatter(attenuation, output_ray);
 }
 
+fn reflect_ray(input_ray: Ray, hit: Intersection) -> Scatter {
+    let lambertian_reflection = hit.normal + generate_random_unit_vector();
+    let metallic_reflection = reflect(input_ray.direction, hit.normal);
+    let reflected = mix(lambertian_reflection, metallic_reflection, hit.material.smoothness);
+    // Bump the start of the reflected ray a little bit off the surface to
+    // try to minimize self intersections due to floating point errors
+    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
+    let attenuation = hit.material.albedo;
+    return Scatter(attenuation, output_ray);
+}
+
 fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Figure out which side of the surface we are hitting
+    // TODO: replace dot with faceForward
     let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
     let refraction_index = select(hit.material.refraction_index, 1./hit.material.refraction_index, dot(input_ray.direction, hit.normal) > 0.);
     
@@ -164,13 +177,11 @@ fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 }
 
 fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    if hit.material.material == 0 {
-        return lambertian_scatter(input_ray, hit);
-    } else if hit.material.material == 1 {
-        return metallic_scatter(input_ray, hit);
-    } else {
+    // Probability of refracting
+    if hit.material.alpha < rand_f32(){
         return dielectric_scatter(input_ray, hit);
     }
+    return reflect_ray(input_ray, hit);
 }
 
 // Create an empty intersection
@@ -181,7 +192,8 @@ fn no_intersection() -> Intersection {
         Material(
             vec3f(0.), 
             0, 
-            0.
+            0.,
+            0.,
         ));
 }
 
@@ -221,7 +233,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 
     // Highlight edges of selected object
     if (sphere.is_selected > 0) && (d <= (.4 * sphere.radius)) {
-        return Intersection(N, t, Material(vec3(1., 0., 0.), 0, 0.));
+        return Intersection(N, t, Material(vec3(1., 0., 0.), 0., 0., 0.));
     }
 
     return Intersection(N, t, sphere.material);

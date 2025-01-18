@@ -78,18 +78,20 @@ impl Uniforms {
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 struct Material {
     albedo: Vec3,
-    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
-    refraction_index: f32,
-    _pad: [u32; 3],
+    alpha: f32,            // 0.0 = Transparent (Dielectric), 1.0 = Opaque
+    refraction_index: f32, // Relative from air into material (glass is ~1.0/1.5)
+    smoothness: f32,       // 0.0 = Matte (Lambertian), 1.0 = Mirror (Specular)
+    _pad: [u32; 2],
 }
 
 impl Material {
-    pub fn new(material: u32, albedo: Vec3, refraction_index: f32) -> Self {
+    pub fn new(albedo: Vec3, smoothness: f32, alpha: f32, refraction_index: f32) -> Self {
         Self {
             albedo,
-            material,
+            smoothness,
+            alpha,
             refraction_index,
-            _pad: [0; 3],
+            _pad: [0; 2],
         }
     }
 }
@@ -97,10 +99,11 @@ impl Material {
 impl Default for Material {
     fn default() -> Self {
         Self {
-            albedo: Vec3::new(0., 0., 0.),
-            material: 0,
+            albedo: Vec3::new(1., 1., 1.),
+            smoothness: 0.0,
+            alpha: 1.0,
             refraction_index: 1. / 1.5,
-            _pad: [0; 3],
+            _pad: [0; 2],
         }
     }
 }
@@ -249,7 +252,7 @@ impl<'a> State<'a> {
         scene[0] = Sphere::new(
             Vec3::new(0., -1000., -1.),
             1000.,
-            Material::new(1, Vec3::new(0.5, 0.5, 0.5), 0.),
+            Material::new(Vec3::new(0.5, 0.5, 0.5), 0., 1., 0.),
         );
         let mut sphere_num = 1;
         // for a in -11..11 {
@@ -271,21 +274,21 @@ impl<'a> State<'a> {
         //     }
         // }
         scene[sphere_num] = Sphere::new(
+            Vec3::new(2., 1., -2.),
+            1.0,
+            Material::new(Vec3::new(0.7, 0.6, 0.5), 0.4, 1., 0.67),
+        );
+        sphere_num += 1;
+        scene[sphere_num] = Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
-            Material::new(2, Vec3::new(1., 1., 1.), 0.67),
+            Material::new(Vec3::new(1., 1., 1.), 0., 0.2, 0.67),
         );
         sphere_num += 1;
         scene[sphere_num] = Sphere::new(
-            Vec3::new(-4., 1., 0.),
+            Vec3::new(-2., 1., -2.),
             1.0,
-            Material::new(0, Vec3::new(0.4, 0.2, 0.1), 0.67),
-        );
-        sphere_num += 1;
-        scene[sphere_num] = Sphere::new(
-            Vec3::new(4., 1., 0.),
-            1.0,
-            Material::new(1, Vec3::new(0.7, 0.6, 0.5), 0.67),
+            Material::new(Vec3::new(0.4, 0.2, 0.1), 0., 1., 0.67),
         );
         sphere_num += 1;
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
@@ -478,9 +481,10 @@ impl<'a> State<'a> {
                         ),
                         0.2,
                         Material::new(
-                            (random() * 3.) as u32,
                             Vec3::new(random() as f32, random() as f32, random() as f32)
                                 .normalized(),
+                            random() as f32,
+                            random() as f32,
                             1. / 1.5,
                         ),
                     );
