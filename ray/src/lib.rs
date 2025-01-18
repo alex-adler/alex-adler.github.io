@@ -76,14 +76,67 @@ impl Uniforms {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-struct Sphere {
-    center: Vec3,
-    radius: f32,
+struct Material {
     albedo: Vec3,
     material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
     refraction_index: f32,
+    _pad: [u32; 3],
+}
+
+impl Material {
+    pub fn new(material: u32, albedo: Vec3, refraction_index: f32) -> Self {
+        Self {
+            albedo,
+            material,
+            refraction_index,
+            _pad: [0; 3],
+        }
+    }
+}
+
+impl Default for Material {
+    fn default() -> Self {
+        Self {
+            albedo: Vec3::new(0., 0., 0.),
+            material: 0,
+            refraction_index: 1. / 1.5,
+            _pad: [0; 3],
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+struct Sphere {
+    center: Vec3,
+    radius: f32,
+    material: Material,
     is_selected: u32,
-    _pad: [f32; 2],
+    _pad: [u32; 3],
+}
+
+impl Sphere {
+    pub fn new(center: Vec3, radius: f32, material: Material) -> Self {
+        Self {
+            center,
+            radius,
+            material,
+            is_selected: 0,
+            _pad: [0; 3],
+        }
+    }
+}
+
+impl Default for Sphere {
+    fn default() -> Self {
+        Self {
+            center: Vec3::new(0., 0., 0.),
+            radius: 0.5,
+            material: Material::default(),
+            is_selected: 0,
+            _pad: [0; 3],
+        }
+    }
 }
 
 struct State<'a> {
@@ -193,15 +246,11 @@ impl<'a> State<'a> {
         });
 
         let mut scene = [Sphere::zeroed(); MAX_OBJECT_COUNT];
-        scene[0] = Sphere {
-            center: Vec3::new(0., -1000., -1.),
-            albedo: Vec3::new(0.5, 0.5, 0.5),
-            radius: 1000.,
-            material: 1,
-            refraction_index: 0.,
-            is_selected: 0,
-            _pad: [0.0; 2],
-        };
+        scene[0] = Sphere::new(
+            Vec3::new(0., -1000., -1.),
+            1000.,
+            Material::new(1, Vec3::new(0.5, 0.5, 0.5), 0.),
+        );
         let mut sphere_num = 1;
         // for a in -11..11 {
         //     for b in -11..11 {
@@ -221,35 +270,23 @@ impl<'a> State<'a> {
         //         sphere_num += 1;
         //     }
         // }
-        scene[sphere_num] = Sphere {
-            center: Vec3::new(0., 1., 0.),
-            albedo: Vec3::new(1., 1., 1.),
-            radius: 1.0,
-            material: 2,
-            refraction_index: 0.67,
-            is_selected: 0,
-            _pad: [0.0; 2],
-        };
+        scene[sphere_num] = Sphere::new(
+            Vec3::new(0., 1., 0.),
+            1.0,
+            Material::new(2, Vec3::new(1., 1., 1.), 0.67),
+        );
         sphere_num += 1;
-        scene[sphere_num] = Sphere {
-            center: Vec3::new(-4., 1., 0.),
-            albedo: Vec3::new(0.4, 0.2, 0.1),
-            radius: 1.0,
-            material: 0,
-            refraction_index: 0.67,
-            is_selected: 1,
-            _pad: [0.0; 2],
-        };
+        scene[sphere_num] = Sphere::new(
+            Vec3::new(-4., 1., 0.),
+            1.0,
+            Material::new(0, Vec3::new(0.4, 0.2, 0.1), 0.67),
+        );
         sphere_num += 1;
-        scene[sphere_num] = Sphere {
-            center: Vec3::new(4., 1., 0.),
-            albedo: Vec3::new(0.7, 0.6, 0.5),
-            radius: 1.0,
-            material: 1,
-            refraction_index: 0.67,
-            is_selected: 0,
-            _pad: [0.0; 2],
-        };
+        scene[sphere_num] = Sphere::new(
+            Vec3::new(4., 1., 0.),
+            1.0,
+            Material::new(1, Vec3::new(0.7, 0.6, 0.5), 0.67),
+        );
         sphere_num += 1;
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Scene"),
@@ -373,8 +410,6 @@ impl<'a> State<'a> {
             cache: None,
         });
 
-        log::warn!("{:?}", camera);
-
         Self {
             limits,
 
@@ -435,20 +470,20 @@ impl<'a> State<'a> {
                 ..
             } => match physical_key {
                 PhysicalKey::Code(KeyCode::KeyA) => {
-                    self.scene[self.sphere_num] = Sphere {
-                        center: Vec3::new(
+                    self.scene[self.sphere_num] = Sphere::new(
+                        Vec3::new(
                             (10. * random() - 5.0) as f32,
                             (5. * random()) as f32,
                             (10. * random() - 5.0) as f32,
                         ),
-                        albedo: Vec3::new(random() as f32, random() as f32, random() as f32)
-                            .normalized(),
-                        radius: 0.2,
-                        material: (random() * 3.) as u32,
-                        refraction_index: 1. / 1.5,
-                        is_selected: 0,
-                        _pad: [0.0; 2],
-                    };
+                        0.2,
+                        Material::new(
+                            (random() * 3.) as u32,
+                            Vec3::new(random() as f32, random() as f32, random() as f32)
+                                .normalized(),
+                            1. / 1.5,
+                        ),
+                    );
                     self.sphere_num += 1;
                     self.uniforms.reset_samples();
                     true

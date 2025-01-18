@@ -56,13 +56,17 @@ struct Uniforms {
     height: u32,
 };
 
+struct Material {
+    albedo: vec3f,
+    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
+    refraction_index: f32,
+}
+
 // Order of members is very important for aligning purposes
 struct Sphere {
     center: vec3f,
     radius: f32,
-    albedo: vec3f,
-    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
-    refraction_index: f32,
+    material: Material,
     is_selected: u32,
 }
 
@@ -80,9 +84,7 @@ struct Ray {
 struct Intersection {
     normal: vec3f,
     t: f32,
-    colour: vec3f,
-    material: u32, // 0 - Lambertian, 1 - Metallic, 2 - Dielectric
-    refraction_index: f32,
+    material: Material,
 }
 
 struct Scatter {
@@ -125,7 +127,7 @@ fn lambertian_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Bump the start of the reflected ray a little bit off the surface to
     // try to minimize self intersections due to floating point errors
     let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
-    let attenuation = hit.colour;
+    let attenuation = hit.material.albedo;
     return Scatter(attenuation, output_ray);
 }
 
@@ -134,14 +136,14 @@ fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Bump the start of the reflected ray a little bit off the surface to
     // try to minimize self intersections due to floating point errors
     let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
-    let attenuation = hit.colour;
+    let attenuation = hit.material.albedo;
     return Scatter(attenuation, output_ray);
 }
 
 fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Figure out which side of the surface we are hitting
     let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
-    let refraction_index = select(hit.refraction_index, 1./hit.refraction_index, dot(input_ray.direction, hit.normal) > 0.);
+    let refraction_index = select(hit.material.refraction_index, 1./hit.material.refraction_index, dot(input_ray.direction, hit.normal) > 0.);
     
     let input_direction = normalize(input_ray.direction);
     var output_ray_direction = refract(input_direction, normal, refraction_index);
@@ -150,21 +152,21 @@ fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
     var output_ray = input_ray;
     // If angle is less than the critical angle, reflection occurs instead and the function returns vec3(0.)
-    if (output_ray_direction.x == 0. && output_ray_direction.y == 0. && output_ray_direction.z == 0.) || is_reflective_schlick(cos_theta, hit.refraction_index) {
+    if (output_ray_direction.x == 0. && output_ray_direction.y == 0. && output_ray_direction.z == 0.) || is_reflective_schlick(cos_theta, hit.material.refraction_index) {
         output_ray_direction = reflect(input_direction, normal);
         output_ray = Ray(point_on_ray(input_ray, hit.t) + normal * EPSILON, output_ray_direction);
     } else {
         output_ray = Ray(point_on_ray(input_ray, hit.t), output_ray_direction);
     }
 
-    let attenuation = hit.colour;
+    let attenuation = hit.material.albedo;
     return Scatter(attenuation, output_ray);
 }
 
 fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    if hit.material == 0 {
+    if hit.material.material == 0 {
         return lambertian_scatter(input_ray, hit);
-    } else if hit.material == 1 {
+    } else if hit.material.material == 1 {
         return metallic_scatter(input_ray, hit);
     } else {
         return dielectric_scatter(input_ray, hit);
@@ -173,7 +175,14 @@ fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
 // Create an empty intersection
 fn no_intersection() -> Intersection {
-    return Intersection(vec3(0.), -1., vec3f(0.), 0, 0.);
+    return Intersection(
+        vec3(0.), 
+        -1., 
+        Material(
+            vec3f(0.), 
+            0, 
+            0.
+        ));
 }
 
 // Calculate if an intersection has occured
@@ -185,7 +194,6 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     let v = ray.origin - sphere.center;
     let a = dot(ray.direction, ray.direction);
     let b = dot(v, ray.direction);
-    // let c = dot(v, v) - .25;
     let c = dot(v, v) - sphere.radius * sphere.radius;
 
     // Find roots for the quadratic
@@ -209,16 +217,14 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     }
 
     let p = point_on_ray(ray, t);
-    // let N = (p - sphere.center) / .5;
     let N = (p - sphere.center) / sphere.radius;
-    // return Intersection(N, t, vec3(0.5, 0.2, 0.8), 0, 0.);
-    // return Intersection(N, t, sphere.albedo, 0, 0.);
 
+    // Highlight edges of selected object
     if (sphere.is_selected > 0) && (d <= (.4 * sphere.radius)) {
-        return Intersection(N, t, vec3(1., 0., 0.), 0, 0.);
+        return Intersection(N, t, Material(vec3(1., 0., 0.), 0, 0.));
     }
 
-    return Intersection(N, t, sphere.albedo, sphere.material, sphere.refraction_index);
+    return Intersection(N, t, sphere.material);
 }
 
 fn intersect_scene(ray: Ray) -> Intersection {
