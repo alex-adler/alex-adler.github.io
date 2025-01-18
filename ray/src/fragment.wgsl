@@ -114,7 +114,6 @@ fn point_on_ray(ray: Ray, t: f32) -> vec3f{
 }
 
 fn generate_random_unit_vector() -> vec3f{
-    // return vec3f(0.); // For replacing the line below when wanting to see the cargo-wgsl output
     return normalize(vec3f(rand_f32()*2.-1., rand_f32()*2.-1., rand_f32()*2.-1.));
 }
 
@@ -122,24 +121,6 @@ fn is_reflective_schlick(cosine: f32, refraction_index: f32) -> bool {
     var r0 = (1. - refraction_index) / (1. + refraction_index);
     r0 = r0*r0;
     return (r0 + (1.-r0)*pow((1. - cosine), 5.)) > rand_f32();
-}
-
-fn lambertian_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    let reflected = hit.normal + generate_random_unit_vector();
-    // Bump the start of the reflected ray a little bit off the surface to
-    // try to minimize self intersections due to floating point errors
-    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
-    let attenuation = hit.material.albedo;
-    return Scatter(attenuation, output_ray);
-}
-
-fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
-    let reflected = reflect(input_ray.direction, hit.normal);
-    // Bump the start of the reflected ray a little bit off the surface to
-    // try to minimize self intersections due to floating point errors
-    let output_ray = Ray(point_on_ray(input_ray, hit.t) + hit.normal * EPSILON, reflected);
-    let attenuation = hit.material.albedo;
-    return Scatter(attenuation, output_ray);
 }
 
 fn reflect_ray(input_ray: Ray, hit: Intersection) -> Scatter {
@@ -186,15 +167,7 @@ fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
 // Create an empty intersection
 fn no_intersection() -> Intersection {
-    return Intersection(
-        vec3(0.), 
-        -1., 
-        Material(
-            vec3f(0.), 
-            0, 
-            0.,
-            0.,
-        ));
+    return Intersection(vec3(0.), -1., Material(vec3f(0.), 0., 0., 0.));
 }
 
 // Calculate if an intersection has occured
