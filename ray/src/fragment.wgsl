@@ -47,6 +47,7 @@ struct CameraUniforms {
     u: vec3f,
     vfov: f32,
     v: vec3f,
+    dof_scale: f32,
     w: vec3f,
 }
 
@@ -94,6 +95,7 @@ struct Scatter {
     ray: Ray,
 }
 
+const TAU: f32 = 6.283185307;
 const F32_MAX: f32 = 3.40282346638528859812e+38;
 const EPSILON: f32 = 1e-2;
 
@@ -205,7 +207,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     let N = (p - sphere.center) / sphere.radius;
 
     // Highlight edges of selected object
-    if (sphere.is_selected > 0) && (d <= (.4 * sphere.radius)) {
+    if (sphere.is_selected > 0) && (d <= (.05 * sphere.radius)) {
         return Intersection(N, t, Material(vec3(1., 0., 0.), 1., 0., 0.));
     }
 
@@ -231,15 +233,20 @@ fn intersect_scene(ray: Ray) -> Intersection {
     return no_intersection();
 }
 
+fn get_random_in_unit_disk() -> vec3f {
+    let r = rand_f32() * 2. - 1.;
+    let theta = rand_f32() * TAU;
+    return vec3(r*cos(theta), r*sin(theta), 0.);
+}
+
 @fragment
 fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     // Seed the Random Number Generator
     init_rng(vec2u(pos.xy), uniforms.width, uniforms.frame_num);
 
-    let origin = uniforms.camera.origin;
     let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
 
-    let offset = vec2(rand_f32() - 0.5, rand_f32() - 0.5);
+    let offset = get_random_in_unit_disk().xy;
     // Add some jitter and normalize the viewport coordinates (0,0 top left; 1,1 bottom right)
     var uv = (pos.xy + offset) / vec2f(f32(uniforms.width-1u), f32(uniforms.height-1u));
 
@@ -253,8 +260,10 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
 
     // Compute the scene-space ray direction by rotating the camera-space vector into a new basis
     let camera_rotation = mat3x3(uniforms.camera.u, uniforms.camera.v, uniforms.camera.w);
-    let direction = camera_rotation * vec3(uv, uniforms.camera.focal_distance);
-    var ray = Ray(origin, direction);
+    let dof_offset = camera_rotation * get_random_in_unit_disk() * uniforms.camera.dof_scale;
+    let direction = camera_rotation * vec3(uv, uniforms.camera.focal_distance) - dof_offset;
+    let origin = uniforms.camera.origin + dof_offset;
+    var ray = Ray(origin, normalize(direction));
     var throughput = vec3f(1.);
     var radiance_sample = vec3(0.);
 

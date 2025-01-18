@@ -12,9 +12,9 @@ pub struct CameraUniforms {
     pub u: Vec3,
     pub vfov_rad: f32,
     pub v: Vec3,
-    _padding0: u32, //  Vectors need to be aligned to 32 Bytes
+    pub dof_scale: f32,
     pub w: Vec3,
-    _padding1: u32,
+    _padding0: u32, //  Vectors need to be aligned to 32 Bytes
 }
 
 #[derive(Debug)]
@@ -36,6 +36,7 @@ impl Camera {
         altitude: f32,
         focal_distance: f32,
         vfov_deg: f32,
+        dof_scale: f32,
     ) -> Camera {
         let mut camera = Camera {
             uniforms: CameraUniforms::zeroed(),
@@ -48,6 +49,7 @@ impl Camera {
         camera.calculate_uniforms();
         camera.uniforms.focal_distance = focal_distance;
         camera.uniforms.vfov_rad = vfov_deg.to_radians();
+        camera.uniforms.dof_scale = dof_scale;
         camera
     }
 
@@ -96,6 +98,7 @@ impl Camera {
         up: Vec3,
         focal_distance: f32,
         vfov_deg: f32,
+        dof_scale: f32,
     ) -> Camera {
         let center_to_origin = source - dest;
         let distance = center_to_origin.length().max(0.01); // Prevent distance of 0
@@ -110,6 +113,7 @@ impl Camera {
             altitude,
             focal_distance,
             vfov_deg,
+            dof_scale,
         )
     }
 }

@@ -38,6 +38,8 @@ extern "C" {
 
 const FOCAL_DISTANCE: f32 = 2.;
 const VFOV_DEG: f32 = 40.;
+const DOF_SCALE: f32 = 0.05;
+
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
 
@@ -240,6 +242,7 @@ impl<'a> State<'a> {
             Vec3::new(0., 1., 0.),
             FOCAL_DISTANCE,
             VFOV_DEG,
+            DOF_SCALE,
         );
 
         let uniforms = Uniforms::new();
@@ -278,13 +281,13 @@ impl<'a> State<'a> {
         scene[sphere_num] = Sphere::new(
             Vec3::new(2., 1., -2.),
             1.0,
-            Material::new(Vec3::new(0.7, 0.6, 0.5), 0.4, 1., 0.67),
+            Material::new(Vec3::new(0.7, 0.6, 0.5), 1., 1., 0.67),
         );
         sphere_num += 1;
         scene[sphere_num] = Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
-            Material::new(Vec3::new(1., 1., 1.), 0., 0.2, 0.67),
+            Material::new(Vec3::new(1., 1., 1.), 0., 0., 0.67),
         );
         sphere_num += 1;
         scene[sphere_num] = Sphere::new(
@@ -475,22 +478,24 @@ impl<'a> State<'a> {
                 ..
             } => match physical_key {
                 PhysicalKey::Code(KeyCode::KeyA) => {
-                    self.scene[self.sphere_num] = Sphere::new(
-                        Vec3::new(
-                            (10. * random() - 5.0) as f32,
-                            (5. * random()) as f32,
-                            (10. * random() - 5.0) as f32,
-                        ),
-                        0.2,
-                        Material::new(
-                            Vec3::new(random() as f32, random() as f32, random() as f32)
-                                .normalized(),
-                            random() as f32,
-                            random() as f32,
-                            1. / 1.5,
-                        ),
-                    );
-                    self.sphere_num += 1;
+                    for _ in 0..10 {
+                        self.scene[self.sphere_num] = Sphere::new(
+                            Vec3::new(
+                                (10. * random() - 5.0) as f32,
+                                (5. * random()) as f32,
+                                (10. * random() - 5.0) as f32,
+                            ),
+                            0.2,
+                            Material::new(
+                                Vec3::new(random() as f32, random() as f32, random() as f32)
+                                    .normalized(),
+                                random() as f32,
+                                random() as f32,
+                                1. / 1.5,
+                            ),
+                        );
+                        self.sphere_num += 1;
+                    }
                     self.uniforms.reset_samples();
                     true
                 }
@@ -541,11 +546,15 @@ impl<'a> State<'a> {
 
                             if hit_object == usize::MAX {
                                 clear_all_selections(&mut self.scene);
+                                if *button == 0 {
+                                    self.camera.uniforms.dof_scale = 0.;
+                                }
                             } else {
                                 match *button {
                                     0 => {
                                         log::warn!("Point is {} units away", dist_to_object);
                                         self.camera.uniforms.focal_distance = dist_to_object;
+                                        self.camera.uniforms.dof_scale = DOF_SCALE;
                                         add_selection(hit_object, &mut self.scene);
                                     }
                                     1 => {
