@@ -140,9 +140,10 @@ fn metallic_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Figure out which side of the surface we are hitting
     let normal = select(hit.normal, -hit.normal, dot(input_ray.direction, hit.normal) > 0.);
+    let refraction_index = select(hit.refraction_index, 1./hit.refraction_index, dot(input_ray.direction, hit.normal) > 0.);
     
     let input_direction = normalize(input_ray.direction);
-    var output_ray_direction = refract(input_direction, normal, hit.refraction_index);
+    var output_ray_direction = refract(input_direction, normal, refraction_index);
 
     let cos_theta = min(dot(-input_direction, normal), 1.0);
 
