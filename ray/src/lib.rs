@@ -36,7 +36,7 @@ extern "C" {
     fn update_fps(new_fps: u32);
 }
 
-const FOCAL_DISTANCE: f32 = 2.;
+const FOCAL_DISTANCE: f32 = 4.5;
 const VFOV_DEG: f32 = 40.;
 const DOF_SCALE: f32 = 0.05;
 
@@ -82,21 +82,57 @@ impl Uniforms {
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 struct Material {
     albedo: Vec3,
-    alpha: f32,            // 0.0 = Transparent (Dielectric), 1.0 = Opaque
-    refraction_index: f32, // Relative from air into material (glass is ~1.0/1.5)
-    smoothness: f32,       // 0.0 = Matte (Lambertian), 1.0 = Mirror (Specular)
-    _pad: [u32; 2],
+    alpha: f32,             // 0.0 = Transparent (Dielectric), 1.0 = Opaque
+    refraction_index: f32,  // Relative from air into material (glass is ~1.0/1.5)
+    smoothness: f32,        // 0.0 = Matte (Lambertian), 1.0 = Mirror (Specular)
+    emissivity: f32,        // 0.0 = No emission, 1.0 pure light
+    emission_strength: f32, // > 0
+    emitted_colour: Vec3,
+    _pad: [u32; 1],
 }
 
 impl Material {
-    pub fn new(albedo: Vec3, smoothness: f32, alpha: f32, refraction_index: f32) -> Self {
+    pub fn new(
+        albedo: Vec3,
+        smoothness: f32,
+        alpha: f32,
+        refraction_index: f32,
+        emissivity: f32,
+        emission_strength: f32,
+        emitted_colour: Vec3,
+    ) -> Self {
         Self {
             albedo,
             smoothness,
             alpha,
             refraction_index,
-            _pad: [0; 2],
+            emissivity,
+            emission_strength,
+            emitted_colour,
+            _pad: [0; 1],
         }
+    }
+    #[allow(unused)]
+    pub fn new_basic(albedo: Vec3, smoothness: f32) -> Self {
+        let mut material = Material::default();
+        material.albedo = albedo;
+        material.smoothness = smoothness;
+        material
+    }
+    #[allow(unused)]
+    pub fn new_clear(albedo: Vec3) -> Self {
+        let mut material = Material::default();
+        material.albedo = albedo;
+        material.alpha = 0.;
+        material
+    }
+    #[allow(unused)]
+    pub fn new_emissive(emitted_colour: Vec3, emission_strength: f32) -> Self {
+        let mut material = Material::default();
+        material.emissivity = 1.;
+        material.emission_strength = emission_strength;
+        material.emitted_colour = emitted_colour;
+        material
     }
 }
 
@@ -107,7 +143,10 @@ impl Default for Material {
             smoothness: 0.0,
             alpha: 1.0,
             refraction_index: 1. / 1.5,
-            _pad: [0; 2],
+            emissivity: 0.0,
+            emission_strength: 0.0,
+            emitted_colour: Vec3::new(1., 1., 1.),
+            _pad: [0; 1],
         }
     }
 }
@@ -239,7 +278,7 @@ impl<'a> State<'a> {
 
         let camera = Camera::look_at(
             Vec3::new(3., 2., 3.),
-            Vec3::new(0., 0., 0.),
+            Vec3::new(0., 1., 0.),
             Vec3::new(0., 1., 0.),
             FOCAL_DISTANCE,
             VFOV_DEG,
@@ -258,7 +297,7 @@ impl<'a> State<'a> {
         scene[0] = Sphere::new(
             Vec3::new(0., -1000., -1.),
             1000.,
-            Material::new(Vec3::new(0.5, 0.5, 0.5), 0., 1., 0.),
+            Material::new_basic(Vec3::new(0.5, 0.5, 0.5), 0.),
         );
         let mut sphere_num = 1;
         // for a in -11..11 {
@@ -282,19 +321,47 @@ impl<'a> State<'a> {
         scene[sphere_num] = Sphere::new(
             Vec3::new(2., 1., -2.),
             1.0,
-            Material::new(Vec3::new(0.7, 0.6, 0.5), 1., 1., 0.67),
+            Material::new_basic(Vec3::new(0.7, 0.6, 0.5), 1.),
         );
         sphere_num += 1;
         scene[sphere_num] = Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
-            Material::new(Vec3::new(1., 1., 1.), 0., 0., 0.67),
+            Material::new_clear(Vec3::new(1., 1., 1.)),
         );
         sphere_num += 1;
         scene[sphere_num] = Sphere::new(
             Vec3::new(-2., 1., -2.),
             1.0,
-            Material::new(Vec3::new(0.4, 0.2, 0.1), 0., 1., 0.67),
+            Material::new_basic(Vec3::new(0.4, 0.2, 0.1), 0.),
+        );
+        sphere_num += 1;
+        scene[sphere_num] = Sphere::new(
+            Vec3::new(0., 3., 0.),
+            0.5,
+            Material::new(
+                Vec3::new(0.9, 0.0, 0.3),
+                0.,
+                1.,
+                0.67,
+                1.,
+                0.1,
+                Vec3::new(0.9, 0.0, 0.3),
+            ),
+        );
+        sphere_num += 1;
+        scene[sphere_num] = Sphere::new(
+            Vec3::new(0., 3., -1.5),
+            0.5,
+            Material::new(
+                Vec3::new(1.0, 1.0, 1.0),
+                0.,
+                1.,
+                0.67,
+                1.,
+                1.,
+                Vec3::new(1.0, 1.0, 1.0),
+            ),
         );
         sphere_num += 1;
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
@@ -493,6 +560,9 @@ impl<'a> State<'a> {
                                 random() as f32,
                                 random() as f32,
                                 1. / 1.5,
+                                random() as f32,
+                                random() as f32,
+                                Vec3::new(random() as f32, random() as f32, random() as f32),
                             ),
                         );
                         self.sphere_num += 1;
@@ -553,7 +623,6 @@ impl<'a> State<'a> {
                             } else {
                                 match *button {
                                     0 => {
-                                        log::warn!("Point is {} units away", dist_to_object);
                                         self.camera.uniforms.focal_distance = dist_to_object;
                                         self.camera.uniforms.dof_scale = DOF_SCALE;
                                         add_selection(hit_object, &mut self.scene);

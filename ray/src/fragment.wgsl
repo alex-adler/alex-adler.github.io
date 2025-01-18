@@ -63,6 +63,9 @@ struct Material {
     alpha: f32,
     refraction_index: f32,
     smoothness: f32,
+    emissivity: f32,
+    emission_strength: f32,
+    emission_colour: vec3f,
 }
 
 // Order of members is very important for aligning purposes
@@ -105,9 +108,10 @@ fn sky_colour(ray: Ray) ->vec3f {
     // Get a value that goes from 1 to 0 as you go down
     let t = 0.5 * (normalize(ray.direction).y + 1.);
     // Make a vertical linear gradient from light blue to white
-    return (1. - t) * vec3(1.) + t * vec3(0.3, 0.5, 1.);
+    // return (1. - t) * vec3(1.) + t * vec3(0.3, 0.5, 1.);
     // or use a rough approximation of twilight (From light red to white)
     // return (1. - t) * vec3(1.) + t * vec3(1., 0.5, 0.3);
+    return vec3(0.);
 }
 
 // Get the position of point on a ray at a given time
@@ -161,7 +165,7 @@ fn dielectric_scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
 fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
     // Probability of refracting
-    if hit.material.alpha < rand_f32(){
+    if hit.material.alpha < rand_f32() {
         return dielectric_scatter(input_ray, hit);
     }
     return reflect_ray(input_ray, hit);
@@ -169,12 +173,16 @@ fn scatter(input_ray: Ray, hit: Intersection) -> Scatter {
 
 // Create an empty intersection
 fn no_intersection() -> Intersection {
-    return Intersection(vec3(0.), -1., Material(vec3f(0.), 0., 0., 0.));
+    return Intersection(vec3(0.), -1., Material(vec3f(0.), 0., 0., 0., 0., 0., vec3f(0.)));
 }
 
 // Calculate if an intersection has occured
 fn is_intersection(hit: Intersection) -> bool {
     return hit.t > 0.;
+}
+
+fn is_light(hit: Intersection) -> bool {
+    return hit.material.emissivity > rand_f32();
 }
 
 fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
@@ -208,7 +216,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 
     // Highlight edges of selected object
     if (sphere.is_selected > 0) && (d <= (.05 * sphere.radius)) {
-        return Intersection(N, t, Material(vec3(1., 0., 0.), 1., 0., 0.));
+        return Intersection(N, t, Material(vec3(1., 0., 0.), 1., 0., 0., 1., 1., vec3f(1., 0., 0.)));
     }
 
     return Intersection(N, t, sphere.material);
@@ -275,6 +283,9 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
             // If not intersection was found, return the colour of the sky and terminate the path
             radiance_sample += throughput * sky_colour(ray);
             break;
+        }
+        if is_light(hit) {
+            radiance_sample += throughput * hit.material.emission_colour * hit.material.emission_strength;
         }
 
         let scattered = scatter(ray, hit);
