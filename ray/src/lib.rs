@@ -42,6 +42,7 @@ const DOF_SCALE: f32 = 0.05;
 
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
+pub const MAX_PASSES: u32 = 600; // 10 Seconds at 60 fps
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -591,6 +592,9 @@ impl<'a> State<'a> {
     fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        if self.uniforms.frame_num > MAX_PASSES {
+            return Ok(());
+        }
         // Calculate FPS
         let current_date = Date::new_0();
         let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
