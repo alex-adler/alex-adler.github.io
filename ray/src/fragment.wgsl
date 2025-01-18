@@ -45,6 +45,7 @@ struct CameraUniforms {
     origin: vec3f,
     focal_distance: f32,
     u: vec3f,
+    vfov: f32,
     v: vec3f,
     w: vec3f,
 }
@@ -265,13 +266,17 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4<f32> {
     let origin = uniforms.camera.origin;
     let aspect_ratio = f32(uniforms.width) / f32(uniforms.height);
 
-    // Normalize the viewport coordinates
     let offset = vec2(rand_f32() - 0.5, rand_f32() - 0.5);
+    // Add some jitter and normalize the viewport coordinates (0,0 top left; 1,1 bottom right)
     var uv = (pos.xy + offset) / vec2f(f32(uniforms.width-1u), f32(uniforms.height-1u));
 
     // Map 'uv' from y-down (normalized) viewport coordinates to camera coordinates
     // (y-up, x-right, right hand, screen height is 2 units)
     uv = (2. * uv - vec2(1.)) * vec2(aspect_ratio,  -1.);
+
+    let viewport_scale_factor = 2. * uniforms.camera.focal_distance * tan(uniforms.camera.vfov/2.);
+
+    uv *= vec2(viewport_scale_factor);
 
     // Compute the scene-space ray direction by rotating the camera-space vector into a new basis
     let camera_rotation = mat3x3(uniforms.camera.u, uniforms.camera.v, uniforms.camera.w);

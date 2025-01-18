@@ -10,16 +10,16 @@ pub struct CameraUniforms {
     pub origin: Vec3,
     pub focal_distance: f32,
     pub u: Vec3,
-    _padding0: u32, //  Vectors need to be aligned to 32 Bytes
+    pub vfov_rad: f32,
     pub v: Vec3,
-    _padding1: u32,
+    _padding0: u32, //  Vectors need to be aligned to 32 Bytes
     pub w: Vec3,
-    _padding2: u32,
+    _padding1: u32,
 }
 
 #[derive(Debug)]
 pub struct Camera {
-    uniforms: CameraUniforms,
+    pub uniforms: CameraUniforms,
     center: Vec3,
     up: Vec3,
     distance: f32,
@@ -35,6 +35,7 @@ impl Camera {
         azimuth: f32,
         altitude: f32,
         focal_distance: f32,
+        vfov_deg: f32,
     ) -> Camera {
         let mut camera = Camera {
             uniforms: CameraUniforms::zeroed(),
@@ -46,6 +47,7 @@ impl Camera {
         };
         camera.calculate_uniforms();
         camera.uniforms.focal_distance = focal_distance;
+        camera.uniforms.vfov_rad = vfov_deg.to_radians();
         camera
     }
 
@@ -88,12 +90,26 @@ impl Camera {
     }
 
     #[allow(unused)]
-    pub fn look_at(source: Vec3, dest: Vec3, up: Vec3, focal_distance: f32) -> Camera {
+    pub fn look_at(
+        source: Vec3,
+        dest: Vec3,
+        up: Vec3,
+        focal_distance: f32,
+        vfov_deg: f32,
+    ) -> Camera {
         let center_to_origin = source - dest;
         let distance = center_to_origin.length().max(0.01); // Prevent distance of 0
         let neg_w = center_to_origin.normalized();
         let azimuth = neg_w.x().atan2(neg_w.z());
         let altitude = neg_w.y().asin();
-        Self::with_spherical_coords(dest, up, distance, azimuth, altitude, focal_distance)
+        Self::with_spherical_coords(
+            dest,
+            up,
+            distance,
+            azimuth,
+            altitude,
+            focal_distance,
+            vfov_deg,
+        )
     }
 }

@@ -83,8 +83,13 @@ pub fn get_selected_object(
     let mut u = (pos.x / (uniforms.width - 1) as f64) as f32;
     let mut v = (pos.y / (uniforms.height - 1) as f64) as f32;
 
-    u = (2. * u - 1.) * ((uniforms.width as f32) / (uniforms.height as f32));
-    v = (2. * v - 1.) * -1.;
+    let viewport_scale_factor =
+        2. * uniforms.camera.focal_distance * (uniforms.camera.vfov_rad / 2.).tan();
+
+    u = (2. * u - 1.)
+        * ((uniforms.width as f32) / (uniforms.height as f32))
+        * viewport_scale_factor;
+    v = (2. * v - 1.) * -1. * viewport_scale_factor;
 
     let camera_rotation = Matrix3::<f32> {
         x: uniforms.camera.u.into(),

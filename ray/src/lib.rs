@@ -37,6 +37,7 @@ extern "C" {
 }
 
 const FOCAL_DISTANCE: f32 = 2.;
+const VFOV_DEG: f32 = 40.;
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
 
@@ -238,6 +239,7 @@ impl<'a> State<'a> {
             Vec3::new(0., 0., 0.),
             Vec3::new(0., 1., 0.),
             FOCAL_DISTANCE,
+            VFOV_DEG,
         );
 
         let uniforms = Uniforms::new();
@@ -543,6 +545,7 @@ impl<'a> State<'a> {
                                 match *button {
                                     0 => {
                                         log::warn!("Point is {} units away", dist_to_object);
+                                        self.camera.uniforms.focal_distance = dist_to_object;
                                         add_selection(hit_object, &mut self.scene);
                                     }
                                     1 => {

@@ -2,7 +2,6 @@ import init from "./ray_rs.js";
 
 function main() {
 	init().then(() => console.log("WASM Loaded"));
-	update_fps(0);
 }
 
 window.onload = function () {
@@ -13,8 +12,6 @@ window.onload = function () {
 		(document.getElementById("fps") as HTMLDivElement).style.display = "none";
 		return;
 	}
-
-	console.log("Loading wasm");
 	main();
 };
 
