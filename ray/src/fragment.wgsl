@@ -232,7 +232,7 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
 
     // Highlight edges of selected object
     if (sphere.is_selected > 0) && (d <= (.4 * sphere.radius)) {
-        return Intersection(N, t, Material(vec3(1., 0., 0.), 0., 0., 0.));
+        return Intersection(N, t, Material(vec3(1., 0., 0.), 1., 0., 0.));
     }
 
     return Intersection(N, t, sphere.material);
