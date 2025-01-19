@@ -214,6 +214,8 @@ struct State<'a> {
     mouse_position: PhysicalPosition<f64>,
     mouse_pressed_position: [PhysicalPosition<f64>; 3],
     mouse_button_pressed: [bool; 3],
+    ctrl_pressed: bool,
+
     last_frame_time: Date,
     frame_rate_history: [f32; FPS_HISTORY_LENGTH],
     frame_rate_pos: usize,
@@ -535,6 +537,8 @@ impl<'a> State<'a> {
             mouse_position: PhysicalPosition { x: 0., y: 0. },
             mouse_pressed_position: [PhysicalPosition { x: 0., y: 0. }; 3],
             mouse_button_pressed: [false; 3],
+            ctrl_pressed: false,
+
             last_frame_time: Date::new_0(),
             frame_rate_history: [60.; FPS_HISTORY_LENGTH],
             frame_rate_pos: 0,
@@ -570,13 +574,13 @@ impl<'a> State<'a> {
             WindowEvent::KeyboardInput {
                 event:
                     KeyEvent {
-                        state: ElementState::Pressed,
+                        state,
                         physical_key,
                         ..
                     },
                 ..
-            } => match physical_key {
-                PhysicalKey::Code(KeyCode::KeyA) => {
+            } => match (physical_key, state) {
+                (PhysicalKey::Code(KeyCode::KeyA), ElementState::Pressed) => {
                     for _ in 0..10 {
                         self.scene.push(Sphere::new(
                             Vec3::new(
@@ -601,10 +605,14 @@ impl<'a> State<'a> {
                     self.uniforms.reset_samples();
                     true
                 }
-                PhysicalKey::Code(KeyCode::KeyR) => {
+                (PhysicalKey::Code(KeyCode::KeyR), ElementState::Pressed) => {
                     self.scene.pop();
                     self.rebuild_scene();
                     self.uniforms.reset_samples();
+                    true
+                }
+                (PhysicalKey::Code(KeyCode::ControlLeft), _) => {
+                    self.ctrl_pressed = *state == ElementState::Pressed;
                     true
                 }
                 _ => false,
@@ -652,15 +660,22 @@ impl<'a> State<'a> {
                             } else {
                                 match *button {
                                     0 => {
-                                        self.camera.uniforms.focal_distance = dist_to_object;
-                                        self.camera.uniforms.dof_scale = DOF_SCALE;
-                                        add_selection(hit_object, &mut self.scene_output);
+                                        if self.ctrl_pressed {
+                                            add_selection(hit_object, &mut self.scene_output);
+                                        } else {
+                                            self.camera.uniforms.focal_distance = dist_to_object;
+                                            self.camera.uniforms.dof_scale = DOF_SCALE;
+                                        }
                                     }
                                     1 => {
-                                        remove_selection(hit_object, &mut self.scene_output);
+                                        if self.ctrl_pressed {
+                                            remove_selection(hit_object, &mut self.scene_output);
+                                        }
                                     }
                                     _ => {
-                                        clear_all_selections(&mut self.scene_output);
+                                        if self.ctrl_pressed {
+                                            clear_all_selections(&mut self.scene_output);
+                                        }
                                     }
                                 }
                             }
