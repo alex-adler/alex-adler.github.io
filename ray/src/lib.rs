@@ -1,9 +1,8 @@
 use core::f32;
 use std::iter;
 
-// use cgmath::prelude::*;
-
 use algebra::Vec3;
+use bvh::{create_bvh, create_scene_array, AABB, BVH};
 use bytemuck::Zeroable;
 use select::{add_selection, clear_all_selections, get_selected_object, remove_selection};
 use web_sys::js_sys::{
@@ -21,6 +20,7 @@ use winit::{
 };
 
 mod algebra;
+mod bvh;
 mod camera;
 mod helpers;
 mod select;
@@ -42,7 +42,7 @@ const DOF_SCALE: f32 = 0.05;
 
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
-pub const MAX_PASSES: u32 = 600; // 10 Seconds at 60 fps
+pub const MAX_PASSES: u32 = 60; // Number of frames before we accept the result
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
@@ -85,7 +85,7 @@ struct Material {
     alpha: f32,             // 0.0 = Transparent (Dielectric), 1.0 = Opaque
     refraction_index: f32,  // Relative from air into material (glass is ~1.0/1.5)
     smoothness: f32,        // 0.0 = Matte (Lambertian), 1.0 = Mirror (Specular)
-    emissivity: f32,        // 0.0 = No emission, 1.0 pure light
+    emissivity: f32,        // 0.0 = No emission, 1.0 = every ray will add light to the scene
     emission_strength: f32, // > 0
     emitted_colour: Vec3,
     _pad: [u32; 1],
@@ -199,9 +199,12 @@ struct State<'a> {
     uniforms_buffer: wgpu::Buffer,
     display_bind_groups: [wgpu::BindGroup; 2],
 
-    scene: [Sphere; MAX_OBJECT_COUNT],
+    scene: Vec<Sphere>,
+    scene_output: [Sphere; MAX_OBJECT_COUNT],
     scene_buffer: wgpu::Buffer,
-    sphere_num: usize,
+
+    bvh: [AABB; 2 * MAX_OBJECT_COUNT - 1],
+    bvh_buffer: wgpu::Buffer,
 
     // The window must be declared after the surface so
     // it gets dropped after it as the surface contains
@@ -293,16 +296,15 @@ impl<'a> State<'a> {
             mapped_at_creation: false,
         });
 
-        let mut scene = [Sphere::zeroed(); MAX_OBJECT_COUNT];
-        scene[0] = Sphere::new(
+        let mut scene = Vec::new();
+        scene.push(Sphere::new(
             Vec3::new(0., -1000., -1.),
             1000.,
             Material::new_basic(Vec3::new(0.5, 0.5, 0.5), 0.),
-        );
-        let mut sphere_num = 1;
+        ));
         for a in -11..11 {
             for b in -11..11 {
-                scene[sphere_num] = Sphere::new(
+                scene.push(Sphere::new(
                     Vec3::new(
                         (a as f64 + 0.9 * random()) as f32,
                         0.2,
@@ -318,29 +320,25 @@ impl<'a> State<'a> {
                         random() as f32,
                         Vec3::new(random() as f32, random() as f32, random() as f32),
                     ),
-                );
-                sphere_num += 1;
+                ));
             }
         }
-        scene[sphere_num] = Sphere::new(
+        scene.push(Sphere::new(
             Vec3::new(2., 1., -2.),
             1.0,
             Material::new_basic(Vec3::new(0.7, 0.6, 0.5), 1.),
-        );
-        sphere_num += 1;
-        scene[sphere_num] = Sphere::new(
+        ));
+        scene.push(Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
             Material::new_clear(Vec3::new(1., 1., 1.)),
-        );
-        sphere_num += 1;
-        scene[sphere_num] = Sphere::new(
+        ));
+        scene.push(Sphere::new(
             Vec3::new(-2., 1., -2.),
             1.0,
             Material::new_basic(Vec3::new(0.4, 0.2, 0.1), 0.),
-        );
-        sphere_num += 1;
-        scene[sphere_num] = Sphere::new(
+        ));
+        scene.push(Sphere::new(
             Vec3::new(0., 3., 0.),
             0.5,
             Material::new(
@@ -352,9 +350,8 @@ impl<'a> State<'a> {
                 0.1,
                 Vec3::new(0.9, 0.0, 0.3),
             ),
-        );
-        sphere_num += 1;
-        scene[sphere_num] = Sphere::new(
+        ));
+        scene.push(Sphere::new(
             Vec3::new(0., 3., -1.5),
             0.5,
             Material::new(
@@ -366,11 +363,17 @@ impl<'a> State<'a> {
                 1.,
                 Vec3::new(1.0, 1.0, 1.0),
             ),
-        );
-        sphere_num += 1;
+        ));
         let scene_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Scene"),
             size: (std::mem::size_of::<Sphere>() * MAX_OBJECT_COUNT) as u64,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let bvh_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("BVH"),
+            size: std::mem::size_of::<BVH>() as u64,
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -383,6 +386,26 @@ impl<'a> State<'a> {
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::StorageTexture {
+                        access: wgpu::StorageTextureAccess::WriteOnly,
+                        format: wgpu::TextureFormat::Rgba32Float,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Buffer {
                         ty: wgpu::BufferBindingType::Uniform,
                         has_dynamic_offset: false,
@@ -391,7 +414,7 @@ impl<'a> State<'a> {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 3,
                     visibility: wgpu::ShaderStages::FRAGMENT,
                     ty: wgpu::BindingType::Buffer {
                         ty: wgpu::BufferBindingType::Storage { read_only: true },
@@ -401,22 +424,12 @@ impl<'a> State<'a> {
                     count: None,
                 },
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: 4,
                     visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 3,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::StorageTexture {
-                        access: wgpu::StorageTextureAccess::WriteOnly,
-                        format: wgpu::TextureFormat::Rgba32Float,
-                        view_dimension: wgpu::TextureViewDimension::D2,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
                     },
                     count: None,
                 },
@@ -430,6 +443,7 @@ impl<'a> State<'a> {
             &radiance_samples,
             &uniforms_buffer,
             &scene_buffer,
+            &bvh_buffer,
         );
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -438,7 +452,6 @@ impl<'a> State<'a> {
                 format!(
                     "{}{}",
                     include_str!("vertex.wgsl"),
-                    // include_str!("rng.wgsl"),
                     include_str!("fragment.wgsl")
                 )
                 .into(),
@@ -490,6 +503,12 @@ impl<'a> State<'a> {
             cache: None,
         });
 
+        let bvh = create_bvh(&mut scene);
+        let mut scene_output = [Sphere::zeroed(); MAX_OBJECT_COUNT];
+        create_scene_array(&scene, &mut scene_output);
+
+        // log::warn!("{:#?}", bvh);
+
         Self {
             limits,
 
@@ -505,8 +524,11 @@ impl<'a> State<'a> {
             uniforms_buffer,
 
             scene,
+            scene_output,
             scene_buffer,
-            sphere_num,
+
+            bvh,
+            bvh_buffer,
 
             window,
             camera,
@@ -517,6 +539,11 @@ impl<'a> State<'a> {
             frame_rate_history: [60.; FPS_HISTORY_LENGTH],
             frame_rate_pos: 0,
         }
+    }
+
+    fn rebuild_scene(&mut self) {
+        self.bvh = create_bvh(&mut self.scene);
+        create_scene_array(&self.scene, &mut self.scene_output);
     }
 
     fn window(&self) -> &Window {
@@ -551,7 +578,7 @@ impl<'a> State<'a> {
             } => match physical_key {
                 PhysicalKey::Code(KeyCode::KeyA) => {
                     for _ in 0..10 {
-                        self.scene[self.sphere_num] = Sphere::new(
+                        self.scene.push(Sphere::new(
                             Vec3::new(
                                 (10. * random() - 5.0) as f32,
                                 (5. * random()) as f32,
@@ -568,18 +595,16 @@ impl<'a> State<'a> {
                                 random() as f32,
                                 Vec3::new(random() as f32, random() as f32, random() as f32),
                             ),
-                        );
-                        self.sphere_num += 1;
+                        ));
                     }
+                    self.rebuild_scene();
                     self.uniforms.reset_samples();
                     true
                 }
                 PhysicalKey::Code(KeyCode::KeyR) => {
-                    self.scene[self.sphere_num] = Sphere::zeroed();
-                    if self.sphere_num > 4 {
-                        self.sphere_num -= 1;
-                        self.uniforms.reset_samples();
-                    }
+                    self.scene.pop();
+                    self.rebuild_scene();
+                    self.uniforms.reset_samples();
                     true
                 }
                 _ => false,
@@ -616,11 +641,11 @@ impl<'a> State<'a> {
                             let (hit_object, dist_to_object) = get_selected_object(
                                 &self.mouse_position,
                                 &self.uniforms,
-                                &self.scene,
+                                &self.scene_output,
                             );
 
                             if hit_object == usize::MAX {
-                                clear_all_selections(&mut self.scene);
+                                clear_all_selections(&mut self.scene_output);
                                 if *button == 0 {
                                     self.camera.uniforms.dof_scale = 0.;
                                 }
@@ -629,13 +654,13 @@ impl<'a> State<'a> {
                                     0 => {
                                         self.camera.uniforms.focal_distance = dist_to_object;
                                         self.camera.uniforms.dof_scale = DOF_SCALE;
-                                        add_selection(hit_object, &mut self.scene);
+                                        add_selection(hit_object, &mut self.scene_output);
                                     }
                                     1 => {
-                                        remove_selection(hit_object, &mut self.scene);
+                                        remove_selection(hit_object, &mut self.scene_output);
                                     }
                                     _ => {
-                                        clear_all_selections(&mut self.scene);
+                                        clear_all_selections(&mut self.scene_output);
                                     }
                                 }
                             }
@@ -668,24 +693,29 @@ impl<'a> State<'a> {
         if self.uniforms.frame_num > MAX_PASSES {
             return Ok(());
         }
-        // Calculate FPS
-        let current_date = Date::new_0();
-        let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
-        let fps = (1. / elapsed as f32) * 1000.;
-        self.frame_rate_history[self.frame_rate_pos] = fps;
+        #[cfg(target_arch = "wasm32")]
+        {
+            // Calculate FPS
+            let current_date = Date::new_0();
+            let elapsed = current_date.get_milliseconds() - self.last_frame_time.get_milliseconds();
+            let fps = (1. / elapsed as f32) * 1000.;
+            if fps.is_normal() {
+                self.frame_rate_history[self.frame_rate_pos] = fps;
 
-        let mut fps_mean = 0.;
-        for f in self.frame_rate_history {
-            fps_mean += f;
-        }
-        fps_mean /= self.frame_rate_history.len() as f32;
+                let mut fps_mean = 0.;
+                for f in self.frame_rate_history {
+                    fps_mean += f;
+                }
+                fps_mean /= self.frame_rate_history.len() as f32;
 
-        unsafe {
-            update_fps(fps_mean as f32);
+                unsafe {
+                    update_fps(fps_mean as f32);
+                }
+                self.last_frame_time = current_date;
+                self.frame_rate_pos += 1;
+                self.frame_rate_pos %= self.frame_rate_history.len();
+            }
         }
-        self.last_frame_time = current_date;
-        self.frame_rate_pos += 1;
-        self.frame_rate_pos %= self.frame_rate_history.len();
 
         // Update Uniforms
         self.uniforms.camera = *self.camera.uniforms();
@@ -697,8 +727,14 @@ impl<'a> State<'a> {
         );
 
         // Update scene
+        self.queue.write_buffer(
+            &self.scene_buffer,
+            0,
+            bytemuck::cast_slice(&self.scene_output),
+        );
+
         self.queue
-            .write_buffer(&self.scene_buffer, 0, bytemuck::cast_slice(&[self.scene]));
+            .write_buffer(&self.bvh_buffer, 0, bytemuck::cast_slice(&self.bvh));
 
         // Prepare pipeline
         let output = self.surface.get_current_texture()?;

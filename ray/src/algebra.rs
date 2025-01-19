@@ -42,6 +42,18 @@ impl Vec3 {
         self.0[2]
     }
 
+    pub fn set_x(&mut self, x: f32) {
+        self.0[0] = x;
+    }
+
+    pub fn set_y(&mut self, y: f32) {
+        self.0[1] = y;
+    }
+
+    pub fn set_z(&mut self, z: f32) {
+        self.0[2] = z;
+    }
+
     pub fn length(&self) -> f32 {
         self.length_squared().sqrt()
     }

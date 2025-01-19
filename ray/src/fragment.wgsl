@@ -76,10 +76,20 @@ struct Sphere {
     is_selected: u32,
 }
 
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
-@group(0) @binding(1) var<storage, read> scene: array<Sphere>;
-@group(0) @binding(2) var radiance_samples_old: texture_2d<f32>;
-@group(0) @binding(3) var radiance_samples_new: texture_storage_2d<rgba32float, write>;
+struct AABB {
+    min: vec3f,
+    left_child_index: u32,
+    max: vec3f,
+    right_child_index: u32,
+    object_index: u32,
+    is_populated: u32,
+}
+
+@group(0) @binding(0) var radiance_samples_old: texture_2d<f32>;
+@group(0) @binding(1) var radiance_samples_new: texture_storage_2d<rgba32float, write>;
+@group(0) @binding(2) var<uniform> uniforms: Uniforms;
+@group(0) @binding(3) var<storage, read> scene: array<Sphere>;
+@group(0) @binding(4) var<storage, read> bvh: array<AABB>;
 
 
 struct Ray {
@@ -100,6 +110,7 @@ struct Scatter {
 
 const TAU: f32 = 6.283185307;
 const F32_MAX: f32 = 3.40282346638528859812e+38;
+const U32_MAX: u32 = 4294967295;
 const EPSILON: f32 = 1e-2;
 
 const MAX_PATH_LENGTH: u32 = 8u;
@@ -222,19 +233,75 @@ fn intersect_sphere(ray: Ray, sphere: Sphere) -> Intersection {
     return Intersection(N, t, sphere.material);
 }
 
+fn intersect_aabb(ray: Ray, node: AABB) -> bool {
+    let t_aabb_min = vec3(
+        (node.min.x - ray.origin.x)/ray.direction.x,
+        (node.min.y - ray.origin.y)/ray.direction.y,
+        (node.min.z - ray.origin.z)/ray.direction.z
+    );
+
+    let t_aabb_max = vec3(
+        (node.max.x - ray.origin.x)/ray.direction.x,
+        (node.max.y - ray.origin.y)/ray.direction.y,
+        (node.max.z - ray.origin.z)/ray.direction.z
+    );
+
+    // If the ray is coming in the opposite direction, the min and max values
+    // stored by the aabb will be reversed from our perspective
+    let t_min = min(t_aabb_min, t_aabb_max);
+    let t_max = max(t_aabb_min, t_aabb_max);
+
+    // Compare the biggest t_min and the smallest t_max to see 
+    // if there exists a time when the ray is within all dimensions
+    let max_t_min = max(max(t_min.x, t_min.y), t_min.z);
+    let min_t_max = min(min(t_max.x, t_max.y), t_max.z);
+
+    if min_t_max < 0. {
+        return false;
+    }
+
+    return max_t_min < min_t_max;
+}
+
 fn intersect_scene(ray: Ray) -> Intersection {
+    var node_stack = array<AABB, 16>();
+    var stack_index = 0;
+
+    node_stack[stack_index] = bvh[0];
+    stack_index += 1;
+
     var closest_hit = no_intersection();
     closest_hit.t = F32_MAX;
-    for (var i = 0u; i < arrayLength(&scene); i += 1u) {
-		// Ignore the rest of the buffer that has uninitialised spheres
-		if(scene[i].radius > 0.) {
-			// Loop through each object
-			let hit = intersect_sphere(ray, scene[i]);
-			if hit.t > 0. && hit.t < closest_hit.t {
-				closest_hit = hit;
+
+    while stack_index > 0 {
+        stack_index -= 1;
+        let node = node_stack[stack_index];
+
+        if node.is_populated == 0 {
+            // We have reached the end of the BVH
+            break;
+        }
+
+        if intersect_aabb(ray, node) {
+            if node.object_index == U32_MAX {
+                // Not a leaf node
+                node_stack[stack_index] = bvh[node.left_child_index];
+                stack_index += 1;
+                node_stack[stack_index] = bvh[node.right_child_index];
+                stack_index += 1;
+            } else {
+                // Leaf node
+                let hit = intersect_sphere(ray, scene[node.object_index]);
+                if hit.t > 0. && hit.t < closest_hit.t {
+                    closest_hit = hit;
+                }
 			}
-		}
+        }
+        if stack_index == 0 {
+            break;
+        }
     }
+
     if closest_hit.t < F32_MAX {
         return closest_hit;
     }
