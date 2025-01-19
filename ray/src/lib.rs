@@ -42,7 +42,7 @@ const DOF_SCALE: f32 = 0.05;
 
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
-pub const MAX_PASSES: u32 = 60; // Number of frames before we accept the result
+pub const MAX_PASSES: u32 = 600; // Number of frames before we accept the result
 
 // We need this for Rust to store our data correctly for the shaders
 #[repr(C)]
