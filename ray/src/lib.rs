@@ -304,27 +304,27 @@ impl<'a> State<'a> {
             1000.,
             Material::new_basic(Vec3::new(0.5, 0.5, 0.5), 0.),
         ));
-        for a in -11..11 {
-            for b in -11..11 {
-                scene.push(Sphere::new(
-                    Vec3::new(
-                        (a as f64 + 0.9 * random()) as f32,
-                        0.2,
-                        (b as f64 + 0.9 * random()) as f32,
-                    ),
-                    0.2,
-                    Material::new(
-                        Vec3::new(random() as f32, random() as f32, random() as f32).normalized(),
-                        random() as f32,
-                        random() as f32,
-                        1. / 1.5,
-                        random() as f32,
-                        random() as f32,
-                        Vec3::new(random() as f32, random() as f32, random() as f32),
-                    ),
-                ));
-            }
-        }
+        // for a in -11..11 {
+        //     for b in -11..11 {
+        //         scene.push(Sphere::new(
+        //             Vec3::new(
+        //                 (a as f64 + 0.9 * random()) as f32,
+        //                 0.2,
+        //                 (b as f64 + 0.9 * random()) as f32,
+        //             ),
+        //             0.2,
+        //             Material::new(
+        //                 Vec3::new(random() as f32, random() as f32, random() as f32).normalized(),
+        //                 random() as f32,
+        //                 random() as f32,
+        //                 1. / 1.5,
+        //                 random() as f32,
+        //                 random() as f32,
+        //                 Vec3::new(random() as f32, random() as f32, random() as f32),
+        //             ),
+        //         ));
+        //     }
+        // }
         scene.push(Sphere::new(
             Vec3::new(2., 1., -2.),
             1.0,
