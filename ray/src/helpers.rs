@@ -1,3 +1,6 @@
+#[cfg(not(target_arch = "wasm32"))]
+use rand::rngs::ThreadRng;
+
 pub fn create_sample_textures(
     device: &wgpu::Device,
     width: u32,
@@ -113,4 +116,16 @@ pub fn create_display_bind_groups(
             ],
         }),
     ]
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn get_random(_rng: &mut u32) -> f32 {
+    use web_sys::js_sys::Math::random;
+    random() as f32
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn get_random(rng: &mut ThreadRng) -> f32 {
+    use rand::Rng;
+    rng.gen::<f32>()
 }

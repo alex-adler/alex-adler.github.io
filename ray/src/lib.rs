@@ -1,16 +1,20 @@
+mod algebra;
+mod bvh;
+mod camera;
+mod helpers;
+mod select;
+
 use core::f32;
 use std::iter;
 
 use algebra::Vec3;
 use bvh::{create_bvh, create_scene_array, AABB, BVH};
-use bytemuck::Zeroable;
+use camera::{Camera, CameraUniforms};
+use helpers::get_random;
 use select::{add_selection, clear_all_selections, get_selected_object, remove_selection};
-use web_sys::js_sys::{
-    Date,
-    Math::{abs, random},
-};
-use wgpu::Limits;
 
+use bytemuck::Zeroable;
+use wgpu::Limits;
 use winit::{
     dpi::PhysicalPosition,
     event::*,
@@ -19,13 +23,11 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-mod algebra;
-mod bvh;
-mod camera;
-mod helpers;
-mod select;
+#[cfg(not(target_arch = "wasm32"))]
+use rand::rngs::ThreadRng;
 
-use crate::camera::{Camera, CameraUniforms};
+#[cfg(target_arch = "wasm32")]
+use web_sys::js_sys::Date;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -40,6 +42,7 @@ const FOCAL_DISTANCE: f32 = 4.5;
 const VFOV_DEG: f32 = 40.;
 const DOF_SCALE: f32 = 0.05;
 
+#[cfg(target_arch = "wasm32")]
 const FPS_HISTORY_LENGTH: usize = 60;
 pub const MAX_OBJECT_COUNT: usize = 1024;
 pub const MAX_PASSES: u32 = 600; // Number of frames before we accept the result
@@ -216,9 +219,17 @@ struct State<'a> {
     mouse_button_pressed: [bool; 3],
     ctrl_pressed: bool,
 
+    #[cfg(target_arch = "wasm32")]
     last_frame_time: Date,
+    #[cfg(target_arch = "wasm32")]
     frame_rate_history: [f32; FPS_HISTORY_LENGTH],
+    #[cfg(target_arch = "wasm32")]
     frame_rate_pos: usize,
+
+    #[cfg(target_arch = "wasm32")]
+    rng: u32, // Dummy variable to allow the same function signature to be used for wasm random calls
+    #[cfg(not(target_arch = "wasm32"))]
+    rng: ThreadRng,
 }
 
 impl<'a> State<'a> {
@@ -308,19 +319,19 @@ impl<'a> State<'a> {
         //     for b in -11..11 {
         //         scene.push(Sphere::new(
         //             Vec3::new(
-        //                 (a as f64 + 0.9 * random()) as f32,
+        //                 (a as f64 + 0.9 * get_random(&mut self.rng)) as f32,
         //                 0.2,
-        //                 (b as f64 + 0.9 * random()) as f32,
+        //                 (b as f64 + 0.9 * get_random(&mut self.rng)) as f32,
         //             ),
         //             0.2,
         //             Material::new(
-        //                 Vec3::new(random() as f32, random() as f32, random() as f32).normalized(),
-        //                 random() as f32,
-        //                 random() as f32,
+        //                 Vec3::new(get_random(&mut self.rng) as f32, get_random(&mut self.rng) as f32, get_random(&mut self.rng) as f32).normalized(),
+        //                 get_random(&mut self.rng) as f32,
+        //                 get_random(&mut self.rng) as f32,
         //                 1. / 1.5,
-        //                 random() as f32,
-        //                 random() as f32,
-        //                 Vec3::new(random() as f32, random() as f32, random() as f32),
+        //                 get_random(&mut self.rng) as f32,
+        //                 get_random(&mut self.rng) as f32,
+        //                 Vec3::new(get_random(&mut self.rng) as f32, get_random(&mut self.rng) as f32, get_random(&mut self.rng) as f32),
         //             ),
         //         ));
         //     }
@@ -539,9 +550,17 @@ impl<'a> State<'a> {
             mouse_button_pressed: [false; 3],
             ctrl_pressed: false,
 
+            #[cfg(target_arch = "wasm32")]
             last_frame_time: Date::new_0(),
+            #[cfg(target_arch = "wasm32")]
             frame_rate_history: [60.; FPS_HISTORY_LENGTH],
+            #[cfg(target_arch = "wasm32")]
             frame_rate_pos: 0,
+
+            #[cfg(target_arch = "wasm32")]
+            rng: 0,
+            #[cfg(not(target_arch = "wasm32"))]
+            rng: rand::thread_rng(),
         }
     }
 
@@ -584,20 +603,28 @@ impl<'a> State<'a> {
                     for _ in 0..10 {
                         self.scene.push(Sphere::new(
                             Vec3::new(
-                                (10. * random() - 5.0) as f32,
-                                (5. * random()) as f32,
-                                (10. * random() - 5.0) as f32,
+                                (10. * get_random(&mut self.rng) - 5.0) as f32,
+                                (5. * get_random(&mut self.rng)) as f32,
+                                (10. * get_random(&mut self.rng) - 5.0) as f32,
                             ),
                             0.2,
                             Material::new(
-                                Vec3::new(random() as f32, random() as f32, random() as f32)
-                                    .normalized(),
-                                random() as f32,
-                                random() as f32,
+                                Vec3::new(
+                                    get_random(&mut self.rng) as f32,
+                                    get_random(&mut self.rng) as f32,
+                                    get_random(&mut self.rng) as f32,
+                                )
+                                .normalized(),
+                                get_random(&mut self.rng) as f32,
+                                get_random(&mut self.rng) as f32,
                                 1. / 1.5,
-                                random() as f32,
-                                random() as f32,
-                                Vec3::new(random() as f32, random() as f32, random() as f32),
+                                get_random(&mut self.rng) as f32,
+                                get_random(&mut self.rng) as f32,
+                                Vec3::new(
+                                    get_random(&mut self.rng) as f32,
+                                    get_random(&mut self.rng) as f32,
+                                    get_random(&mut self.rng) as f32,
+                                ),
                             ),
                         ));
                     }
@@ -644,7 +671,7 @@ impl<'a> State<'a> {
                         let last_pos = &self.mouse_pressed_position[*button as usize];
                         let pos = &self.mouse_position;
                         // Allow for the mouse to move a little bit between being pressed and released
-                        if abs(pos.x - last_pos.x) < 5. && abs(pos.y - last_pos.y) < 5. {
+                        if (pos.x - last_pos.x).abs() < 5. && (pos.y - last_pos.y).abs() < 5. {
                             // Check if there are any object we can select
                             let (hit_object, dist_to_object) = get_selected_object(
                                 &self.mouse_position,
